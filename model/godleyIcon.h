@@ -42,7 +42,10 @@ namespace minsky
     friend class SchemaHelper;
   public:
     static SVGRenderer svgRenderer;
-    
+
+    ~GodleyIcon() {cleanupControlledItems();}
+    void cleanupControlledItems() const override;
+  
     /// width of Godley icon in screen coordinates
     float width() const {return (flowMargin+iconSize)*iconScale()*zoomFactor();}
     /// height of Godley icon in screen coordinates

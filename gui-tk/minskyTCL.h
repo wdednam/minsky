@@ -64,12 +64,6 @@ namespace minsky
     /// @param operationName
     void operationIcon(const char* imageName, const char* opName) const;
 
-//    void displayErrorItem(float x, float y) const override
-//    {
-//      tclcmd() << "catch {indicateCanvasItemInError"<<x<<y<<"}\n";
-//      Tcl_ResetResult(interp());
-//    }
-    
     void putClipboard(const std::string& s) const override; 
     std::string getClipboard() const override; 
 
@@ -283,13 +277,6 @@ namespace minsky
             v->importFromCSV(filename, *spec->memberptr);
     }
     
-    //   void inGroupSelect(int gid, float x0, float y0, float x1, float y1)
-//    {
-//      clearSelection();
-//      if (groupItems.count(gid))
-//        groupItems[gid].select(currentSelection,x0,y0,x1,y1);
-//    }
-//
     void initGroupList(TCL_args args) {
       //      groupTest.initGroupList(groupItems, (args.count? args: -1));
     }

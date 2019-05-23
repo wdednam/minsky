@@ -83,6 +83,19 @@ namespace minsky
 
   }
 
+  void GodleyIcon::cleanupControlledItems() const
+  {
+    if (auto g=group.lock())
+      {
+        for (auto& i: m_flowVars)
+          g->deleteItem(*i);
+        for (auto& i: m_stockVars)
+          g->deleteItem(*i);
+      }
+  }
+
+  
+  
     void GodleyIcon::updateVars(GodleyIcon::Variables& vars, 
                     const vector<string>& varNames, 
                     VariableType::Type varType)
@@ -259,8 +272,8 @@ namespace minsky
         // right justification
         RenderVariable rv(*v);
         v->rotation=0;
-        v->bb.update(*v);
-        v->moveTo(x-0.5*v->width()*zoomFactor,y);
+        //v->bb.update(*v);
+        v->moveTo(x-rv.width()*zoomFactor,y);
         y+=2*rv.height()*zoomFactor;
       }
     x= this->x() - 0.5*(0.85*iconSize-flowMargin)*zoomFactor;
@@ -271,8 +284,8 @@ namespace minsky
         // top justification at bottom of icon
         RenderVariable rv(*v);
         v->rotation=90;
-        v->bb.update(*v);
-        v->moveTo(x,y+0.5*v->height()*zoomFactor);
+        //v->bb.update(*v);
+        v->moveTo(x,y+rv.width()*zoomFactor);
         x+=2*rv.height()*zoomFactor;
       }
   }

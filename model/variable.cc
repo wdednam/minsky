@@ -33,8 +33,6 @@ using namespace minsky;
 using ecolab::array;
 using namespace ecolab::cairo;
 
-VariableBase::~VariableBase() {}
-
 void VariableBase::addPorts()
 {
 #ifndef NDEBUG

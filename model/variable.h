@@ -174,7 +174,6 @@ namespace minsky
       m_name=x.m_name;
       return *this;
     }
-    virtual ~VariableBase();
 
     /** draws the icon onto the given cairo context 
         @return cairo path of icon outline

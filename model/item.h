@@ -29,6 +29,8 @@
 #include <vector>
 #include <cairo_base.h>
 
+#include <typeinfo>
+
 namespace minsky 
 {
   class LassoBox;
@@ -145,6 +147,9 @@ namespace minsky
     virtual void updateIcon(double t) {}
     virtual ~Item() {}
 
+    /// delete any controlled items
+    virtual void cleanupControlledItems() const {}
+    
     void drawPorts(cairo_t* cairo) const;
     void drawSelected(cairo_t* cairo) const;
     void drawResizeHandles(cairo_t* cairo) const;
@@ -192,6 +197,7 @@ namespace minsky
         s=s.substr(eop);
       return s;
     }
+    ~ItemT() {std::cout << classType() << " destroyed\n";}
     ItemT* clone() const override {
       auto r=new T(*dynamic_cast<const T*>(this));
       r->group.reset();

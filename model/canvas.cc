@@ -448,6 +448,7 @@ namespace minsky
     if (item)
       {
         model->deleteItem(*item);
+        item.reset();
         requestRedraw();
       }
   }

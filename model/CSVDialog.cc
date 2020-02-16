@@ -45,6 +45,8 @@ void CSVDialog::loadFile(const string& fname)
       initialLines.emplace_back();
       getline(is, initialLines.back());
     }
+  // Ensure dimensions.size() is the same as nColAxes() upon first load of a CSV file. For ticket 974.
+  if (spec.dimensions.size()<spec.nColAxes()) spec.setDataArea(spec.nRowAxes(),spec.nColAxes());    
 }
 
 template <class Parser>
@@ -110,7 +112,7 @@ void CSVDialog::redraw(int, int, int width, int height)
     cairo_move_to(cairo,xoffs-pango.width()-5,(4+spec.headerRow)*rowHeight);
     pango.show();
     
-  }
+  }	
   
   set<size_t> done;
   double x=xoffs, y=0;
@@ -152,6 +154,7 @@ void CSVDialog::redraw(int, int, int width, int height)
       if (spec.dimensionCols.count(col) && col<spec.dimensionNames.size() && col<spec.nColAxes())
         {
           pango.setText(spec.dimensionNames[col]);
+          //cout << col << " " << spec.dimensionNames[col] << endl;
           pango.setxy(x,y);
           pango.show();
         }

@@ -154,7 +154,6 @@ void CSVDialog::redraw(int, int, int width, int height)
       if (spec.dimensionCols.count(col) && col<spec.dimensionNames.size() && col<spec.nColAxes())
         {
           pango.setText(spec.dimensionNames[col]);
-          //cout << col << " " << spec.dimensionNames[col] << endl;
           pango.setxy(x,y);
           pango.show();
         }

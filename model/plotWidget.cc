@@ -526,6 +526,7 @@ namespace minsky
   
   void PlotWidget::connectVar(const VariableValue& var, unsigned port)
   {
+    minsky().reset();
     if (port<nBoundsPorts)
       switch (port)
         {

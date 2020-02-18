@@ -78,10 +78,7 @@ namespace minsky
     /// return true if both endpoints of the wire lie
     /// within the lasso
     bool contains(const Wire& wire) const {
-      auto c=wire.coords();
-      return c[0]>=x0 && c[0]<=x1 && c[1]>=y0 && c[1]<=y1 &&
-              c[c.size()-2]>=x0 && c[c.size()-2]<=x1 &&
-              c[c.size()-1]>=y0 && c[c.size()-1]<=y1;
+     return (intersects(wire.from()->item()) && intersects(wire.to()->item())); 
     }
 
   };

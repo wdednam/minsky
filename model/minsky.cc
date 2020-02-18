@@ -231,8 +231,7 @@ namespace minsky
       putClipboard(""); // clear clipboard
     else
       {
-        schema3::Minsky m(canvas.selection); 
-        std::cout << " " <<canvas.selection.wires.size() << " " << m.wires.size() << endl;        
+        schema3::Minsky m(canvas.selection);    
         ostringstream os;
         xml_pack_t packer(os, schemaURL);
         xml_pack(packer, "Minsky", m);
@@ -338,6 +337,9 @@ namespace minsky
 
   void Minsky::garbageCollect()
   {
+    //if (reset_flag())
+    //  reset();
+	  
     makeVariablesConsistent();
     stockVars.clear();
     flowVars.clear();

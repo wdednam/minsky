@@ -75,7 +75,7 @@ namespace minsky
   {
     if (!item) return false;
     if (auto g=std::dynamic_pointer_cast<Group>(item))
-      {
+      { 
         if (find(groups.begin(), groups.end(), g)!=groups.end())
           return true;
       }

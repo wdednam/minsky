@@ -199,7 +199,7 @@ SUITE(TensorOps)
                     double x=scalarOp->evaluate((*src.vValue())[i]);
                     double y=(*dest.vValue())[i];
                     if (finite(x)||finite(y))
-                      CHECK_EQUAL(scalarOp->evaluate((*src.vValue())[i]), (*dest.vValue())[i]);
+                      CHECK_EQUAL(x,y);
                   }
                 break;
               }
@@ -218,4 +218,75 @@ SUITE(TensorOps)
         }
     }
   
+  TEST_FIXTURE(MinskyFixture, tensorBinOpFactory)
+    {
+      TensorOpFactory factory;
+      auto ev=make_shared<EvalCommon>();
+      TensorsFromPort tp(ev);
+      Variable<VariableType::flow> src1("src1"), src2("src2"), dest("dest");
+      src1.init("iota(5)");
+      src2.init("one(5)");
+      variableValues.reset();
+      CHECK_EQUAL(1,src1.vValue()->rank());
+      CHECK_EQUAL(5,src1.vValue()->size());
+      CHECK_EQUAL(1,src2.vValue()->rank());
+      CHECK_EQUAL(5,src2.vValue()->size());
+      for (OperationType::Type op=OperationType::add; op<OperationType::copy;
+           op=OperationType::Type(op+1))
+        {
+          OperationPtr o(op);
+          CHECK_EQUAL(3, o->numPorts());
+          Wire w1(src1.ports[0], o->ports[1]), w2(src2.ports[0], o->ports[2]),
+            w3(o->ports[0], dest.ports[1]);
+          TensorEval eval(*dest.vValue(), ev, factory.create(*o,tp));
+          eval.eval(ValueVector::flowVars.data(), ValueVector::stockVars.data());
+          CHECK_EQUAL(src1.vValue()->size(), dest.vValue()->size());
+          CHECK_EQUAL(src2.vValue()->size(), dest.vValue()->size());
+          unique_ptr<ScalarEvalOp> scalarOp(ScalarEvalOp::create(op));
+          for (size_t i=0; i<src1.vValue()->size(); ++i)
+            {
+              double x=scalarOp->evaluate((*src1.vValue())[i], (*src2.vValue())[i]);
+              double y=(*dest.vValue())[i];
+              if (finite(x)||finite(y))
+                CHECK_EQUAL(x,y);
+            }
+        }
+    }
+
+  template <OperationType::Type op, class F, class F2>
+    void multiWireTest(double identity, F f, F2 f2)
+  {
+    //cout << OperationType::typeName(op)<<endl;
+    Operation<op> o;
+    auto tensorOp=TensorOpFactory().create(o);
+    CHECK_EQUAL(1, tensorOp->size());
+    CHECK_EQUAL(identity, (*tensorOp)[0]);
+    Hypercube hc(vector<unsigned>{2});
+    auto tv1=make_shared<TensorVal>(hc), tv2=make_shared<TensorVal>(hc);
+    tv1->push_back(0,1), tv2->push_back(0,2);
+    tv1->push_back(1,2), tv2->push_back(1,1);
+    tensorOp->setArguments(vector<TensorPtr>{tv1,tv2},vector<TensorPtr>{});
+    CHECK_EQUAL(f((*tv1)[0],(*tv2)[0]), (*tensorOp)[0]);
+    CHECK_EQUAL(f((*tv1)[1],(*tv2)[1]), (*tensorOp)[1]);
+    tensorOp->setArguments(vector<TensorPtr>{},vector<TensorPtr>{tv1,tv2});
+    CHECK_EQUAL(f2(f((*tv1)[0],(*tv2)[0])), (*tensorOp)[0]);
+    CHECK_EQUAL(f2(f((*tv1)[1],(*tv2)[1])), (*tensorOp)[1]);
+  }
+
+  TEST_FIXTURE(MinskyFixture, tensorBinOpMultiples)
+    {
+      auto id=[](double x){return x;};
+      multiWireTest<OperationType::add>(0, [](double x,double y){return x+y;},id);
+      multiWireTest<OperationType::subtract>
+        (0, [](double x,double y){return x+y;}, [](double x){return -x;});
+      multiWireTest<OperationType::multiply>(1, [](double x,double y){return x*y;}, id);
+      multiWireTest<OperationType::divide>
+        (1, [](double x,double y){return x*y;}, [](double x){return 1/x;});
+      multiWireTest<OperationType::min>
+        (std::numeric_limits<double>::max(), [](double x,double y){return x<y? x: y;}, id);
+      multiWireTest<OperationType::max>
+        (-std::numeric_limits<double>::max(), [](double x,double y){return x>y? x: y;}, id);
+      multiWireTest<OperationType::and_>(1, [](double x,double y){return x>0.5 && y>0.5;}, id);
+      multiWireTest<OperationType::or_>(0, [](double x,double y){return x>0.5 || y>0.5;}, id);
+    }
 }

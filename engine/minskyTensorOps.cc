@@ -119,7 +119,7 @@ namespace minsky
   {
     AccumArgs(): civita::ReduceArguments([](double& x,double y){x*=y;},1) {}
   };
-  template <> struct AccumArgs<OperationType::divide>: public AccumArgs<OperationType::add> {};
+  template <> struct AccumArgs<OperationType::divide>: public AccumArgs<OperationType::multiply> {};
 
   template <> struct AccumArgs<OperationType::min>: public civita::ReduceArguments
   {
@@ -272,6 +272,7 @@ namespace minsky
   {
     std::shared_ptr<ITensor> arg1, arg2;
     void computeTensor() const override {//TODO
+      throw runtime_error("inner product not yet implemented");
     }
     Timestamp timestamp() const override {return max(arg1->timestamp(), arg2->timestamp());}
   };
@@ -281,6 +282,7 @@ namespace minsky
   {
     std::shared_ptr<ITensor> arg1, arg2;
     void computeTensor() const override {//TODO
+      throw runtime_error("outer product not yet implemented");
     }
     Timestamp timestamp() const override {return max(arg1->timestamp(), arg2->timestamp());}
   };

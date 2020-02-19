@@ -77,7 +77,7 @@ namespace minsky
 
     /// return true if both endpoints of the wire lie
     /// within the lasso
-    bool contains(const Wire& wire) const {
+    bool contains(const Wire& wire) const { // Make sure both ends of wires are selected in all cases. For ticket 1147
      return (intersects(wire.from()->item()) && intersects(wire.to()->item())); 
     }
 

@@ -108,7 +108,7 @@ VariableBase* VariableBase::create(VariableType::Type type)
 }
 
 void VariableBase::retype(VariableType::Type type)
-{
+{	
   if (type==this->type()) return; // nothing to do
   if (auto vv=vValue())
     if (type==vv->type())

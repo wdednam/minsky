@@ -271,7 +271,7 @@ namespace minsky
       // label pens
       for (size_t i=0; i<yvars.size(); ++i)
         if (yvars[i].idx()>=0)
-          labelPen(i, latexToPango(yvars[i].name));     
+          labelPen(i, latexToPango(yvars[i].name));
   }
 
   void PlotWidget::mouseDown(double x,double y)
@@ -525,7 +525,7 @@ namespace minsky
 
   
   void PlotWidget::connectVar(const VariableValue& var, unsigned port)
-  {  
+  {
     if (port<nBoundsPorts)
       switch (port)
         {

@@ -178,7 +178,7 @@ string VariableBase::name(const std::string& name)
   m_name=(type()==integral && name[0]==':' &&inputWired())? name.substr(1): name;
   ensureValueExists(tmpVV);
   bb.update(*this); // adjust bounding box for new name - see ticket #704
-  return this->name();
+  return name;
 }
 
 bool VariableBase::ioVar() const

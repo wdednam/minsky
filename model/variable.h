@@ -118,7 +118,7 @@ namespace minsky
 
     /// accessor for the name member (may differ from name() with top
     /// level variables)
-    const std::string& rawName() const {return m_name;}
+    const std::string& rawName() const {return name();}
     
     bool ioVar() const override;
     
@@ -175,15 +175,7 @@ namespace minsky
     bool temp() const {return type()==tempFlow || type()==undefined;}
     virtual VariableBase* clone() const override=0;
     bool isStock() const {return type()==stock || type()==integral;}
-    
-    VariableBase() {}
-    VariableBase(const VariableBase& x): Item(x), Slider(x), m_name(x.m_name) {ensureValueExists(x.vValue());}
-    VariableBase& operator=(const VariableBase& x) {
-      Item::operator=(x);
-      Slider::operator=(x);
-      m_name=x.m_name;
-      return *this;
-    }    
+
     virtual ~VariableBase();
 
     /** draws the icon onto the given cairo context 

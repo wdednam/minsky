@@ -593,8 +593,9 @@ namespace minsky
                    else
                      {
                        v->name(newName);
-                       if (auto vv=v->vValue())
-                         v->retype(vv->type()); // ensure correct type. Note this invalidates v.
+                       //if (auto vv=v->vValue()) {
+                       // v->retype(vv->type()); // ensure correct type. Note this invalidates v.
+                       //}
                      }
                  }
              return false;

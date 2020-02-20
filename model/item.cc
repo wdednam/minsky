@@ -184,6 +184,16 @@ namespace minsky
     }
   }
   
+  // Refactor resize() code for all canvas items here. For feature 25
+  //void Item:resize(const LassoBox& b) const
+  //{
+  //  float invZ=1/zoomFactor();
+  //  width=abs(x.x1-x.x0)*invZ;
+  //  height=abs(x.y1-x.y0)*invZ;
+  //  moveTo(0.5*(x.x0+x.x1), 0.5*(x.y0+x.y1));
+  //  bb.update(*this);	  
+  //}
+  
   void Item::drawResizeHandles(cairo_t* cairo) const
   {
     {

@@ -108,7 +108,7 @@ VariableBase* VariableBase::create(VariableType::Type type)
 }
 
 void VariableBase::retype(VariableType::Type type)
-{	
+{
   if (type==this->type()) return; // nothing to do
   if (auto vv=vValue())
     if (type==vv->type())
@@ -169,23 +169,23 @@ string VariableBase::name()  const
 }
 
 string VariableBase::name(const std::string& name) 
-{
+{	
   // cowardly refuse to set a blank name
   if (name.empty() || name==":") return name;
   // Ensure value of variable is preserved after rename. For ticket 1106.	
-  auto tmpVV=vValue();  
+  auto tmpVV=vValue();//minsky().variableValues[valueId()]; //vValue();  
   // ensure integral variables are not global when wired to an integral operation
   m_name=(type()==integral && name[0]==':' &&inputWired())? name.substr(1): name;
-  ensureValueExists(tmpVV);
+  ensureValueExists(tmpVV,name);
   bb.update(*this); // adjust bounding box for new name - see ticket #704
-  return name;
+  return this->name();
 }
 
 bool VariableBase::ioVar() const
 {return dynamic_cast<Group*>(controller.lock().get());}
 
 
-void VariableBase::ensureValueExists(VariableValue* vv) const
+void VariableBase::ensureValueExists(VariableValue* vv, const std::string& name) const
 {
   string valueId=this->valueId();
   // disallow blank names
@@ -195,9 +195,9 @@ void VariableBase::ensureValueExists(VariableValue* vv) const
       assert(VariableValue::isValueId(valueId));
 	  // Ensure value of variable is preserved after rename. For ticket 1106.	      
       if (vv==nullptr) minsky().variableValues.insert
-        (make_pair(valueId,VariableValue(type(), name(), "", group.lock())));
+        (make_pair(valueId,VariableValue(type(), rawName(),"",group.lock())));
       else minsky().variableValues.insert
-        (make_pair(valueId,*vv));
+        (make_pair(valueId,VariableValue(type(),name,vv->init,group.lock())));
     }
 }
 
@@ -213,7 +213,7 @@ string VariableBase::init() const
 
 string VariableBase::init(const string& x)
 {
-  ensureValueExists(nullptr); 
+  ensureValueExists(nullptr,""); 
   if (VariableValue::isValueId(valueId()))
     {
       VariableValue& val=minsky().variableValues[valueId()];
@@ -376,7 +376,7 @@ void VariablePtr::retype(VariableBase::Type type)
             assert(!tmp->ports[i]->input());
             w->moveToPorts(get()->ports[i], w->to());
           }
-      get()->ensureValueExists(nullptr);
+      get()->ensureValueExists(nullptr,"");
     }
 }
 
@@ -466,22 +466,22 @@ void VariableBase::draw(cairo_t *cairo) const
     vv=minsky::cminsky().variableValues[valueId()];
   
   // For feature 47
-  if (type()!=constant && !ioVar() && (vv.size()))
+  if (type()!=constant && !ioVar() && (vv.size()==1) )
     try
     {
       auto val=engExp();
   
       Pango pangoVal(cairo);
-      if (isfinite(value())) {
+      if (!isnan(value())) {
 		   pangoVal.setFontSize(6*z);
 		   pangoVal.setMarkup(mantissa(val));
 	   }
-      else if (!isfinite(value())) { // Display divide by zero as infinity. For ticket 1155
-		  pangoVal.setFontSize(12*z);
-		  if (!signbit(value())) pangoVal.setMarkup("-∞");
+      else if (isinf(value())) { // Display non-zero divide by zero as infinity. For ticket 1155
+		  pangoVal.setFontSize(8*z);
+		  if (signbit(value())) pangoVal.setMarkup("-∞");
           else pangoVal.setMarkup("∞");
 	  }
-	  else {  // Display any other NaN case as ???
+	  else {  // Display all other NaN cases as ???. For ticket 1155
 		  pangoVal.setFontSize(6*z);
 		  pangoVal.setMarkup("???");
 	  }
@@ -490,14 +490,14 @@ void VariableBase::draw(cairo_t *cairo) const
       cairo_move_to(cairo,r.x(w-pangoVal.width()-2,-h-hoffs+2),
                     r.y(w-pangoVal.width()-2,-h-hoffs+2));
       pangoVal.show();
-      if (val.engExp!=0 && isfinite(value()))
+      if (val.engExp!=0 && (!isnan(value()))) // Avoid large exponential number in variable value display. For ticket 1155
         {
           pangoVal.setMarkup(expMultiplier(val.engExp));
           cairo_move_to(cairo,r.x(w-pangoVal.width()-2,0),r.y(w-pangoVal.width()-2,0));
           pangoVal.show();
         }
     }
-    catch (...) {} // ignore errors in obtaining values otherwise
+    catch (...) {} // ignore errors in obtaining values
 
   unique_ptr<cairo::Path> clipPath;
   {

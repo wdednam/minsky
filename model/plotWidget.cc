@@ -210,15 +210,8 @@ namespace minsky
             legendSize(width,height,gh);
             width+=legendOffset*gw;
 
-            double x,y;   
-            if (title.empty()) {
-              x=legendLeft*gw-0.5*(w-width)+portSpace;
-              y=-legendTop*gh+0.5*(h+height)-portSpace;
-		    } else {
-			  x=legendLeft*gw-0.5*(w-width);	
-			  y=-legendTop*gh+0.5*(h+height)+portSpace+titleHeight;
-		    } 
-				
+            double x=legendLeft*gw-0.5*(w-width)+portSpace;
+            double y=-legendTop*gh+0.5*(h+height)-portSpace;
             double arrowLength=6;
             cairo_move_to(cairo,x-arrowLength,y);
             cairo_rel_line_to(cairo,2*arrowLength,0);
@@ -303,10 +296,8 @@ namespace minsky
     switch (ct)
       {
       case ClickType::legendMove:
-        //if (abs(x-clickX)<width*z && abs(y-clickY)<height*z) { 
         legendLeft = (oldLegendLeft + x - clickX-portSpace)/gw;
         legendTop = (oldLegendTop + clickY - y)/gh;
-	    //}
         break;
       case ClickType::legendResize:
         legendFontSz = oldLegendFontSz * (y-yoffs)/(clickY-yoffs);

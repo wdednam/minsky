@@ -231,7 +231,7 @@ namespace minsky
       putClipboard(""); // clear clipboard
     else
       {
-        schema3::Minsky m(canvas.selection);    
+        schema3::Minsky m(canvas.selection);
         ostringstream os;
         xml_pack_t packer(os, schemaURL);
         xml_pack(packer, "Minsky", m);
@@ -269,8 +269,8 @@ namespace minsky
     canvas.model->addGroup(g);
     m.populateGroup(*g);
     // Default pasting no longer occurs as grouped items or as a group within a group. Fix for tickets 1080/1098    
-    canvas.selection.clear(); 
-    auto copyOfItems=g->items;    
+    canvas.selection.clear();    
+    auto copyOfItems=g->items;
     for (auto& i: copyOfItems)
       {		
          canvas.model->addItem(i);			  
@@ -278,7 +278,7 @@ namespace minsky
          assert(!i->ioVar());
       }
     // Attach mouse focus only to first item in selection. For ticket 1098.      
-    if (!copyOfItems.empty()) canvas.setItemFocus(copyOfItems[0]);
+    if (!copyOfItems.empty()) canvas.setItemFocus(copyOfItems[0]);	      
     auto copyOfGroups=g->groups;
     for (auto& i: copyOfGroups)
     {	
@@ -337,9 +337,6 @@ namespace minsky
 
   void Minsky::garbageCollect()
   {
-    //if (reset_flag())
-    //  reset();
-	  
     makeVariablesConsistent();
     stockVars.clear();
     flowVars.clear();

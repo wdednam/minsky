@@ -118,7 +118,7 @@ namespace minsky
 
     /// accessor for the name member (may differ from name() with top
     /// level variables)
-    const std::string& rawName() const {return name();}
+    const std::string& rawName() const {return m_name;}
     
     bool ioVar() const override;
     

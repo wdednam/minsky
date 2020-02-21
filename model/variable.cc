@@ -466,27 +466,38 @@ void VariableBase::draw(cairo_t *cairo) const
     vv=minsky::cminsky().variableValues[valueId()];
   
   // For feature 47
-  if (type()!=constant && !ioVar() && (vv.size()==1) )
+  if (type()!=constant && !ioVar() && (vv.size()))
     try
     {
       auto val=engExp();
   
       Pango pangoVal(cairo);
-      pangoVal.setFontSize(6*z);
-      pangoVal.setMarkup(mantissa(val));
+      if (isfinite(value())) {
+		   pangoVal.setFontSize(6*z);
+		   pangoVal.setMarkup(mantissa(val));
+	   }
+      else if (!isfinite(value())) { // Display divide by zero as infinity. For ticket 1155
+		  pangoVal.setFontSize(12*z);
+		  if (!signbit(value())) pangoVal.setMarkup("-∞");
+          else pangoVal.setMarkup("∞");
+	  }
+	  else {  // Display any other NaN case as ???
+		  pangoVal.setFontSize(6*z);
+		  pangoVal.setMarkup("???");
+	  }
       pangoVal.angle=angle+(notflipped? 0: M_PI);
 
       cairo_move_to(cairo,r.x(w-pangoVal.width()-2,-h-hoffs+2),
                     r.y(w-pangoVal.width()-2,-h-hoffs+2));
       pangoVal.show();
-      if (val.engExp!=0)
+      if (val.engExp!=0 && isfinite(value()))
         {
           pangoVal.setMarkup(expMultiplier(val.engExp));
           cairo_move_to(cairo,r.x(w-pangoVal.width()-2,0),r.y(w-pangoVal.width()-2,0));
           pangoVal.show();
         }
     }
-    catch (...) {} // ignore errors in obtaining values
+    catch (...) {} // ignore errors in obtaining values otherwise
 
   unique_ptr<cairo::Path> clipPath;
   {

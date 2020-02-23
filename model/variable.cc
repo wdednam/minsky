@@ -173,7 +173,7 @@ string VariableBase::name(const std::string& name)
   // cowardly refuse to set a blank name
   if (name.empty() || name==":") return name;
   // Ensure value of variable is preserved after rename. For ticket 1106.	
-  auto tmpVV=vValue();//minsky().variableValues[valueId()]; //vValue();  
+  auto tmpVV=vValue();
   // ensure integral variables are not global when wired to an integral operation
   m_name=(type()==integral && name[0]==':' &&inputWired())? name.substr(1): name;
   ensureValueExists(tmpVV,name);

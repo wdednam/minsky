@@ -196,6 +196,7 @@ void VariableBase::ensureValueExists(VariableValue* vv, const std::string& name)
 	  // Ensure value of variable is preserved after rename. For ticket 1106.	      
       if (vv==nullptr) minsky().variableValues.insert
         (make_pair(valueId,VariableValue(type(), rawName(),"",group.lock())));
+      // Ensure variable names are updated correctly everywhere they appear. For tickets 1109/1138.  
       else minsky().variableValues.insert
         (make_pair(valueId,VariableValue(type(),name,vv->init,group.lock())));
     }

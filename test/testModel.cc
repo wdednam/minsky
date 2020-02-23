@@ -155,6 +155,25 @@ SUITE(Group)
     CHECK(integ->intVar->group.lock()==group0);
   }
   
+  TEST_FIXTURE(TestFixture, addBookmark)
+    {
+      model->findGroup(*group0);
+      group0->bookmarks.clear();		
+      group0->addBookmark("group0");
+      CHECK_EQUAL(group0->bookmarkList()[0],"group0");
+      CHECK_EQUAL(group0->bookmarks.size(),1);
+      model->moveTo(500,500);
+      group0->gotoBookmark(0);
+      double x=group0->x();
+      double y=group0->y();
+      auto& b=group0->bookmarks[0];
+      group0->moveTo(b.x, b.y);
+      CHECK_EQUAL(x,b.x);
+      CHECK_EQUAL(y,b.y);
+      group0->deleteBookmark(0);
+      CHECK_EQUAL(group0->bookmarks.size(),0);      
+    }  
+  
   // check that removing then adding an item leaves the group idempotent
   TEST_FIXTURE(TestFixture, removeAddItem)
   {

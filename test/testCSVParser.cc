@@ -67,7 +67,7 @@ SUITE(CSVParser)
   TEST_FIXTURE(DataSpec,reportFromCSV)
     {
       string input="A comment\n"
-        ";;foobar\n" // horizontal dim name
+        ";;foobar\n"
         "foo;bar;A;B;C\n"
         "A;A;1.2;1.3;1.4\n"
         "A;B;1;2;3\n"
@@ -75,41 +75,25 @@ SUITE(CSVParser)
       string output="";  
       istringstream is(input);
       ostringstream os(output);
-      
-      separator=';';
-      setDataArea(3,2);
-      missingValue=-1;
-      headerRow=2;
-      dimensionNames={"foo","bar"};
-      dimensionCols={0,1};
-      horizontalDimName="foobar";      
-      
+            
       reportFromCSVFile(is,os,*this);
       
       CHECK(os.str().find("error") != std::string::npos);
-
-      string input="A comment\n"
-        "foobar1;foobar2;foobar3\n" // horizontal dim name
-        "foo;bar;A;B;C\n"
-        "A;A;1.2;;1.4\n"
-        "A;B;1;2;3\n"
-        "B;A;3;2;1\n";
-      string output="";  
-      istringstream is(input);
-      ostringstream os(output);
+      CHECK(os.str().find("invalid numerical data") != std::string::npos);
+      CHECK(os.str().find("duplicate key") != std::string::npos);
       
-      separator=';';
-      setDataArea(3,2);
-      missingValue=-1;
-      headerRow=2;
-      dimensionNames={"foo","bar"};
-      dimensionCols={0,1};
-      horizontalDimName="foobar";      
+      string in="Country,value$,\n"
+        "Australia\n"
+        "Brazil,1.1,\n"
+        "China,1.5,\n"
+        "\n";
+      string out="";  
+      istringstream isn(in);
+      ostringstream osn(out);
+            
+      reportFromCSVFile(isn,osn,*this);
       
-      reportFromCSVFile(is,os,*this);
-      
-      CHECK(os.str().find("missing numerical data") != std::string::npos);
-       // || os.str().find("invalid numerical data") != std::string::npos || os.str().find("duplicate key") != std::string::npos);
+      CHECK(osn.str().find("missing numerical data") != std::string::npos);
     }    
   
   TEST_FIXTURE(DataSpec,loadVar)

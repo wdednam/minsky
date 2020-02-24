@@ -149,7 +149,7 @@ namespace minsky
       }
     };
 
-    RavelLib ravelLib;
+    RavelLib ravelLib;    // Call functions from minskyTensorOps.cc here
 
     template <class... T> struct RavelFn;
     

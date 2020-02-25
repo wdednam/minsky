@@ -425,19 +425,46 @@ namespace minsky
   {
     Ravel& ravel;
     TensorPtr arg;
+    //TensorsFromPort& argp;
+    //void computeTensor() const override
+    //{
+    //  ravel.loadDataCubeFromVariable(*arg);
+    //  ravel.loadDataFromSlice(cachedResult);
+    //  m_timestamp = Timestamp::clock::now();
+    //}
     void computeTensor() const override
     {
-      ravel.loadDataCubeFromVariable(*arg);
-      ravel.loadDataFromSlice(cachedResult);
+      tensorOpFactory.create(ravel);
       m_timestamp = Timestamp::clock::now();
     }
-    
+      
   public:
     RavelTensor(Ravel& ravel): ravel(ravel) {}
     void setArgument(const TensorPtr& a,const std::string& d,double) override {arg=a;}
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
   };
-  
+
+  std::shared_ptr<TensorOp> TensorOpFactory::create
+  (const Ravel& ravel, const TensorsFromPort& tfp)
+  {
+    try
+      {
+        std::shared_ptr<TensorOp> r{create(ravel)};
+        switch (ravel.ports.size())
+          {
+          case 2:
+            r->setArguments(tfp.tensorsFromPort(*ravel.ports[1]),ravel.axis,ravel.arg);
+            break;
+          case 3:
+            r->setArguments(tfp.tensorsFromPort(*ravel.ports[1]), tfp.tensorsFromPort(*ravel.ports[2]));
+            break;
+          }
+        return r;
+      }
+    catch (const InvalidType&)
+      {return {};}
+  }
+
   std::shared_ptr<TensorOp> TensorOpFactory::create
   (const OperationBase& op, const TensorsFromPort& tfp)
   {

@@ -20,6 +20,7 @@
 #define MINSKYTENSOROPS_H
 #include "variableValue.h"
 #include "evalOp.h"
+#include "ravelWrap.h"
 #include <tensorOp.h>
 
 namespace minsky
@@ -61,7 +62,7 @@ namespace minsky
   /// As it says on the tin, this is a factory for creating a TensorOp
   /// which can compute the result of op applied to its arguments and
   /// so on until all the argument terminate in variables.
-  class TensorOpFactory: public classdesc::Factory<TensorOp, OperationType::Type>
+  class TensorOpFactory: public Ravel, public classdesc::Factory<TensorOp, OperationType::Type>
   {
     using classdesc::Factory<civita::TensorOp, OperationType::Type>::create;
   public:
@@ -70,6 +71,7 @@ namespace minsky
     /// op. If expression doesn't contain any references variables,
     /// then the \a tp parameter may be omitted.
     std::shared_ptr<TensorOp> create(const OperationBase&, const TensorsFromPort& tp={});
+    std::shared_ptr<TensorOp> create(const Ravel&, const TensorsFromPort& tp={});
   };    
   
   extern TensorOpFactory tensorOpFactory;

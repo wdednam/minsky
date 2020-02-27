@@ -472,12 +472,12 @@ namespace minsky
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
   };
 
-  std::shared_ptr<TensorOp> TensorOpFactory::create
+  std::shared_ptr<ITensor> TensorOpFactory::create
   (const Ravel& ravel, const TensorsFromPort& tfp)
   {
     try
       {
-        std::shared_ptr<TensorOp> r{create(ravel)};
+        std::shared_ptr<ITensor> r{create(ravel)};
         switch (ravel.ports.size())
           {
           case 2:

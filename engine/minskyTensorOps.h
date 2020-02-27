@@ -20,7 +20,6 @@
 #define MINSKYTENSOROPS_H
 #include "variableValue.h"
 #include "evalOp.h"
-#include "ravelWrap.h"
 #include <tensorOp.h>
 
 namespace minsky

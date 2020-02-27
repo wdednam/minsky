@@ -451,27 +451,19 @@ namespace minsky
   {
     const Ravel& ravel;
     TensorPtr arg;
-    //TensorsFromPort& argp;
-    //void computeTensor() const override
-    //{
-    //  ravel.loadDataCubeFromVariable(*arg);
-    //  ravel.loadDataFromSlice(cachedResult);
-    //  m_timestamp = Timestamp::clock::now();
-    //}
     void computeTensor() const override
     {
-      //tensorOpFactory.create(const_cast<Ravel&>(ravel));
       const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);
       ravel.loadDataFromSlice(cachedResult);
       m_timestamp = Timestamp::clock::now();
     }
-      
+    
   public:
     RavelTensor(const Ravel& ravel): ravel(ravel) {}
     void setArgument(const TensorPtr& a,const std::string& d,double) override {arg=a;}
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
   };
-
+  
   std::shared_ptr<ITensor> TensorOpFactory::create
   (const Item& it, const TensorsFromPort& tfp)
   {

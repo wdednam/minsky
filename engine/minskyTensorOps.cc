@@ -434,7 +434,9 @@ namespace minsky
     //}
     void computeTensor() const override
     {
-      tensorOpFactory.create(ravel);
+      //tensorOpFactory.create(ravel);
+      ravel.loadDataCubeFromVariable(*arg);
+      ravel.loadDataFromSlice(cachedResult);
       m_timestamp = Timestamp::clock::now();
     }
       

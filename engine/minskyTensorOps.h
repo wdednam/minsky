@@ -65,7 +65,7 @@ namespace minsky
   /// As it says on the tin, this is a factory for creating a TensorOp
   /// which can compute the result of op applied to its arguments and
   /// so on until all the argument terminate in variables.
-  class TensorOpFactory: public Ravel, public classdesc::Factory<civita::ITensor, OperationType::Type>
+  class TensorOpFactory: public classdesc::Factory<civita::ITensor, OperationType::Type>
   {
     using classdesc::Factory<civita::ITensor, OperationType::Type>::create;
   public:
@@ -73,7 +73,6 @@ namespace minsky
     /// create a tensor representation of the expression rooted at
     /// op. If expression doesn't contain any references variables,
     /// then the \a tp parameter may be omitted.
-    std::shared_ptr<ITensor> create(const Ravel&, const TensorsFromPort& tp={});
     std::shared_ptr<ITensor> create(const Item&, const TensorsFromPort& tp={});
   };    
   

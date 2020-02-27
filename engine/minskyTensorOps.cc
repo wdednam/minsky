@@ -460,7 +460,7 @@ namespace minsky
     //}
     void computeTensor() const override
     {
-      //tensorOpFactory.create(ravel);
+      //tensorOpFactory.create(const_cast<Ravel&>(ravel));
       const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);
       ravel.loadDataFromSlice(cachedResult);
       m_timestamp = Timestamp::clock::now();
@@ -471,27 +471,6 @@ namespace minsky
     void setArgument(const TensorPtr& a,const std::string& d,double) override {arg=a;}
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
   };
-
-  std::shared_ptr<ITensor> TensorOpFactory::create
-  (const Ravel& ravel, const TensorsFromPort& tfp)
-  {
-    try
-      {
-        std::shared_ptr<ITensor> r{create(ravel)};
-        switch (ravel.ports.size())
-          {
-          case 2:
-            r->setArguments(tfp.tensorsFromPort(*ravel.ports[1]),ravel.axis,ravel.arg);
-            break;
-          case 3:
-            r->setArguments(tfp.tensorsFromPort(*ravel.ports[1]), tfp.tensorsFromPort(*ravel.ports[2]));
-            break;
-          }
-        return r;
-      }
-    catch (const InvalidType&)
-      {return {};}
-  }
 
   std::shared_ptr<ITensor> TensorOpFactory::create
   (const Item& it, const TensorsFromPort& tfp)

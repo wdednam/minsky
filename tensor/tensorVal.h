@@ -37,7 +37,24 @@ namespace civita
 
     virtual double& operator[](size_t)=0;
     using ITensor::operator[];
-
+    using ITensor::operator();
+    template <class T>
+    double& operator()(const std::initializer_list<T>& indices)
+    {
+      auto idx=index();
+      auto hcIdx=hcIndex(indices);
+      if (idx.empty())
+        return operator[](hcIdx);
+      else
+        {
+          auto i=std::lower_bound(idx.begin(), idx.end(), hcIdx);
+          if (i!=idx.end() && *i==hcIdx)
+            return operator[](i-idx.begin()); 
+          static double noValue;
+          return noValue;
+        }
+    }
+          
     virtual void index(const std::vector<size_t>&)=0;
     using ITensor::index;
     

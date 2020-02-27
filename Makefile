@@ -269,9 +269,10 @@ lcov:
 # ensure schema export code is exercised
 	-$(MAKE) GCOV=1 minsky.xsd
 	-$(MAKE) GCOV=1 sure
-	lcov -c -d . --no-external -o lcovt.info
+	lcov -c -d .  --no-external -o lcovt.info
 	lcov -a lcovi.info -a lcovt.info -o lcov.info
-	genhtml -o coverage lcov.info
+	lcov -r lcov.info */ecolab/* "*.cd" "*.xcd" -o lcovr.info 
+	genhtml -o coverage lcovr.info
 
 compile_commands.json: Makefile
 	$(MAKE) clean

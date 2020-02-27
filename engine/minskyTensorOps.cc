@@ -451,12 +451,18 @@ namespace minsky
   {
     const Ravel& ravel;
     TensorPtr arg;
-    void computeTensor() const override
+    void computeTensor() const override   // replace this with a method that computes tensor from the state of the ravel
     {
       const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);
       ravel.loadDataFromSlice(cachedResult);
       m_timestamp = Timestamp::clock::now();
     }
+    
+    //RavelState computeTensor()
+    //{
+    //   //const RavelState& r;
+    //   return ravel.getState();
+    //}
     
   public:
     RavelTensor(const Ravel& ravel): ravel(ravel) {}

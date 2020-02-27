@@ -451,23 +451,26 @@ namespace minsky
   {
     const Ravel& ravel;
     TensorPtr arg;
-    void computeTensor() const override   // replace this with a method that computes tensor from the state of the ravel
+    void computeTensor() const override  
     {
       const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);
       ravel.loadDataFromSlice(cachedResult);
       m_timestamp = Timestamp::clock::now();
-    }
-    
-    //RavelState computeTensor()
-    //{
-    //   //const RavelState& r;
-    //   return ravel.getState();
-    //}
+    }    
     
   public:
     RavelTensor(const Ravel& ravel): ravel(ravel) {}
     void setArgument(const TensorPtr& a,const std::string& d,double) override {arg=a;}
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
+
+    //void eval(double fv[], const double sv[])  // replace this with a method that computes tensor from the state of the ravel
+    //{
+	//  if (auto r=dynamic_cast<Ravel*>(this)) {	
+    //     r->loadDataCubeFromVariable(*arg);
+    //     r->loadDataFromSlice(cachedResult);
+    //  }
+    //}     
+    
   };
   
   std::shared_ptr<ITensor> TensorOpFactory::create
@@ -570,7 +573,7 @@ namespace minsky
     copy->setArgument(make_shared<TensorVarVal>(src,result.ev));
     rhs=move(copy);
     assert(result.size()==rhs->size());
-  }
+  }   
 
   void TensorEval::eval(double fv[], const double sv[])
   {

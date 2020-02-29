@@ -447,6 +447,80 @@ namespace minsky
     }
   };
 
+//    class RavelTensor: public ITensor
+//    {
+//    size_t m_size=1;
+//    vector<size_t> m_index;
+//    vector<TensorPtr> args;
+//    size_t hcIndex(size_t i) const {
+//      if (m_index.empty()) return i;
+//      if (i>=m_index.size()) return numeric_limits<size_t>::max();
+//      return m_index[i];
+//    }
+//  public:
+//    void setArguments(const std::vector<TensorPtr>& a,const std::string& axis={},double argv=0) override {
+//      args=a;
+//      if (args.size()<2)
+//        hypercube(Hypercube());
+//      else
+//        hypercube(args[1]->hypercube());
+////      if (!args.empty() && args[0]->rank()!=0)
+////        // TODO: feature ticket #36 - extend to conformant selector arg
+////        throw runtime_error("tensor value selectors not yet supported");
+//      
+//      set<size_t> indices; // collect the union of argument indices
+//      for (auto& i: args)
+//        {
+//          auto ai=i->index();
+//          indices.insert(ai.begin(), ai.end());
+//          if (i->size()>1)
+//            {
+//              if (m_size==1)
+//                m_size=i->size();
+//              else if (m_size!=i->size())
+//                // TODO - should we check and throw on nonconformat hypercubes?
+//                throw runtime_error("noconformant tensor arguments in switch");
+//            }
+//        }
+//      m_index.clear();
+//      m_index.insert(m_index.end(),indices.begin(), indices.end());
+//      if (!m_index.empty()) m_size=m_index.size();
+//    }
+//    vector<size_t> index() const override {return m_index;}
+//    size_t size() const override {return m_size;}
+//    Timestamp timestamp() const override {
+//      Timestamp t;
+//      for (auto& i: args)
+//        {
+//          auto tt=i->timestamp();
+//          if (tt>t) t=tt;
+//        }
+//      return t;
+//    }
+//    void computeTensor() const override {
+//      if (args.size()<2) return nan("");
+//
+//      double selector=0;
+//      if (args[0])
+//        {
+//          if (args[0]->rank()==0) // scalar selector, so broadcast
+//            selector = (*args[0])[0];
+//          else
+//            selector = args[0]->atHCIndex(hcIndex(i));
+//        }
+//      ssize_t idx = selector+1.5; // selector selects between args 1..n
+//      
+//      if (idx>0 && idx<int(args.size()))
+//        {
+//          if (args[idx]->rank()==0)
+//            return (*args[idx])[0];
+//          else
+//            return args[idx]->atHCIndex(hcIndex(i));
+//        }
+//      return nan("");
+//    }
+//};		
+    
   class RavelTensor: public CachedTensorOp
   {
     const Ravel& ravel;

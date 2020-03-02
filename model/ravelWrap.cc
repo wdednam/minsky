@@ -501,12 +501,12 @@ namespace minsky
     v.hypercube({}); // ensure scalar data space allocated
   }
 
-  void Ravel::loadDataCubeFromVariable(const ITensor& v)
+  void Ravel::loadDataCubeFromVariable(const ITensorVal& v)
   {
     if (ravel && dataCube)
       {
         // this ensure that handles are restored correctly after loading a .mky file. 
-        RavelState state=initState.empty()? getState(): initState;
+        RavelState state=initState.empty()? initState : getState();
         initState.clear();
         ravel_clear(ravel);
         for (auto& i: v.hypercube().xvectors)

@@ -449,6 +449,7 @@ namespace minsky
 
 //    class RavelTensor: public ITensor
 //    {
+//	const Ravel& ravel;	
 //    size_t m_size=1;
 //    vector<size_t> m_index;
 //    vector<TensorPtr> args;
@@ -458,6 +459,7 @@ namespace minsky
 //      return m_index[i];
 //    }
 //  public:
+//    RavelTensor(const Ravel& ravel): ravel(ravel) {}
 //    void setArguments(const std::vector<TensorPtr>& a,const std::string& axis={},double argv=0) override {
 //      args=a;
 //      if (args.size()<2)
@@ -497,54 +499,70 @@ namespace minsky
 //        }
 //      return t;
 //    }
-//    void computeTensor() const override {
+//
+//    double operator[](size_t i) const override {
 //      if (args.size()<2) return nan("");
 //
-//      double selector=0;
+//     return nan("");
+//    }    
+//    
+//    void computeTensor(size_t i) const {
+//      //if (args.size()<2) return nan("");
+//
+//      //double selector=0;
 //      if (args[0])
 //        {
-//          if (args[0]->rank()==0) // scalar selector, so broadcast
-//            selector = (*args[0])[0];
-//          else
-//            selector = args[0]->atHCIndex(hcIndex(i));
+//          if (args[0]->rank()==0) // scalar ravel, so broadcast
+//          {
+//            //selector = (*args[0])[0];
+//            const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*args[0]));
+//            ravel.loadDataFromSlice(dynamic_cast<ITensorVal&>(*args[0]));
+//		  }
+//          else {
+//            //selector = args[0]->atHCIndex(hcIndex(i));
+//            const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*args[hcIndex(i)]));
+//            ravel.loadDataFromSlice(dynamic_cast<ITensorVal&>(*args[hcIndex(i)]));
+//		  }
 //        }
-//      ssize_t idx = selector+1.5; // selector selects between args 1..n
+//      //ssize_t idx = selector+1.5; // selector selects between args 1..n
 //      
-//      if (idx>0 && idx<int(args.size()))
-//        {
-//          if (args[idx]->rank()==0)
-//            return (*args[idx])[0];
-//          else
-//            return args[idx]->atHCIndex(hcIndex(i));
-//        }
-//      return nan("");
+//      //ravel.loadDataFromSlice(cachedResult);
+//      
+//      //if (idx>0 && idx<int(args.size()))
+//      //  {
+//      //    if (args[idx]->rank()==0)
+//      //      return (*args[idx])[0];
+//      //    else
+//      //      return args[idx]->atHCIndex(hcIndex(i));
+//      //  }
+//      //return nan("");
 //    }
 //};		
     
-  class RavelTensor: public CachedTensorOp
+  class RavelTensor: public civita::CachedTensorOp
   {
     const Ravel& ravel;
     TensorPtr arg;
     void computeTensor() const override  
     {
-      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);
+      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*arg));
       ravel.loadDataFromSlice(cachedResult);
       m_timestamp = Timestamp::clock::now();
     }    
     
   public:
     RavelTensor(const Ravel& ravel): ravel(ravel) {}
-    void setArgument(const TensorPtr& a,const std::string& d,double) override {arg=a;}
+    void setArgument(const TensorPtr& a,const std::string& d={},double argv={}) override {arg=a;}
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
-
-    //void eval(double fv[], const double sv[])  // replace this with a method that computes tensor from the state of the ravel
-    //{
-	//  if (auto r=dynamic_cast<Ravel*>(this)) {	
-    //     r->loadDataCubeFromVariable(*arg);
-    //     r->loadDataFromSlice(cachedResult);
-    //  }
-    //}     
-    
+//
+//    //void eval(double fv[], const double sv[])  // replace this with a method that computes tensor from the state of the ravel
+//    //{
+//	//  if (auto r=dynamic_cast<Ravel*>(this)) {	
+//    //     r->loadDataCubeFromVariable(*arg);
+//    //     r->loadDataFromSlice(cachedResult);
+//    //  }
+//    //}     
+//    
   };
   
   std::shared_ptr<ITensor> TensorOpFactory::create
@@ -664,8 +682,7 @@ namespace minsky
           }
       }
   }
-
-  
+   
   void TensorEval::deriv(double df[], const double ds[],
                          const double sv[], const double fv[])
   {

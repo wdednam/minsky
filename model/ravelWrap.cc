@@ -501,7 +501,7 @@ namespace minsky
     v.hypercube({}); // ensure scalar data space allocated
   }
 
-  void Ravel::loadDataCubeFromVariable(const ITensorVal& v)
+  void Ravel::loadDataCubeFromVariable(const ITensor& v)
   {
     if (ravel && dataCube)
       {

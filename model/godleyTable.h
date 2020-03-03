@@ -55,6 +55,7 @@ namespace minsky
   public:
 
     bool doubleEntryCompliant;
+    bool multipleEquities=false;
 
     std::string title;
   

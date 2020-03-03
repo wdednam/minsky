@@ -515,12 +515,12 @@ namespace minsky
 //          if (args[0]->rank()==0) // scalar ravel, so broadcast
 //          {
 //            //selector = (*args[0])[0];
-//            const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*args[0]));
+//            const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*args[0]);
 //            ravel.loadDataFromSlice(dynamic_cast<ITensorVal&>(*args[0]));
 //		  }
 //          else {
 //            //selector = args[0]->atHCIndex(hcIndex(i));
-//            const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*args[hcIndex(i)]));
+//            const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*args[hcIndex(i)]);
 //            ravel.loadDataFromSlice(dynamic_cast<ITensorVal&>(*args[hcIndex(i)]));
 //		  }
 //        }
@@ -545,7 +545,7 @@ namespace minsky
     TensorPtr arg;
     void computeTensor() const override  
     {
-      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*arg));
+      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);
       ravel.loadDataFromSlice(cachedResult);
       m_timestamp = Timestamp::clock::now();
     }    

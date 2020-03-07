@@ -107,6 +107,7 @@ proc openGodley {id} {
         .$id.menubar.options add checkbutton -label "Show Values" -variable preferences(godleyDisplay) -command setGodleyDisplay
         .$id.menubar.options add checkbutton -label "DR/CR style" -variable preferences(godleyDisplayStyle) -onvalue DRCR -offvalue sign -command setGodleyDisplay
         .$id.menubar.options add checkbutton -label "Enable multiple equity columns" -variable preferences(multipleEquities) -command "toggleEquityColumns $id"
+
         
         .$id.menubar add cascade -label File -menu .$id.menubar.file -underline 0
         .$id.menubar add cascade -label Edit -menu .$id.menubar.edit -underline 0
@@ -305,8 +306,12 @@ proc setGodleyDisplay {} {
     foreach c [info commands godleyWindow*.displayStyle] {
         $c $preferences(godleyDisplayStyle)
     }
+    foreach c [info commands godleyIcon.table.multipleEquities] {
+        $c $preferences(multipleEquities)
+    }    
     redrawAllGodleyTables
 }
+	
 
 # sets each individual Godley table mutliple equity column preference
 proc toggleEquityColumns id {

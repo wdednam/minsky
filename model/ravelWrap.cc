@@ -59,11 +59,11 @@ namespace minsky
     
     struct RavelHandleState
     {
-      double x,y; ///< handle tip coordinates (only angle important, not length)
-      size_t sliceIndex, sliceMin, sliceMax;
-      bool collapsed, displayFilterCaliper;
-      ReductionOp reductionOp;
-      HandleSort order;
+      double x=0,y=0; ///< handle tip coordinates (only angle important, not length)
+      size_t sliceIndex=0, sliceMin=0, sliceMax=0;
+      bool collapsed=false, displayFilterCaliper=false;
+      ReductionOp reductionOp=RavelState::HandleState::sum;
+      HandleSort order=RavelState::HandleState::none;
       RavelHandleState() {}
       // NB: sliceIndex, sliceMin, sliceMax need to be dealt with separately
       RavelHandleState(const RavelState::HandleState& s):
@@ -116,14 +116,13 @@ namespace minsky
       
         auto version=(const char* (*)())dlsym(lib,"ravel_version");
         auto capi_version=(int (*)())dlsym(lib,"ravel_capi_version");
+        if (version) versionFound=version();
         if (!version || !capi_version || ravelVersion!=capi_version())
           { // incompatible API
             errorMsg="Incompatible libravel dynamic library found";
-            if (version) versionFound=version();
             dlclose(lib);
             lib=nullptr;
           }
-        versionFound=version();
       }
       ~RavelLib() {
         if (lib)
@@ -149,7 +148,7 @@ namespace minsky
       }
     };
 
-    RavelLib ravelLib;    // Call functions from minskyTensorOps.cc here
+    RavelLib ravelLib;
 
     template <class... T> struct RavelFn;
     
@@ -444,13 +443,12 @@ namespace minsky
       }
   }
 
-  void Ravel::loadDataFromSlice(ITensorVal& v) const
+  void Ravel::loadDataFromSlice(TensorVal& v) const
   {
     if (ravel && dataCube)
       {
-        //        assert(ravel_rank(ravel)==1);
         vector<size_t> dims(ravel_rank(ravel));
-        double* tmp;
+        double* tmp=nullptr;
         ravelDC_hyperSlice(dataCube, ravel, &dims[0], &tmp);
         if (dims.empty() || dims[0]==0)
           {
@@ -462,8 +460,7 @@ namespace minsky
           {
             vector<size_t> outHandles(dims.size());
             ravel_outputHandleIds(ravel, &outHandles[0]);
-            // For feature 47
-            size_t prevNumElem = v.size();
+            size_t prevNumElem=v.size();
             Hypercube hc;
             auto& xv=hc.xvectors;
             for (size_t j=0; j<outHandles.size(); ++j)
@@ -491,22 +488,24 @@ namespace minsky
               }
             v.hypercube(move(hc));
             assert(vector<unsigned>(dims.begin(), dims.end())==v.hypercube().dims());
-
+            
+            if (v.index()[0]==-1 || v.size()>prevNumElem)
+              v.allocVal();
             for (size_t i=0; i< v.size(); ++i)
               *(v.begin()+i)=tmp[i];
           }
         else
           throw error(ravel_lastErr());
       }
-    v.hypercube({}); // ensure scalar data space allocated
+   v.hypercube({}); // ensure scalar data space allocated
   }
 
-  void Ravel::loadDataCubeFromVariable(const ITensor& v)
+  void Ravel::loadDataCubeFromVariable(const ITensorVal& v)
   {
     if (ravel && dataCube)
       {
         // this ensure that handles are restored correctly after loading a .mky file. 
-        RavelState state=initState.empty()? initState : getState();
+        RavelState state=initState.empty()? getState(): initState;
         initState.clear();
         ravel_clear(ravel);
         for (auto& i: v.hypercube().xvectors)
@@ -538,9 +537,9 @@ namespace minsky
               assert(d[i]==ravel_numSliceLabels(ravel,outputHandles[i]));
           }
 #endif
-        vector<double> tmp(v.size());
-        for (size_t i=0; i<v.size(); ++i) tmp[i]=v[i];
-        ravelDC_loadData(dataCube, ravel, &tmp[0]);
+        //vector<double> tmp(v.size());
+        //for (size_t i=0; i<v.size(); ++i) tmp[i]=v[i];
+        ravelDC_loadData(dataCube, ravel, v.begin());
         applyState(state);
       }
   }
@@ -834,7 +833,7 @@ namespace minsky
   {
     // TODO: add some comment lines
     VariableValue v(VariableType::flow);
-    loadDataFromSlice(v);
+    loadDataFromSlice(reinterpret_cast<TensorVal&>(v));
     v.exportAsCSV(filename, m_filename+": "+ravel_description(ravel));
   }
 

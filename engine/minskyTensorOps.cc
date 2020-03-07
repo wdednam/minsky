@@ -318,6 +318,16 @@ namespace minsky
     }
     Timestamp timestamp() const override {return max(arg1->timestamp(), arg2->timestamp());}
   };
+  
+  template <>
+  class GeneralTensorOp<OperationType::ravel>: public civita::CachedTensorOp
+  {
+    std::shared_ptr<ITensor> arg;
+    void computeTensor() const override {//TODO
+      throw runtime_error("ravel evaluation not yet implemented");
+    }
+    Timestamp timestamp() const override {return arg->timestamp();}
+  };  
 
   template <>
   class GeneralTensorOp<OperationType::index>: public civita::CachedTensorOp
@@ -480,7 +490,7 @@ namespace minsky
   };
    
 //  template <> 
-  class RavelTensor: public civita::CachedTensorOp
+  class RavelTensor: public GeneralTensorOp<OperationType::ravel>
   {
     const Ravel& ravel;
     //TensorPtr arg;
@@ -496,7 +506,18 @@ namespace minsky
     RavelTensor(const Ravel& ravel): ravel(ravel) {}
     void setArgument(const TensorPtr& a,const std::string& d={},double argv={}) override {arg=a;}
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
+    //void computeTensor(const Ravel& ravel) const; 
   };
+  
+//  void RavelTensor::computeTensor(const Ravel& ravel) const
+//  {
+//    //if (auto r=dynamic_cast<const Ravel*>(&ravel.getState()))
+//    //  {	   
+//      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*arg));
+//      ravel.loadDataFromSlice(cachedResult);
+//      m_timestamp = Timestamp::clock::now();
+//     // }
+//  }    
   
 //  template <>
 //  class RavelTensor<OperationType::ravel>: public civita::DimensionedArgCachedOp
@@ -567,7 +588,13 @@ namespace minsky
   std::shared_ptr<ITensor> TensorOpFactory::create
   (const Item& it, const TensorsFromPort& tfp)
   {
-    if (auto op=it.operationCast())
+    if (auto ravel=dynamic_cast<const Ravel*>(&it))
+      {
+        auto r=make_shared<RavelTensor>(*ravel);
+        r->setArguments(tfp.tensorsFromPorts(it.ports));
+        return r;
+      }	  
+    else if (auto op=it.operationCast())
       try
         {
           TensorPtr r{create(op->type())};
@@ -592,12 +619,12 @@ namespace minsky
         r->setArguments(tfp.tensorsFromPorts(it.ports));
         return r;
       }
-    else if (auto ravel=dynamic_cast<const Ravel*>(&it))
-      {
-        auto r=make_shared<RavelTensor>(*ravel);
-        r->setArguments(tfp.tensorsFromPorts(it.ports));
-        return r;
-      }
+    //else if (auto ravel=dynamic_cast<const Ravel*>(&it))
+    //  {
+    //    auto r=make_shared<RavelTensor>(*ravel);
+    //    r->setArguments(tfp.tensorsFromPorts(it.ports));
+    //    return r;
+    //  }
     return {};
   }
 
@@ -623,57 +650,57 @@ namespace minsky
                   throw std::runtime_error("Tensor derivative not implemented");
               }
           }
-        if (auto o=dynamic_cast<const Ravel*>(&item))
-          {
-            if (o->type()==OperationType::sum)
-              {
-                // check if we're differentiating a scalar or tensor
-                // expression, and throw accordingly
-                auto rhs=tensorsFromPort(*o->ports[1]);
-                if (rhs.empty() || rhs[0]->size()==1)
-                  throw FallBackToScalar();
-                else
-                  // TODO - implement symbolic differentiation of
-                  // tensor operations
-                  throw std::runtime_error("Tensor derivative not implemented");
-              }
-            if (o->type()==OperationType::multiply)
-              {
-                // check if we're differentiating a scalar or tensor
-                // expression, and throw accordingly
-                auto rhs=tensorsFromPort(*o->ports[1]);
-                if (rhs.empty() || rhs[0]->size()==1)
-                  throw FallBackToScalar();
-                else
-                  // TODO - implement symbolic differentiation of
-                  // tensor operations
-                  throw std::runtime_error("Tensor derivative not implemented");
-              }
-            if (o->type()==OperationType::min)
-              {
-                // check if we're differentiating a scalar or tensor
-                // expression, and throw accordingly
-                auto rhs=tensorsFromPort(*o->ports[1]);
-                if (rhs.empty() || rhs[0]->size()==1)
-                  throw FallBackToScalar();
-                else
-                  // TODO - implement symbolic differentiation of
-                  // tensor operations
-                  throw std::runtime_error("Tensor derivative not implemented");
-              }   
-            if (o->type()==OperationType::max)
-              {
-                // check if we're differentiating a scalar or tensor
-                // expression, and throw accordingly
-                auto rhs=tensorsFromPort(*o->ports[1]);
-                if (rhs.empty() || rhs[0]->size()==1)
-                  throw FallBackToScalar();
-                else
-                  // TODO - implement symbolic differentiation of
-                  // tensor operations
-                  throw std::runtime_error("Tensor derivative not implemented");
-              }                               
-          }          
+        //if (auto o=dynamic_cast<const Ravel*>(&item))
+        //  {
+        //    if (o->type()==OperationType::sum)
+        //      {
+        //        // check if we're differentiating a scalar or tensor
+        //        // expression, and throw accordingly
+        //        auto rhs=tensorsFromPort(*o->ports[1]);
+        //        if (rhs.empty() || rhs[0]->size()==1)
+        //          throw FallBackToScalar();
+        //        else
+        //          // TODO - implement symbolic differentiation of
+        //          // tensor operations
+        //          throw std::runtime_error("Tensor derivative not implemented");
+        //      }
+        //    if (o->type()==OperationType::multiply)
+        //      {
+        //        // check if we're differentiating a scalar or tensor
+        //        // expression, and throw accordingly
+        //        auto rhs=tensorsFromPort(*o->ports[1]);
+        //        if (rhs.empty() || rhs[0]->size()==1)
+        //          throw FallBackToScalar();
+        //        else
+        //          // TODO - implement symbolic differentiation of
+        //          // tensor operations
+        //          throw std::runtime_error("Tensor derivative not implemented");
+        //      }
+        //    if (o->type()==OperationType::min)
+        //      {
+        //        // check if we're differentiating a scalar or tensor
+        //        // expression, and throw accordingly
+        //        auto rhs=tensorsFromPort(*o->ports[1]);
+        //        if (rhs.empty() || rhs[0]->size()==1)
+        //          throw FallBackToScalar();
+        //        else
+        //          // TODO - implement symbolic differentiation of
+        //          // tensor operations
+        //          throw std::runtime_error("Tensor derivative not implemented");
+        //      }   
+        //    if (o->type()==OperationType::max)
+        //      {
+        //        // check if we're differentiating a scalar or tensor
+        //        // expression, and throw accordingly
+        //        auto rhs=tensorsFromPort(*o->ports[1]);
+        //        if (rhs.empty() || rhs[0]->size()==1)
+        //          throw FallBackToScalar();
+        //        else
+        //          // TODO - implement symbolic differentiation of
+        //          // tensor operations
+        //          throw std::runtime_error("Tensor derivative not implemented");
+        //      }                               
+        //  }          
         r.push_back(tensorOpFactory.create(item, *this));
         assert(r.back());
       }
@@ -693,7 +720,6 @@ namespace minsky
     return r;
   }
   
-
   TensorEval::TensorEval(VariableValue& v, const shared_ptr<EvalCommon>& ev): result(v, ev)
   {
     if (auto var=cminsky().definingVar(v.valueId()))
@@ -723,7 +749,7 @@ namespace minsky
     if (rhs)
       {
         assert(result.idx()>=0);
-        assert(result.size()==rhs->size());
+        //assert(result.size()==rhs->size());
         result.ev->update(fv, sv);
         for (size_t i=0; i<rhs->size(); ++i)
           {

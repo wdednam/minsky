@@ -488,103 +488,33 @@ namespace minsky
       return nan("");
     }
   };
-   
+
+//  template <>
+//  class RavelTensor<OperationType::ravel>: public civita::DimensionedArgCachedOp   
 //  template <> 
-  class RavelTensor: public GeneralTensorOp<OperationType::ravel>
+//  class RavelTensor: public civita:CachedTensorOp //public GeneralTensorOp<OperationType::ravel>
+
+  class RavelTensor: public civita::DimensionedArgCachedOp 
   {
     const Ravel& ravel;
-    //TensorPtr arg;
-    std::shared_ptr<ITensor> arg;
+    TensorPtr arg;
+    //std::shared_ptr<ITensor> arg;
     void computeTensor() const override  
     {
       const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*arg));
+      //const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);      
       ravel.loadDataFromSlice(cachedResult);
       m_timestamp = Timestamp::clock::now();
     }    
     
   public:
     RavelTensor(const Ravel& ravel): ravel(ravel) {}
-    void setArgument(const TensorPtr& a,const std::string& d={},double argv={}) override {arg=a;}
+    void setArgument(const TensorPtr& a,const std::string&,double) override {arg=a;
+  	; cachedResult.index(a->index()); cachedResult.hypercube(a->hypercube());}
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
-    //void computeTensor(const Ravel& ravel) const; 
   };
   
-//  void RavelTensor::computeTensor(const Ravel& ravel) const
-//  {
-//    //if (auto r=dynamic_cast<const Ravel*>(&ravel.getState()))
-//    //  {	   
-//      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*arg));
-//      ravel.loadDataFromSlice(cachedResult);
-//      m_timestamp = Timestamp::clock::now();
-//     // }
-//  }    
-  
-//  template <>
-//  class RavelTensor<OperationType::ravel>: public civita::DimensionedArgCachedOp
-//  {
-//	const Ravel& ravel;  
-//    std::shared_ptr<ITensor> arg;
-//    void computeTensor() const override {
-//      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*arg));		
-//      //size_t i=0, j=0;
-//      //for (; i<arg->size(); ++i)
-//      //  if ((*arg)[i]>0.5)
-//      //    cachedResult[j++]=i;
-//      //for (; j<cachedResult.size(); ++j)
-//      //  cachedResult[j]=nan("");
-//    if (dimension<rank())
-//      {
-//        auto argDims=arg->hypercube().dims();
-//        size_t stride=1;
-//        for (size_t j=0; j<dimension; ++j)
-//          stride*=argDims[j];
-//        if (argVal>=1 && argVal<argDims[dimension])
-//          // argVal is interpreted as the binning window. -ve argVal ignored
-//          for (size_t i=0; i<hypercube().numElements(); i+=stride*argDims[dimension])
-//            for (size_t j=0; j<stride; ++j)
-//              for (size_t j1=0; j1<argDims[dimension]*stride; j1+=stride)
-//                {
-//                  size_t k=i+j+max(ssize_t(0), ssize_t(j1-ssize_t(argVal-1)*stride));
-//                  cachedResult[i+j+j1]=arg->atHCIndex(i+j+j1);
-//                  //for (; k<i+j+j1; k+=stride)
-//                  //  {
-//                  //    f(cachedResult[i+j+j1], arg->atHCIndex(k), k);
-//                  //  }
-//              }
-//        else // scan over whole dimension
-//          for (size_t i=0; i<hypercube().numElements(); i+=stride*argDims[dimension])
-//            for (size_t j=0; j<stride; ++j)
-//              {
-//                cachedResult[i+j]=arg->atHCIndex(i+j);
-//                for (size_t k=i+j+stride; k<i+j+stride*argDims[dimension]; k+=stride)
-//                  {
-//                    cachedResult[k] = cachedResult[k-stride];
-//                    //f(cachedResult[k], arg->atHCIndex(k), k);
-//                  }
-//              }
-//          }
-//    else
-//      {
-//        cachedResult[0]=arg->atHCIndex(0);
-//        for (size_t i=1; i<hypercube().numElements(); ++i)
-//          {
-//            cachedResult[i]=cachedResult[i-1];
-//            //f(cachedResult[i], arg->atHCIndex(i), i);
-//          }
-//      }      
-//      
-//       ravel.loadDataFromSlice(cachedResult);      
-//       m_timestamp = Timestamp::clock::now();  
-//    }
-//    
-//    
-//    void setArgument(const TensorPtr& a, const string&,double) override {
-//      arg=a; cachedResult.index(a->index()); cachedResult.hypercube(a->hypercube());
-//    }
-//    
-//    Timestamp timestamp() const override {return arg->timestamp();}
-//  };
-  
+
   std::shared_ptr<ITensor> TensorOpFactory::create
   (const Item& it, const TensorsFromPort& tfp)
   {
@@ -637,7 +567,7 @@ namespace minsky
         Item& item=w->from()->item();
         if (auto o=item.operationCast())
           {
-            if (o->type()==OperationType::differentiate)
+            if (o->type()==OperationType::ravel)
               {
                 // check if we're differentiating a scalar or tensor
                 // expression, and throw accordingly
@@ -647,23 +577,8 @@ namespace minsky
                 else
                   // TODO - implement symbolic differentiation of
                   // tensor operations
-                  throw std::runtime_error("Tensor derivative not implemented");
+                  throw std::runtime_error("Tensor ravel not implemented");
               }
-          }
-        //if (auto o=dynamic_cast<const Ravel*>(&item))
-        //  {
-        //    if (o->type()==OperationType::sum)
-        //      {
-        //        // check if we're differentiating a scalar or tensor
-        //        // expression, and throw accordingly
-        //        auto rhs=tensorsFromPort(*o->ports[1]);
-        //        if (rhs.empty() || rhs[0]->size()==1)
-        //          throw FallBackToScalar();
-        //        else
-        //          // TODO - implement symbolic differentiation of
-        //          // tensor operations
-        //          throw std::runtime_error("Tensor derivative not implemented");
-        //      }
         //    if (o->type()==OperationType::multiply)
         //      {
         //        // check if we're differentiating a scalar or tensor
@@ -700,7 +615,22 @@ namespace minsky
         //          // tensor operations
         //          throw std::runtime_error("Tensor derivative not implemented");
         //      }                               
-        //  }          
+        //}                  
+        //else if (auto o=item.operationCast())
+        //  {
+          else if (o->type()==OperationType::differentiate)
+              {
+                // check if we're differentiating a scalar or tensor
+                // expression, and throw accordingly
+                auto rhs=tensorsFromPort(*o->ports[1]);
+                if (rhs.empty() || rhs[0]->size()==1)
+                  throw FallBackToScalar();
+                else
+                  // TODO - implement symbolic differentiation of
+                  // tensor operations
+                  throw std::runtime_error("Tensor derivative not implemented");
+              }
+          }
         r.push_back(tensorOpFactory.create(item, *this));
         assert(r.back());
       }
@@ -749,7 +679,7 @@ namespace minsky
     if (rhs)
       {
         assert(result.idx()>=0);
-        //assert(result.size()==rhs->size());
+        assert(result.size()==rhs->size());
         result.ev->update(fv, sv);
         for (size_t i=0; i<rhs->size(); ++i)
           {

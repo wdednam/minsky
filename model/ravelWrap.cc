@@ -539,6 +539,7 @@ namespace minsky
 #endif
         //vector<double> tmp(v.size());
         //for (size_t i=0; i<v.size(); ++i) tmp[i]=v[i];
+        //ravelDC_loadData(dataCube, ravel, &tmp[0]);
         ravelDC_loadData(dataCube, ravel, v.begin());
         applyState(state);
       }
@@ -833,6 +834,7 @@ namespace minsky
   {
     // TODO: add some comment lines
     VariableValue v(VariableType::flow);
+    //loadDataFromSlice(v);
     loadDataFromSlice(reinterpret_cast<TensorVal&>(v));
     v.exportAsCSV(filename, m_filename+": "+ravel_description(ravel));
   }

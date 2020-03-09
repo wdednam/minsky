@@ -218,6 +218,7 @@ namespace minsky
   TensorOpFactory::TensorOpFactory()
   {
     tensorOpFactory.registerType<TimeOp>(OperationType::time);
+    //tensorOpFactory.registerType<RavelTensor>(OperationType::ravel);
     registerOps<MultiWireBinOp, OperationType::add, OperationType::log>(*this);
     registerOps<TensorBinOp, OperationType::log, OperationType::copy>(*this);
     registerOps<MinskyTensorOp, OperationType::copy, OperationType::sum>(*this);

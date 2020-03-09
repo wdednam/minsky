@@ -535,7 +535,7 @@ namespace minsky
         if (r!=selectedRow && !godleyIcon->table.initialConditionRow(selectedRow) && !godleyIcon->table.initialConditionRow(r))  // Cannot move Intitial Conditions row. For ticket 1064.
           godleyIcon->table.moveRow(selectedRow,r-selectedRow);
       } 
-    else if ((c!=selectedCol || r!=selectedRow) && c>0 && r>0))
+    else if ((c!=selectedCol || r!=selectedRow) && c>0 && r>0)
       {
         swap(godleyIcon->table.cell(selectedRow,selectedCol), godleyIcon->table.cell(r,c));
         selectedCol=c;

@@ -223,7 +223,6 @@ namespace minsky
     registerOps<TensorBinOp, OperationType::log, OperationType::copy>(*this);
     registerOps<MinskyTensorOp, OperationType::copy, OperationType::sum>(*this);
     registerOps<GeneralTensorOp, OperationType::sum, OperationType::numOps>(*this);
-    //registerOps<RavelTensor, OperationType::ravel, OperationType::ravel>(*this);
   }
                                                                                     
   template <>
@@ -526,6 +525,7 @@ namespace minsky
         return r;
       }	  
     else if (auto op=it.operationCast())
+    if (auto op=it.operationCast())
       try
         {
           TensorPtr r{create(op->type())};
@@ -568,58 +568,7 @@ namespace minsky
         Item& item=w->from()->item();
         if (auto o=item.operationCast())
           {
-            if (o->type()==OperationType::ravel)
-              {
-                // check if we're differentiating a scalar or tensor
-                // expression, and throw accordingly
-                auto rhs=tensorsFromPort(*o->ports[1]);
-                if (rhs.empty() || rhs[0]->size()==1)
-                  throw FallBackToScalar();
-                else
-                  // TODO - implement symbolic differentiation of
-                  // tensor operations
-                  throw std::runtime_error("Tensor ravel not implemented");
-              }
-        //    if (o->type()==OperationType::multiply)
-        //      {
-        //        // check if we're differentiating a scalar or tensor
-        //        // expression, and throw accordingly
-        //        auto rhs=tensorsFromPort(*o->ports[1]);
-        //        if (rhs.empty() || rhs[0]->size()==1)
-        //          throw FallBackToScalar();
-        //        else
-        //          // TODO - implement symbolic differentiation of
-        //          // tensor operations
-        //          throw std::runtime_error("Tensor derivative not implemented");
-        //      }
-        //    if (o->type()==OperationType::min)
-        //      {
-        //        // check if we're differentiating a scalar or tensor
-        //        // expression, and throw accordingly
-        //        auto rhs=tensorsFromPort(*o->ports[1]);
-        //        if (rhs.empty() || rhs[0]->size()==1)
-        //          throw FallBackToScalar();
-        //        else
-        //          // TODO - implement symbolic differentiation of
-        //          // tensor operations
-        //          throw std::runtime_error("Tensor derivative not implemented");
-        //      }   
-        //    if (o->type()==OperationType::max)
-        //      {
-        //        // check if we're differentiating a scalar or tensor
-        //        // expression, and throw accordingly
-        //        auto rhs=tensorsFromPort(*o->ports[1]);
-        //        if (rhs.empty() || rhs[0]->size()==1)
-        //          throw FallBackToScalar();
-        //        else
-        //          // TODO - implement symbolic differentiation of
-        //          // tensor operations
-        //          throw std::runtime_error("Tensor derivative not implemented");
-        //      }                               
-        //}                  
-        //else if (auto o=item.operationCast())
-        //  {
-          else if (o->type()==OperationType::differentiate)
+          if (o->type()==OperationType::differentiate)
               {
                 // check if we're differentiating a scalar or tensor
                 // expression, and throw accordingly

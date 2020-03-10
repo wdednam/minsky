@@ -108,7 +108,7 @@ namespace minsky
   void ButtonWidget<ButtonWidgetEnums::col>::invoke(double x)
   {
     int button=x/buttonSpacing;
-    if (!cminsky().multipleEquities) {  // no column widgets on equity column in single equity column mode
+    if (!cminsky().multipleEquities && godleyIcon.table.singleEquity()) {  // no column widgets on equity column in single equity column mode
       if (pos!=last)
         switch (button)
          {
@@ -201,14 +201,7 @@ namespace minsky
           {
             CairoSave cs(surface->cairo());
             cairo_move_to(surface->cairo(), x, columnButtonsOffset);
-            // Prevent the existence of more than one equity column in single equity column mode
-            if (godleyIcon->table._assetClass(col)==GodleyAssetClass::equity && col!=godleyIcon->table.cols()-1 && !cminsky().multipleEquities) {
-               godleyIcon->table.deleteCol(col);
-               colWidgets[col].draw(surface->cairo());
-		   }
-            else {
-			   colWidgets[col].draw(surface->cairo());   
-		   }
+            colWidgets[col].draw(surface->cairo());
           }
       
         if (col>1)
@@ -319,7 +312,7 @@ namespace minsky
     cairo_set_line_width(surface->cairo(),0.5);
     cairo_stroke(surface->cairo());
 
-    //cairo_move_to(surface->cairo(),x-pulldownHot,topTableOffset);
+    cairo_move_to(surface->cairo(),x-pulldownHot,topTableOffset);
 
     // now row sum column
     x+=3;
@@ -527,7 +520,7 @@ namespace minsky
     else if (selectedRow==0)
       {  
 		// Disallow moving flow labels column and prevent columns from moving when import stockvar dropdown button is pressed in empty column. For tickets 1053/1064/1066
-        if (c>0 && size_t(c)<godleyIcon->table.cols() && selectedCol>0 && size_t(selectedCol)<godleyIcon->table.cols() && c!=selectedCol && !(colLeftMargin[c+1]-x < pulldownHot) && !(colLeftMargin[selectedCol+1]-x < pulldownHot)) 
+        if (c>0 && size_t(c)<godleyIcon->table.cols() && selectedCol>0 && size_t(selectedCol)<godleyIcon->table.cols() && c!=selectedCol && !(colLeftMargin[c+1]-x < pulldownHot)) 
           godleyIcon->table.moveCol(selectedCol,c-selectedCol);
       }
     else if (r>0 && selectedCol==0)
@@ -600,7 +593,7 @@ namespace minsky
         selectedRow<int(table.rows()) && (selectedCol!=0 || selectedRow!=1)) // Cell (1,0) is off-limits. For ticket 1064
           {			  	  
             auto& str=table.cell(selectedRow,selectedCol);
-            if (utf8.length() && (keySym<0x7f || (0xffaa <= keySym && keySym <= 0xffbf)))  // Enable numeric keypad key presses. For ticket 1136
+            if (utf8.length() && (keySym<0x7f || (0xffb0 < keySym && keySym < 0xffbe)))  // Enable numeric keypad key presses. For ticket 1136
               // all printing and control characters have keysym
               // <0x80. But some keys (eg tab, backspace and escape
               // are mapped to control characters
@@ -910,7 +903,7 @@ namespace {
 		    auto swapVar=godleyIcon->table.cell(0,selectedCol);
 		    auto oldAssetClass=godleyIcon->table._assetClass(selectedCol);
 		    auto targetAssetClass=godleyIcon->table._assetClass(c);
-		    if (!swapVar.empty() && !(colLeftMargin[c+1]-x < pulldownHot)) { // ImportVar dropdown button should not trigger this condition. For ticket 1162
+		    if (!swapVar.empty()) {
 		      if (targetAssetClass!=oldAssetClass && targetAssetClass!=GodleyAssetClass::equity && targetAssetClass!=GodleyAssetClass::noAssetClass)
 		         tmpStr=constructMessage(targetAssetClass,oldAssetClass,swapVar);
 		      else if ((targetAssetClass==GodleyAssetClass::equity || targetAssetClass==GodleyAssetClass::noAssetClass) || oldAssetClass==GodleyAssetClass::noAssetClass)
@@ -1126,7 +1119,7 @@ namespace {
   {	    
     CairoSave cs(cairo);
     int idx=0;
-    if (!cminsky().multipleEquities || rowCol==row) {  // no column widgets on equity column in single equity column mode
+    if ((!cminsky().multipleEquities && godleyIcon.table.singleEquity()) || rowCol==row) {  // no column widgets on equity column in single equity column mode
       if (rowCol == row || (rowCol == col && pos!=last)) 
         drawButton(cairo,"+",0,1,0,idx++);
       if ((rowCol == row && pos!=first && pos!=firstAndLast) || (rowCol == col && pos!=last)) 	// no delete button for first row containing initial conditions. For ticket 1064

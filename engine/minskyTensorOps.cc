@@ -150,38 +150,6 @@ namespace minsky
     }
   };
   
-//  template <OperationType::Type op> struct AccumRavelArgs;
-//  
-//  template <> struct AccumRavelArgs<OperationType::add>: public civita::ReduceArguments
-//  {
-//    AccumRavelArgs(): civita::ReduceArguments([](double& x,double y){x+=y;},0) {}
-//  };
-//  
-//  template <> struct AccumRavelArgs<OperationType::multiply>: public civita::ReduceArguments
-//  {
-//    AccumRavelArgs(): civita::ReduceArguments([](double& x,double y){x*=y;},1) {}
-//  };
-//  
-//  template <> struct AccumRavelArgs<OperationType::min>: public civita::ReduceArguments
-//  {
-//    AccumRavelArgs(): civita::ReduceArguments([](double& x,double y){if (y<x) x=y;},std::numeric_limits<double>::max()) {}
-//  };
-//  template <> struct AccumRavelArgs<OperationType::max>: public civita::ReduceArguments
-//  {
-//    AccumRavelArgs(): civita::ReduceArguments([](double& x,double y){if (y>x) x=y;},-std::numeric_limits<double>::max()) {}
-//  };  
-//  
-//  template <OperationType::Type op> struct RavelTensor: public CachedTensorOp
-//  {
-//    virtual void setArguments(const std::vector<TensorPtr>& a)
-//    {
-//      auto pa=make_shared<AccumRavelArgs<op>>();
-//      pa->setArguments(a,{},0);
-//      civita::DimensionedArgCachedOp::setArguments(pa);
-//    }
-//  };
-
-  
 //  template <minsky::OperationType::Type T>
 //  struct ReductionTraits
 //  {
@@ -192,7 +160,7 @@ namespace minsky
 
   template <OperationType::Type op> struct GeneralTensorOp;
   
-//  template <OperationType::Type op> struct RavelTensor;
+  class RavelTensor;
                                                                                       
   namespace
   {
@@ -218,7 +186,7 @@ namespace minsky
   TensorOpFactory::TensorOpFactory()
   {
     tensorOpFactory.registerType<TimeOp>(OperationType::time);
-    //tensorOpFactory.registerType<RavelTensor>(OperationType::ravel);
+    tensorOpFactory.registerType<RavelTensor>(OperationType::ravel);
     registerOps<MultiWireBinOp, OperationType::add, OperationType::log>(*this);
     registerOps<TensorBinOp, OperationType::log, OperationType::copy>(*this);
     registerOps<MinskyTensorOp, OperationType::copy, OperationType::sum>(*this);
@@ -319,16 +287,6 @@ namespace minsky
     Timestamp timestamp() const override {return max(arg1->timestamp(), arg2->timestamp());}
   };
   
-  template <>
-  class GeneralTensorOp<OperationType::ravel>: public civita::CachedTensorOp
-  {
-    std::shared_ptr<ITensor> arg;
-    void computeTensor() const override {//TODO
-      throw runtime_error("ravel evaluation not yet implemented");
-    }
-    Timestamp timestamp() const override {return arg->timestamp();}
-  };  
-
   template <>
   class GeneralTensorOp<OperationType::index>: public civita::CachedTensorOp
   {
@@ -489,42 +447,51 @@ namespace minsky
     }
   };
 
-//  template <>
-//  class RavelTensor<OperationType::ravel>: public civita::DimensionedArgCachedOp   
-//  template <> 
-//  class RavelTensor: public civita:CachedTensorOp //public GeneralTensorOp<OperationType::ravel>
+// Original code
 
-  class RavelTensor: public civita::DimensionedArgCachedOp 
+//  class RavelTensor: public civita::CachedTensorOp
+//  {
+//    const Ravel& ravel;
+//    TensorPtr arg;
+//    void computeTensor() const override  
+//    {
+//      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);      
+//      ravel.loadDataFromSlice(cachedResult);
+//      m_timestamp = Timestamp::clock::now();
+//    }    
+//    CLASSDESC_ACCESS(Ravel);
+//  public:
+//    RavelTensor(const Ravel& ravel): ravel(ravel) {}
+//    void setArgument(const TensorPtr& a,const std::string&,double) override {arg=a;
+//  	; cachedResult.index(a->index()); cachedResult.hypercube(a->hypercube());}
+//    Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
+//  };
+
+// Alternative version of initial code  with ravel op added in tensorOpFactory
+
+  class RavelTensor: public civita::CachedTensorOp
   {
-    const Ravel& ravel;
+    CLASSDESC_ACCESS(Ravel);	  
     TensorPtr arg;
-    //std::shared_ptr<ITensor> arg;
     void computeTensor() const override  
     {
-      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*arg));
-      //const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);      
-      ravel.loadDataFromSlice(cachedResult);
-      m_timestamp = Timestamp::clock::now();
+	   if (auto r=dynamic_cast<Ravel*>(arg.get())) {
+         r->loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*arg));
+         r->loadDataFromSlice(cachedResult);	
+	   }			
     }    
-    
   public:
-    RavelTensor(const Ravel& ravel): ravel(ravel) {}
-    void setArgument(const TensorPtr& a,const std::string&,double) override {arg=a;
-  	; cachedResult.index(a->index()); cachedResult.hypercube(a->hypercube());}
+    void setArgument(const TensorPtr& a,const std::string&,double) override {
+	   arg=a;
+  	   cachedResult.index(a->index());
+  	   cachedResult.hypercube(a->hypercube());
+  	}	
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
   };
-  
 
   std::shared_ptr<ITensor> TensorOpFactory::create
   (const Item& it, const TensorsFromPort& tfp)
   {
-    if (auto ravel=dynamic_cast<const Ravel*>(&it))
-      {
-        auto r=make_shared<RavelTensor>(*ravel);
-        r->setArguments(tfp.tensorsFromPorts(it.ports));
-        return r;
-      }	  
-    else if (auto op=it.operationCast())
     if (auto op=it.operationCast())
       try
         {
@@ -549,7 +516,7 @@ namespace minsky
         auto r=make_shared<SwitchTensor>();
         r->setArguments(tfp.tensorsFromPorts(it.ports));
         return r;
-      }
+      } // Original code
     //else if (auto ravel=dynamic_cast<const Ravel*>(&it))
     //  {
     //    auto r=make_shared<RavelTensor>(*ravel);

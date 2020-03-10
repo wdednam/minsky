@@ -443,7 +443,7 @@ namespace minsky
       }
   }
 
-  void Ravel::loadDataFromSlice(TensorVal& v) const
+  void Ravel::loadDataFromSlice(ITensorVal& v) const
   {
     if (ravel && dataCube)
       {
@@ -460,7 +460,6 @@ namespace minsky
           {
             vector<size_t> outHandles(dims.size());
             ravel_outputHandleIds(ravel, &outHandles[0]);
-            size_t prevNumElem=v.size();
             Hypercube hc;
             auto& xv=hc.xvectors;
             for (size_t j=0; j<outHandles.size(); ++j)
@@ -488,19 +487,17 @@ namespace minsky
               }
             v.hypercube(move(hc));
             assert(vector<unsigned>(dims.begin(), dims.end())==v.hypercube().dims());
-            
-            if (v.index()[0]==-1 || v.size()>prevNumElem)
-              v.allocVal();
+
             for (size_t i=0; i< v.size(); ++i)
               *(v.begin()+i)=tmp[i];
           }
         else
           throw error(ravel_lastErr());
       }
-   v.hypercube({}); // ensure scalar data space allocated
+    v.hypercube({}); // ensure scalar data space allocated
   }
 
-  void Ravel::loadDataCubeFromVariable(const ITensorVal& v)
+  void Ravel::loadDataCubeFromVariable(const ITensor& v)
   {
     if (ravel && dataCube)
       {
@@ -537,10 +534,9 @@ namespace minsky
               assert(d[i]==ravel_numSliceLabels(ravel,outputHandles[i]));
           }
 #endif
-        //vector<double> tmp(v.size());
-        //for (size_t i=0; i<v.size(); ++i) tmp[i]=v[i];
-        //ravelDC_loadData(dataCube, ravel, &tmp[0]);
-        ravelDC_loadData(dataCube, ravel, v.begin());
+        vector<double> tmp(v.size());
+        for (size_t i=0; i<v.size(); ++i) tmp[i]=v[i];
+        ravelDC_loadData(dataCube, ravel, &tmp[0]);
         applyState(state);
       }
   }
@@ -834,8 +830,7 @@ namespace minsky
   {
     // TODO: add some comment lines
     VariableValue v(VariableType::flow);
-    //loadDataFromSlice(v);
-    loadDataFromSlice(reinterpret_cast<TensorVal&>(v));
+    loadDataFromSlice(v);
     v.exportAsCSV(filename, m_filename+": "+ravel_description(ravel));
   }
 

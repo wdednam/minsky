@@ -87,8 +87,8 @@ namespace minsky
     void onMouseLeave();
     void loadFile(const std::string&);
     const string& filename() const {return m_filename;}
-    void loadDataFromSlice(TensorVal&) const;
-    void loadDataCubeFromVariable(const ITensorVal&);
+    void loadDataFromSlice(ITensorVal&) const;
+    void loadDataCubeFromVariable(const ITensor&);
     unsigned maxRank() const;
     unsigned rank() const;
     void setRank(unsigned);

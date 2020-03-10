@@ -138,6 +138,8 @@ namespace minsky
   {
     AccumArgs(): civita::ReduceArguments([](double& x,double y){if (y>0.5) x=1;},0) {}
   };
+
+  
   
   template <OperationType::Type op> struct MultiWireBinOp: public TensorBinOp<op>
   {
@@ -149,6 +151,7 @@ namespace minsky
       civita::BinOp::setArguments(pa1, pa2);
     }
   };
+
   
 //  template <minsky::OperationType::Type T>
 //  struct ReductionTraits
@@ -160,7 +163,7 @@ namespace minsky
 
   template <OperationType::Type op> struct GeneralTensorOp;
   
-  class RavelTensor;
+  class RavelTensor;  
                                                                                       
   namespace
   {
@@ -185,8 +188,8 @@ namespace minsky
 
   TensorOpFactory::TensorOpFactory()
   {
-    tensorOpFactory.registerType<TimeOp>(OperationType::time);
-    tensorOpFactory.registerType<RavelTensor>(OperationType::ravel);
+    registerType<TimeOp>(OperationType::time);
+    registerType<RavelTensor>(OperationType::ravel);
     registerOps<MultiWireBinOp, OperationType::add, OperationType::log>(*this);
     registerOps<TensorBinOp, OperationType::log, OperationType::copy>(*this);
     registerOps<MinskyTensorOp, OperationType::copy, OperationType::sum>(*this);
@@ -286,7 +289,7 @@ namespace minsky
     }
     Timestamp timestamp() const override {return max(arg1->timestamp(), arg2->timestamp());}
   };
-  
+
   template <>
   class GeneralTensorOp<OperationType::index>: public civita::CachedTensorOp
   {
@@ -446,8 +449,8 @@ namespace minsky
       return nan("");
     }
   };
-
-// Original code
+   
+  // Original code
 
 //  class RavelTensor: public civita::CachedTensorOp
 //  {
@@ -467,8 +470,7 @@ namespace minsky
 //    Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
 //  };
 
-// Alternative version of initial code  with ravel op added in tensorOpFactory
-
+// Alternative version of original code with ravel op added in tensorOpFactory
   class RavelTensor: public civita::CachedTensorOp
   {
     CLASSDESC_ACCESS(Ravel);	  
@@ -476,19 +478,18 @@ namespace minsky
     void computeTensor() const override  
     {
 	   if (auto r=dynamic_cast<Ravel*>(arg.get())) {
-         r->loadDataCubeFromVariable(dynamic_cast<ITensorVal&>(*arg));
-         r->loadDataFromSlice(cachedResult);	
-	   }			
+         r->loadDataCubeFromVariable(*arg);
+         r->loadDataFromSlice(cachedResult);		  
+	   } 			
     }    
   public:
     void setArgument(const TensorPtr& a,const std::string&,double) override {
 	   arg=a;
-  	   cachedResult.index(a->index());
-  	   cachedResult.hypercube(a->hypercube());
+       cachedResult.index(cachedResult.index()); cachedResult.hypercube(cachedResult.hypercube());  
   	}	
-    Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
+    Timestamp timestamp() const override {return arg? cachedResult.timestamp(): Timestamp();}    
   };
-
+  
   std::shared_ptr<ITensor> TensorOpFactory::create
   (const Item& it, const TensorsFromPort& tfp)
   {
@@ -535,7 +536,7 @@ namespace minsky
         Item& item=w->from()->item();
         if (auto o=item.operationCast())
           {
-          if (o->type()==OperationType::differentiate)
+            if (o->type()==OperationType::differentiate)
               {
                 // check if we're differentiating a scalar or tensor
                 // expression, and throw accordingly
@@ -566,7 +567,7 @@ namespace minsky
         }
     return r;
   }
-  
+
   TensorEval::TensorEval(VariableValue& v, const shared_ptr<EvalCommon>& ev): result(v, ev)
   {
     if (auto var=cminsky().definingVar(v.valueId()))

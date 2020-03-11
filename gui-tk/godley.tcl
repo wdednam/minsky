@@ -115,7 +115,6 @@ proc openGodley {id} {
         global preferences
         $id.displayValues $preferences(godleyDisplay)
         $id.displayStyle $preferences(godleyDisplayStyle)
-        multipleEquities $preferences(multipleEquities)
         
     }
     wm deiconify .$id

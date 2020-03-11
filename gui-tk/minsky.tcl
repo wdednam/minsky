@@ -227,9 +227,9 @@ proc setCursor {cur} {. configure -cursor $cur; update idletasks}
 # Toggle single or multiple equity column mode
 multipleEquities $preferences(multipleEquities)
 if $preferences(multipleEquities) {
-   set multipleEquities 0
+   set $preferences(multipleEquities) 0
 } else {
-   set multipleEquities 1
+   set $preferences(multipleEquities) 1
 }	
 
 #source $minskyHome/library/htmllib.tcl
@@ -1419,9 +1419,9 @@ proc setPreferenceParms {} {
     # Toggle single or multiple equity column mode
     multipleEquities $preferences(multipleEquities)
     if $preferences(multipleEquities) {
-       set multipleEquities 0
+       set $preferences(multipleEquities) 0
     } else {
-       set multipleEquities 1
+       set $preferences(multipleEquities) 1
     }	      
 }
 

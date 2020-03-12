@@ -115,8 +115,6 @@ namespace minsky
       t->is_setterGetter=true;
     if (auto t=getCommandData("minsky.resetEdited"))
       t->is_const=true;
-    if (auto t=getCommandData("minsky.multipleEquities"))
-      t->is_const=true;      
     if (auto t=getCommandData("minsky.initGroupList"))
       t->is_const=true;
     if (auto t=getCommandData("minsky.godley.mouseFocus"))

@@ -85,8 +85,9 @@ namespace minsky
     AssetClass _assetClass(size_t col) const;
     AssetClass _assetClass(size_t col, AssetClass cls);
     
-    // Check whether more than one equity column is present irrespective of single or multiple equity column mode. For feature 111.
-    bool singleEquity();
+    /// Check whether more than one equity column is present
+    /// irrespective of single or multiple equity column mode.
+    bool singleEquity() const;
 
     /**
      * Generates a unique name for this table.
@@ -129,7 +130,9 @@ namespace minsky
     */
     /// insert row at \a row
     void insertRow(unsigned row);
-   /// insert col at \a col
+    /// delete row at \a row
+    void deleteRow(unsigned row) {data.erase(data.begin()+row);}
+    /// insert col at \a col
     void insertCol(unsigned col);
     /// delete col before \a col
     void deleteCol(unsigned col);

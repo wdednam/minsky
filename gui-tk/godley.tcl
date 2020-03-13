@@ -290,7 +290,9 @@ proc setGodleyTitleOK id {
 }
     
 proc redrawAllGodleyTables {} {
-    foreach c [info commands godleyWindow*.requestRedraw] {$c}
+    foreach c [info commands godleyWindow*.requestRedraw] {
+        $c
+    }
 }
 
 # sets each individual Godley table displayValue preference
@@ -302,9 +304,7 @@ proc setGodleyDisplay {} {
     foreach c [info commands godleyWindow*.displayStyle] {
         $c $preferences(godleyDisplayStyle)
     }
-    foreach c [info commands multipleEquities] {
-        $c $preferences(multipleEquities)
-    }          
+    multipleEquities $preferences(multipleEquities)
     redrawAllGodleyTables
 }
 

@@ -645,53 +645,25 @@ namespace minsky
 //    
 //    DEFFN(ravel_lastErr, const char*);
 //    DEFFN(ravel_version, const char*);
-//    DEFFN(ravel_new, Ravel::RavelImpl*,size_t);
-//    DEFFN(ravel_delete, void, Ravel::RavelImpl*);
 //    DEFFN(ravel_clear, void, Ravel::RavelImpl*);
-//    DEFFN(ravel_render, void, Ravel::RavelImpl*, CAPIRenderer*);
-//    DEFFN(ravel_onMouseDown, void, Ravel::RavelImpl*, double, double);
-//    DEFFN(ravel_onMouseUp,void, Ravel::RavelImpl*, double, double);
-//    DEFFN(ravel_onMouseMotion, bool, Ravel::RavelImpl*, double, double);
-//    DEFFN(ravel_onMouseOver, bool, Ravel::RavelImpl*, double, double);
-//    DEFFN(ravel_onMouseLeave, void, Ravel::RavelImpl*);
-//    DEFFN(ravel_rescale, void, Ravel::RavelImpl*, double);
-//    DEFFN(ravel_radius, double, Ravel::RavelImpl*);
 //    DEFFN(ravel_rank, size_t, Ravel::RavelImpl*);
-//    DEFFN(ravel_description, const char*, Ravel::RavelImpl*);
-//    DEFFN(ravel_explain, const char*, Ravel::RavelImpl*, double, double);
 //    DEFFN(ravel_outputHandleIds, void, Ravel::RavelImpl*, size_t*);
-//    DEFFN(ravel_setOutputHandleIds, void, Ravel::RavelImpl*, size_t, size_t*);
 //    DEFFN(ravel_addHandle, void, Ravel::RavelImpl*, const char*, size_t, const char**);
 //    DEFFN(ravel_numHandles, unsigned, Ravel::RavelImpl*);
-//    DEFFN(ravel_selectedHandle, int, Ravel::RavelImpl*);
 //    DEFFN(ravel_handleDescription, const char*, Ravel::RavelImpl*, int);
-//    DEFFN(ravel_setHandleDescription, void, Ravel::RavelImpl*, int, const char*);
 //    DEFFN(ravel_numSliceLabels, size_t, Ravel::RavelImpl*, size_t);
 //    DEFFN(ravel_sliceLabels, void, Ravel::RavelImpl*, size_t, const char**);
 //    DEFFN(ravel_displayFilterCaliper, void, Ravel::RavelImpl*, size_t, bool);
-//    DEFFN(ravel_setSlicer,void,Ravel::RavelImpl*,size_t,const char*);
-//    DEFFN(ravel_setCalipers,void,Ravel::RavelImpl*,size_t,const char*,const char*);
 //    DEFFN(ravel_orderLabels, void, Ravel::RavelImpl*, size_t,HandleSort);
-//    DEFFN(ravel_applyCustomPermutation, void, Ravel::RavelImpl*, size_t, size_t, const size_t*);
-//    DEFFN(ravel_currentPermutation, void, Ravel::RavelImpl*, size_t, size_t, size_t*);
-//    DEFFN(ravel_toXML, const char*, Ravel::RavelImpl*);
-//    DEFFN(ravel_fromXML, int, Ravel::RavelImpl*, const char*);
 //    DEFFN(ravel_getHandleState, void, const Ravel::RavelImpl*, size_t, RavelHandleState*);
-//    DEFFN(ravel_setHandleState, void, Ravel::RavelImpl*, size_t, const RavelHandleState*);
-//    DEFFN(ravel_adjustSlicer, void, Ravel::RavelImpl*, int);
-//    DEFFN(ravel_redistributeHandles,void, Ravel::RavelImpl*);
 //    
-//    DEFFN(ravelDC_new, Ravel::Ravel::DataCube*);
-//    DEFFN(ravelDC_delete, void, Ravel::DataCube*);
-//    DEFFN(ravelDC_initRavel, bool, Ravel::DataCube*, Ravel::RavelImpl*);
-//    DEFFN(ravelDC_openFile, bool, Ravel::DataCube*, const char*, RavelDataSpec);
 //    DEFFN(ravelDC_loadData, void, Ravel::DataCube*, const Ravel::RavelImpl*, const double*);
 //    DEFFN(ravelDC_hyperSlice, int, Ravel::DataCube*, Ravel::RavelImpl*, size_t*, double**);
 //
 //    inline double sqr(double x) {return x*x;} 
 //  }  
 
-  class RavelTensor: public civita::CachedTensorOp
+  class RavelTensor: public civita::DimensionedArgCachedOp
   {
     const Ravel& ravel;
     TensorPtr arg;
@@ -701,28 +673,31 @@ namespace minsky
     {
 	 //RavelState initState;	
 	 
-      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);      
+    const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);      
+      
 //    if (ravel.ravel && ravel.dataCube)
 //      {
-//        // this ensure that handles are restored correctly after loading a .mky file. 
+		// Load input tensor pointer  
+		  
+        // this ensure that handles are restored correctly after loading a .mky file. 
 //        RavelState state=initState.empty()? const_cast<Ravel&>(ravel).getState(): initState;
 //        initState.clear();
-//        ravel_clear(ravel.ravel);
+//        ravel_clear(ravel.ravel);                         // THINK IT CAN BE USED AS IS
 //        for (auto& i: arg->hypercube().xvectors)
 //          {
 //            vector<string> ss;
 //            for (auto& j: i) ss.push_back(str(j));
 //            // clear the format if time so that data will reload correctly
 //            if (i.dimension.type==Dimension::time)
-//              const_cast<Ravel&>(ravel).axisDimensions[i.name]=Dimension(Dimension::time,"");
+//              const_cast<Ravel&>(ravel).axisDimensions[i.name]=Dimension(Dimension::time,"");          // CHECK IF NEEDS TO BE REFACTORED.: CAN BE DONE INSIDE RAVELWRAP.CC
 //            vector<const char*> sl;
 //            for (auto& j: ss)
 //              sl.push_back(j.c_str());
-//            ravel_addHandle(ravel.ravel, i.name.c_str(), i.size(), &sl[0]);
-//            size_t h=ravel_numHandles(ravel.ravel)-1;
-//            ravel_displayFilterCaliper(ravel.ravel,h,false);
+//            ravel_addHandle(ravel.ravel, i.name.c_str(), i.size(), &sl[0]);              // CHECK IF NEEDS TO BE REFACTORED
+//            size_t h=ravel_numHandles(ravel.ravel)-1;                                    // CHECK IF NEEDS TO BE REFACTORED
+//            ravel_displayFilterCaliper(ravel.ravel,h,false);                             // CHECK IF NEEDS TO BE REFACTORED   
 //            // set forward sort order
-//            ravel_orderLabels(ravel.ravel,h,RavelState::HandleState::forward);
+//            ravel_orderLabels(ravel.ravel,h,RavelState::HandleState::forward);            // PROBABLY REQUIRES REFACTOR 
 //          }
 //        if (state.empty())
 //          const_cast<Ravel&>(ravel).setRank(arg->hypercube().rank());
@@ -732,21 +707,33 @@ namespace minsky
 //            auto d=arg->hypercube().dims();
 //            assert(d.size()==ravel_rank(ravel.ravel));
 //            vector<size_t> outputHandles(d.size());
-//            ravel_outputHandleIds(ravel.ravel,&outputHandles[0]);
+//            ravel_outputHandleIds(ravel.ravel,&outputHandles[0]);                      // PROBABLY NEEDS TO BE REFACTORED
 //            for (size_t i=0; i<d.size(); ++i)
-//              assert(d[i]==ravel_numSliceLabels(ravel.ravel,outputHandles[i]));
+//              assert(d[i]==ravel_numSliceLabels(ravel.ravel,outputHandles[i]));         // PROBABLY NEEDS TO BE REFACTORED
 //          }
 //#endif
 //        vector<double> tmp(arg->size());
 //        for (size_t i=0; i<arg->size(); ++i) tmp[i]=dynamic_cast<ITensorVal&>(*arg)[i];
-//           ravelDC_loadData(ravel.dataCube, ravel.ravel, &tmp[0]);
-//        const_cast<Ravel&>(ravel).applyState(state);
+//           ravelDC_loadData(ravel.dataCube, ravel.ravel, &tmp[0]);                           // PROBABLY NEEDS TO BE REFACTORED
+//        const_cast<Ravel&>(ravel).applyState(state);                                       // PROBABLY NEEDS TO BE REFACTORED: CAN BE DONE INSIDE RAVELWRAP.CC
 //          
 //     
-// 
+//        // Populate output tensor pointer
 //        vector<size_t> dims(ravel_rank(ravel.ravel));
 //        double* temp=nullptr;
-//        ravelDC_hyperSlice(ravel.dataCube, ravel.ravel, &dims[0], &temp);
+//        ravelDC_hyperSlice(ravel.dataCube, ravel.ravel, &dims[0], &temp);              // WILL NEED REFACTORING
+////        try
+////            {
+////              ravel.dataCube->hyperSlice(ravel.dataCube->slice,*ravel.ravel);           // WILL NEED REFACTORING, dataCube->slice is a rawData object inherited from struct AxisSlice, SizeAndStride is like C++ gslice object
+////              if (ravel.ravel->rank()==ravel.dataCube->slice.rank())
+////                {
+////                  if (ravel.dataCube->slice.size()>0)
+////                    *data=&ravel.dataCube->slice[0];
+////                  for (size_t i=0; i<ravel.dataCube->slice.rank(); ++i)
+////                    dims[i]=ravel.dataCube->slice.dim(i);
+////                  return true;
+////                }
+////            }
 //        if (dims.empty() || dims[0]==0)
 //          {
 //            cachedResult.hypercube({});
@@ -756,19 +743,19 @@ namespace minsky
 //        if (&temp)
 //          {
 //            vector<size_t> outHandles(dims.size());
-//            ravel_outputHandleIds(ravel.ravel, &outHandles[0]);
-//            Hypercube hc;
+//            ravel_outputHandleIds(ravel.ravel, &outHandles[0]);                              // WILL NEED REFACTORING
+//            Hypercube hc; 
 //            auto& xv=hc.xvectors;
 //            for (size_t j=0; j<outHandles.size(); ++j)
 //              {
 //                auto h=outHandles[j];
 //                vector<const char*> labels(ravel_numSliceLabels(ravel.ravel,h));
-//                assert(ravel_numSliceLabels(ravel.ravel,h)==dims[j]);
-//                ravel_sliceLabels(ravel.ravel,h,&labels[0]);
+//                assert(ravel_numSliceLabels(ravel.ravel,h)==dims[j]);                          // CHECK IF NEEDS TO BE REFACTORED       
+//                ravel_sliceLabels(ravel.ravel,h,&labels[0]);                               // WILL NEED REFACTORING
 //                assert(all_of(labels.begin(), labels.end(),
 //                              [](const char* i){return bool(i);}));
 //                xv.emplace_back
-//                  (ravel_handleDescription(ravel.ravel,h));
+//                  (ravel_handleDescription(ravel.ravel,h));                                   // CHECK IF NEEDS TO BE REFACTORED                                           
 //                auto dim=const_cast<Ravel&>(ravel).axisDimensions.find(xv.back().name);
 //                if (dim!=const_cast<Ravel&>(ravel).axisDimensions.end())
 //                  xv.back().dimension=dim->second;
@@ -794,11 +781,64 @@ namespace minsky
      //cachedResult.hypercube({}); // ensure scalar data space allocated
      
       ravel.loadDataFromSlice(cachedResult);  
+//     if (dimension<rank())
+//      {
+//        auto argDims=arg->hypercube().dims();
+//        size_t stride=1;
+//        for (size_t j=0; j<dimension; ++j)
+//          stride*=argDims[j];
+//        if (argVal>=1 && argVal<argDims[dimension])
+//          // argVal is interpreted as the binning window. -ve argVal ignored
+//          for (size_t i=0; i<hypercube().numElements(); i+=stride*argDims[dimension])
+//            for (size_t j=0; j<stride; ++j)
+//              for (size_t j1=0; j1<argDims[dimension]*stride; j1+=stride)
+//                {
+//                  size_t k=i+j+max(ssize_t(0), ssize_t(j1-ssize_t(argVal-1)*stride));
+//                  cachedResult[i+j+j1]=arg->atHCIndex(i+j+j1);
+//                  for (; k<i+j+j1; k+=stride)
+//                    {
+//                      f(cachedResult[i+j+j1], arg->atHCIndex(k), k);
+//                    }
+//              }
+//        else // scan over whole dimension
+//          for (size_t i=0; i<hypercube().numElements(); i+=stride*argDims[dimension])
+//            for (size_t j=0; j<stride; ++j)
+//              {
+//                cachedResult[i+j]=arg->atHCIndex(i+j);
+//                for (size_t k=i+j+stride; k<i+j+stride*argDims[dimension]; k+=stride)
+//                  {
+//                    cachedResult[k] = cachedResult[k-stride];
+//                    f(cachedResult[k], arg->atHCIndex(k), k);
+//                  }
+//              }
+//          }
+//    else
+//      {
+//        cachedResult[0]=arg->atHCIndex(0);
+//        for (size_t i=1; i<hypercube().numElements(); ++i)
+//          {
+//            cachedResult[i]=cachedResult[i-1];
+//            f(cachedResult[i], arg->atHCIndex(i), i);
+//          }
+//      }
+
+      size_t i=0, j=0;
+      for (; i<arg->size(); ++i)
+        if ((*arg)[i]>0.5)
+          cachedResult[j++]+=i;
+      for (; j<cachedResult.size(); ++j)
+        cachedResult[j]=nan("");
+
       m_timestamp = Timestamp::clock::now();
     }    
     CLASSDESC_ACCESS(Ravel);
   public:
     RavelTensor(const Ravel& ravel): ravel(ravel) {}
+    //std::function<void(double&,double,size_t)> f;
+    //template <class F>
+    //RavelTensor(F f, const TensorPtr& arg={}, const std::string& dimName="", double av=0): f(f) 
+    //{RavelTensor::setArgument(arg,dimName,av);}      
+
     void setArgument(const TensorPtr& a,const std::string&,double) override {arg=a;		
   	cachedResult.index(arg->index()); cachedResult.hypercube(arg->hypercube());}
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
@@ -813,7 +853,7 @@ namespace minsky
 	      r->setArguments(tfp.tensorsFromPorts(it.ports));
 	      return r;
 	    }
-    else if (auto op=it.operationCast())
+    if (auto op=it.operationCast())
       try
         {
           TensorPtr r{create(op->type())};

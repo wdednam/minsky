@@ -20,6 +20,7 @@
 #include <classdesc.h>
 #include "minskyTensorOps.h"
 #include "minsky.h"
+#include "ravelWrap.h"
 #include "minsky_epilogue.h"
 static const int ravelVersion=2;
 
@@ -43,6 +44,7 @@ namespace classdesc
 namespace minsky
 {
   using namespace classdesc;
+  using namespace std;
 
   TensorOpFactory tensorOpFactory;
 
@@ -170,83 +172,7 @@ namespace minsky
 //    static const double init;
 //  };
 
-  template <OperationType::Type op> struct GeneralTensorOp;
-  
-  //struct RavelTensor;
-    
-  
-  class RavelTensor: public civita::DimensionedArgCachedOp
-  {
-    const Ravel& ravel;
-    //TensorPtr arg;
-    void computeTensor() const override  
-    {
-	   
-    //const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);      
-     
-    ravel.loadDataFromSlice(cachedResult);      
-    
-    //if (dimension<rank())
-    //  {
-    //    auto argDims=arg->hypercube().dims();
-    //    size_t stride=1;
-    //    for (size_t j=0; j<dimension; ++j)
-    //      stride*=argDims[j];
-    //    if (argVal>=1 && argVal<argDims[dimension])
-    //      // argVal is interpreted as the binning window. -ve argVal ignored
-    //      for (size_t i=0; i<hypercube().numElements(); i+=stride*argDims[dimension])
-    //        for (size_t j=0; j<stride; ++j)
-    //          for (size_t j1=0; j1<argDims[dimension]*stride; j1+=stride)
-    //            {
-    //              size_t k=i+j+max(ssize_t(0), ssize_t(j1-ssize_t(argVal-1)*stride));
-    //              cachedResult[i+j+j1]=arg->atHCIndex(i+j+j1);
-    //              //for (; k<i+j+j1; k+=stride)
-    //              //  {
-    //              //    f(cachedResult[i+j+j1], arg->atHCIndex(k), k);
-    //              //  }
-    //          }
-    //    else // scan over whole dimension
-    //      for (size_t i=0; i<hypercube().numElements(); i+=stride*argDims[dimension])
-    //        for (size_t j=0; j<stride; ++j)
-    //          {
-    //            cachedResult[i+j]=arg->atHCIndex(i+j);
-    //            for (size_t k=i+j+stride; k<i+j+stride*argDims[dimension]; k+=stride)
-    //              {
-    //                cachedResult[k] = cachedResult[k-stride];
-    //                //f(cachedResult[k], arg->atHCIndex(k), k);
-    //              }
-    //          }
-    //      }
-    //else
-    //  {
-    //    cachedResult[0]=arg->atHCIndex(0);
-    //    for (size_t i=1; i<hypercube().numElements(); ++i)
-    //      {
-    //        cachedResult[i]=cachedResult[i-1];
-    //        //f(cachedResult[i], arg->atHCIndex(i), i);
-    //      }
-    //  }    
-    
-    
-    
-    
-     m_timestamp = Timestamp::clock::now();
-    }    
-    CLASSDESC_ACCESS(Ravel);
-  public:
-    RavelTensor(const Ravel& ravel, const TensorPtr& arg={}, const std::string& dimName="", double av=0): ravel(ravel) {
-		RavelTensor::setArgument(arg,dimName,av);}
-    void setArgument(const TensorPtr& arg, const std::string& dimName,double argVal) override {
-      DimensionedArgCachedOp::setArgument(arg,dimName,argVal);
-      if (arg) {
-		  //cachedResult.index(cachedResult.index());
-		   cachedResult.hypercube(cachedResult.hypercube());
-		  } 
-      }
-    Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
-    
-      
-  };  
+  template <OperationType::Type op> struct GeneralTensorOp;  
                                                                                       
   namespace
   {
@@ -271,12 +197,10 @@ namespace minsky
   TensorOpFactory::TensorOpFactory()
   {
     registerType<TimeOp>(OperationType::time);
-    //registerType<RavelTensorOp>(OperationType::ravel);
     registerOps<MultiWireBinOp, OperationType::add, OperationType::log>(*this);
     registerOps<TensorBinOp, OperationType::log, OperationType::copy>(*this);
     registerOps<MinskyTensorOp, OperationType::copy, OperationType::sum>(*this);
     registerOps<GeneralTensorOp, OperationType::sum, OperationType::numOps>(*this);
-    //registerOps<RavelTensor, OperationType::ravel, OperationType::ravel>(*this);
   }
                                                                                     
   template <>
@@ -533,305 +457,122 @@ namespace minsky
     }
   };
 
-// Pulled the C interface out of ravelWrap.cc and put it here in the hope all that is required to use tensor interface are correct hypercube indices  
-//  namespace
-//  {
-//    struct InvalidSym {
-//      const string symbol;
-//      InvalidSym(const string& s): symbol(s) {}
-//    };
-//
-//    struct RavelDataSpec
-//    {
-//      int nRowAxes=-1; ///< No. rows describing axes
-//      int nColAxes=-1; ///< No. cols describing axes
-//      int nCommentLines=-1; ///< No. comment header lines
-//      char separator=','; ///< field separator character
-//    };
-//
-//    typedef RavelState::HandleState::ReductionOp ReductionOp;
-//    typedef RavelState::HandleState::HandleSort HandleSort;
-//    
-//    struct RavelHandleState
-//    {
-//      double x=0,y=0; ///< handle tip coordinates (only angle important, not length)
-//      size_t sliceIndex=0, sliceMin=0, sliceMax=0;
-//      bool collapsed=false, displayFilterCaliper=false;
-//      ReductionOp reductionOp=RavelState::HandleState::sum;
-//      HandleSort order=RavelState::HandleState::none;
-//      RavelHandleState() {}
-//      // NB: sliceIndex, sliceMin, sliceMax need to be dealt with separately
-//      RavelHandleState(const RavelState::HandleState& s):
-//        x(s.x), y(s.y), collapsed(s.collapsed), displayFilterCaliper(s.displayFilterCaliper),
-//        reductionOp(s.reductionOp), order(s.order) {}
-//      operator RavelState::HandleState() {
-//        RavelState::HandleState r;
-//        r.x=x; r.y=y;
-//        r.collapsed=collapsed; r.displayFilterCaliper=displayFilterCaliper;
-//        r.reductionOp=reductionOp; r.order=order;
-//        return r;
-//      }
-//    };
-//    
-//#ifdef WIN32
-//    typedef HINSTANCE libHandle;
-//    libHandle loadLibrary(const string& lib)
-//    {return LoadLibraryA((lib+".dll").c_str());}
-//
-//    FARPROC WINAPI dlsym(HMODULE lib, const char* name)
-//    {return GetProcAddress(lib,name);}
-//
-//    void dlclose(HINSTANCE) {}
-//
-//    const string dlerror() {
-//      char msg[1024];
-//      FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,nullptr,GetLastError(),0,msg,sizeof(msg),nullptr);
-//      return msg;
-//    }
-//#else
-//    typedef void* libHandle;
-//    libHandle loadLibrary(const string& lib)
-//    {return dlopen((lib+".so").c_str(),RTLD_NOW);}
-//#endif
-//  
-//    //#define ASG_FN_PTR(f,lib) asgFnPointer(f,lib,#f)
-//
-//    struct RavelLib
-//    {
-//      libHandle lib;
-//      string errorMsg;
-//      string versionFound="unavailable";
-//      RavelLib(): lib(loadLibrary("libravel"))
-//      {
-//        if (!lib)
-//          {
-//            errorMsg=dlerror();
-//            return;
-//          }
-//      
-//        auto version=(const char* (*)())dlsym(lib,"ravel_version");
-//        auto capi_version=(int (*)())dlsym(lib,"ravel_capi_version");
-//        if (version) versionFound=version();
-//        if (!version || !capi_version || ravelVersion!=capi_version())
-//          { // incompatible API
-//            errorMsg="Incompatible libravel dynamic library found";
-//            dlclose(lib);
-//            lib=nullptr;
-//          }
-//      }
-//      ~RavelLib() {
-//        if (lib)
-//          dlclose(lib);
-//        lib=nullptr;
-//      }
-//      template <class F>
-//      void asgFnPointer(F& f, const char* name)
-//      {
-//        if (lib)
-//          {
-//            f=(F)dlsym(lib,name);
-//            if (!f)
-//              {
-//                errorMsg=dlerror();
-//                errorMsg+="\nLooking for ";
-//                errorMsg+=name;
-//                errorMsg+="\nProbably libravel dynamic library is too old";
-//                dlclose(lib);
-//                lib=nullptr;
-//              }
-//          }
-//      }
-//    };
-//
-//    RavelLib ravelLib;
-//
-//    template <class... T> struct RavelFn;
-//    
-//    template <class R>
-//    struct RavelFn<R>
-//    {
-//      R (*f)()=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      R operator()() {return f? f(): R();}
-//    };
-//    template <>
-//    struct RavelFn<void>
-//    {
-//      void (*f)()=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      void operator()() {if (f) f();}
-//    };
-//    template <class R, class A>
-//    struct RavelFn<R,A>
-//    {
-//      R (*f)(A)=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      R operator()(A a) {return f? f(a): R{};}
-//    };
-//    template <class A>
-//    struct RavelFn<void,A>
-//    {
-//      void (*f)(A)=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      void operator()(A a) {if (f) f(a);}
-//    };
-//    template <class R, class A0, class A1>
-//    struct RavelFn<R,A0,A1>
-//    {
-//      R (*f)(A0,A1)=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      R operator()(A0 a0, A1 a1) {return f? f(a0,a1): R{};}
-//    };
-//    template <class A0, class A1>
-//    struct RavelFn<void,A0,A1>
-//    {
-//      void (*f)(A0,A1)=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      void operator()(A0 a0, A1 a1) {if (f) f(a0,a1);}
-//    };
-//    template <class R, class A0, class A1, class A2>
-//    struct RavelFn<R,A0,A1,A2>
-//    {
-//      R (*f)(A0,A1,A2)=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      R operator()(A0 a0, A1 a1,A2 a2) {return f? f(a0,a1,a2): R{};}
-//    };
-//    template <class A0, class A1, class A2>
-//    struct RavelFn<void,A0,A1,A2>
-//    {
-//      void (*f)(A0,A1,A2)=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      void operator()(A0 a0, A1 a1, A2 a2) {if (f) f(a0,a1,a2);}
-//    };
-//    template <class R, class A0, class A1, class A2, class A3>
-//    struct RavelFn<R,A0,A1,A2,A3>
-//    {
-//      R (*f)(A0,A1,A2,A3)=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      R operator()(A0 a0, A1 a1,A2 a2,A3 a3) {return f? f(a0,a1,a2,a3): R{};}
-//    };
-//    template <class A0, class A1, class A2,class A3>
-//    struct RavelFn<void,A0,A1,A2,A3>
-//    {
-//      void (*f)(A0,A1,A2,A3)=nullptr;
-//      RavelFn(const char*name, libHandle lib) {ravelLib.asgFnPointer(f,name);}
-//      void operator()(A0 a0, A1 a1, A2 a2,A3 a3) {if (f) f(a0,a1,a2,a3);}
-//    };
-//    
-//#define DEFFN(f,...) RavelFn<__VA_ARGS__> f(#f,ravelLib.lib);
-//    
-//    DEFFN(ravel_lastErr, const char*);
-//    DEFFN(ravel_version, const char*);
-//    DEFFN(ravel_clear, void, Ravel::RavelImpl*);
-//    DEFFN(ravel_rank, size_t, Ravel::RavelImpl*);
-//    DEFFN(ravel_outputHandleIds, void, Ravel::RavelImpl*, size_t*);
-//    DEFFN(ravel_addHandle, void, Ravel::RavelImpl*, const char*, size_t, const char**);
-//    DEFFN(ravel_numHandles, unsigned, Ravel::RavelImpl*);
-//    DEFFN(ravel_handleDescription, const char*, Ravel::RavelImpl*, int);
-//    DEFFN(ravel_numSliceLabels, size_t, Ravel::RavelImpl*, size_t);
-//    DEFFN(ravel_sliceLabels, void, Ravel::RavelImpl*, size_t, const char**);
-//    DEFFN(ravel_displayFilterCaliper, void, Ravel::RavelImpl*, size_t, bool);
-//    DEFFN(ravel_orderLabels, void, Ravel::RavelImpl*, size_t,HandleSort);
-//    DEFFN(ravel_getHandleState, void, const Ravel::RavelImpl*, size_t, RavelHandleState*);
-//    
-//    DEFFN(ravelDC_loadData, void, Ravel::DataCube*, const Ravel::RavelImpl*, const double*);
-//    DEFFN(ravelDC_hyperSlice, int, Ravel::DataCube*, Ravel::RavelImpl*, size_t*, double**);
-//
-//    inline double sqr(double x) {return x*x;} 
-//  }  
 
-//  class RavelTensor: public civita::DimensionedArgCachedOp
-//  {
-//    const Ravel& ravel;
-//    TensorPtr arg;
-//    //friend struct DataCube;
-//    //friend struct RavelImpl;
-//    void computeTensor() const override  
-//    {
-//	 RavelState initState;	
-//	   
-//    //const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);      
-//      
-//    if (&ravel.ravel && &ravel.dataCube)
+  class RavelTensor: public civita::DimensionedArgCachedOp
+  {
+    const Ravel& ravel;
+
+    struct checkCollapsed
+    {
+      checkCollapsed( bool collapsed ) : collapsed_(collapsed) {}
+      bool operator()( const std::pair<std::string, RavelState::HandleState>& v ) const 
+      { 
+        return v.second.collapsed == collapsed_; 
+      }
+    private:
+      bool collapsed_;
+    };
+
+    struct checkRotated
+    {
+      checkRotated( vector<pair<double,double>>& coords) : coords_(coords) {}
+      bool operator()( const std::pair<std::string, RavelState::HandleState>& v ) const 
+      { 
+		for (auto i: coords_)
+           if (v.second.x == i.first && v.second.y == i.second) return true;
+         return false;   
+      }
+    private:
+      vector<pair<double,double>> coords_;
+    };
+
+    
+    void computeTensor() const override  
+    {
+	 
+	 RavelState initState=const_cast<Ravel&>(ravel).getState();
+	 
+	 vector<pair<double,double>> initHandleCoords;
+	 for (auto& h: initState.handleStates) initHandleCoords.push_back(make_pair(h.second.x,h.second.y));
+	 
+    std::map<std::string, RavelState::HandleState>::iterator iter1 = find_if(initState.handleStates.begin(),initState.handleStates.end(),checkRotated(initHandleCoords));	 
+	 
+	 RavelState state=const_cast<Ravel&>(ravel).getState(); 
+	 
+	 
+	 Hypercube hc; 
+     auto& xv=hc.xvectors;
+     
+     size_t labelSize;
+     map<std::string, RavelState::HandleState>::iterator iter = find_if(state.handleStates.begin(),state.handleStates.end(),checkCollapsed(true)); 
+     if (iter!=state.handleStates.end()) iter->second.collapsed=true;
+     else iter->second.collapsed=false;
+     //cout << iter->second.collapsed << endl;
+     
+     if (iter->second.collapsed) labelSize=1;
+     else {
+     	labelSize=const_cast<Ravel&>(ravel).allSliceLabels().size();
+         cout  << "There are " << labelSize << " labels on the presently selected handle" << endl;	
+     }	
+	
+     vector<const char*> labels(labelSize);     
+     
+     for (size_t i=0; i<labelSize; ++i)
+       labels[i]=const_cast<Ravel&>(ravel).allSliceLabels()[i].c_str();
+     assert(all_of(labels.begin(), labels.end(),
+                   [](const char* i){return bool(i);}));
+     xv.emplace_back(const_cast<Ravel&>(ravel).description());     
+      
+     for (size_t i=0; i<labels.size(); ++i)    
+       xv.back().push_back(labels[i]);     
+     
+     cachedResult.hypercube(xv);	 
+     
+     for (size_t i=0; i< (*arg).size(); ++i)
+       *(cachedResult.begin()+i)==(*arg)[i];   
+	 
+	 
+//      if (&ravel.ravel)
 //      {
-//		// Load input tensor pointer  
-//		  
-//        // this ensure that handles are restored correctly after loading a .mky file. 
-//        RavelState state=initState.empty()? const_cast<Ravel&>(ravel).getState(): initState;
-//        initState.clear();
-//        ravel_clear(ravel.ravel);                         // THINK IT CAN BE USED AS IS
-//        for (auto& i: arg->hypercube().xvectors)
-//          {
-//            vector<string> ss;
-//            for (auto& j: i) ss.push_back(str(j));
-//            // clear the format if time so that data will reload correctly
-//            if (i.dimension.type==Dimension::time)
-//              const_cast<Ravel&>(ravel).axisDimensions[i.name]=Dimension(Dimension::time,"");          // CHECK IF NEEDS TO BE REFACTORED.: CAN BE DONE INSIDE RAVELWRAP.CC
-//            vector<const char*> sl;
-//            for (auto& j: ss)
-//              sl.push_back(j.c_str());
-//            ravel_addHandle(ravel.ravel, i.name.c_str(), i.size(), &sl[0]);              // CHECK IF NEEDS TO BE REFACTORED
-//            size_t h=ravel_numHandles(ravel.ravel)-1;                                    // CHECK IF NEEDS TO BE REFACTORED
-//            ravel_displayFilterCaliper(ravel.ravel,h,false);                             // CHECK IF NEEDS TO BE REFACTORED   
-//            // set forward sort order
-//            ravel_orderLabels(ravel.ravel,h,RavelState::HandleState::forward);            // PROBABLY REQUIRES REFACTOR 
-//          }
-//        if (state.empty())
-//          const_cast<Ravel&>(ravel).setRank(arg->hypercube().rank());
-//#ifndef NDEBUG
-//        if (state.empty())
-//          {
-//            auto d=arg->hypercube().dims();
-//            assert(d.size()==ravel_rank(ravel.ravel));
-//            vector<size_t> outputHandles(d.size());
-//            ravel_outputHandleIds(ravel.ravel,&outputHandles[0]);                      // PROBABLY NEEDS TO BE REFACTORED
-//            for (size_t i=0; i<d.size(); ++i)
-//              assert(d[i]==ravel_numSliceLabels(ravel.ravel,outputHandles[i]));         // PROBABLY NEEDS TO BE REFACTORED
-//          }
-//#endif
-//        vector<double> tmp(arg->size());
-//        for (size_t i=0; i<arg->size(); ++i) tmp[i]=dynamic_cast<ITensorVal&>(*arg)[i];
-//           ravelDC_loadData(ravel.dataCube, ravel.ravel, &tmp[0]);                           // PROBABLY NEEDS TO BE REFACTORED
-//        const_cast<Ravel&>(ravel).applyState(state);                                       // PROBABLY NEEDS TO BE REFACTORED: CAN BE DONE INSIDE RAVELWRAP.CC
-//          
-//     
-//        // Populate output tensor pointer
-//        vector<size_t> dims(ravel_rank(ravel.ravel));
-//        double* temp=nullptr;
-//        ravelDC_hyperSlice(ravel.dataCube, ravel.ravel, &dims[0], &temp);              // WILL NEED REFACTORING
-////        try
-////            {
-////              ravel.dataCube->hyperSlice(ravel.dataCube->slice,*ravel.ravel);           // WILL NEED REFACTORING, dataCube->slice is a rawData object inherited from struct AxisSlice, SizeAndStride is like C++ gslice object
-////              if (ravel.ravel->rank()==ravel.dataCube->slice.rank())
-////                {
-////                  if (ravel.dataCube->slice.size()>0)
-////                    *data=&ravel.dataCube->slice[0];
-////                  for (size_t i=0; i<ravel.dataCube->slice.rank(); ++i)
-////                    dims[i]=ravel.dataCube->slice.dim(i);
-////                  return true;
-////                }
-////            }
+//        vector<size_t> dims(const_cast<Ravel&>(ravel).rank());
+//        for (int i=0; i<dims.size(); i++) {
+//			dims[i]=ravel.allSliceLabels().size();
+//		    cout << dims[i];
+//		} 	
 //        if (dims.empty() || dims[0]==0)
 //          {
 //            cachedResult.hypercube({});
-//            if (dims.empty() && temp) cachedResult[0]=temp[0];
+//            if (dims.empty()) cachedResult[0]=(*arg)[0];
 //            return; // do nothing if ravel data is empty
 //          }
-//        if (&temp)
+//        if (arg)
 //          {
-//            vector<size_t> outHandles(dims.size());
-//            ravel_outputHandleIds(ravel.ravel, &outHandles[0]);                              // WILL NEED REFACTORING
 //            Hypercube hc; 
 //            auto& xv=hc.xvectors;
-//            for (size_t j=0; j<outHandles.size(); ++j)
+//            for (size_t j=0; j<state.outputHandles.size(); ++j)
 //              {
-//                auto h=outHandles[j];
-//                vector<const char*> labels(ravel_numSliceLabels(ravel.ravel,h));
-//                assert(ravel_numSliceLabels(ravel.ravel,h)==dims[j]);                          // CHECK IF NEEDS TO BE REFACTORED       
-//                ravel_sliceLabels(ravel.ravel,h,&labels[0]);                               // WILL NEED REFACTORING
+//                auto h=state.outputHandles[j];
+//                //cout << dims[j] << endl;
+//                //auto handleDesc=ravel.description();
+//                size_t labelSize;
+//                map<std::string, RavelState::HandleState>::iterator iter = find_if(state.handleStates.begin(),state.handleStates.end(),checkCollapsed(true)); 
+//                if (iter!=state.handleStates.end()) iter->second.collapsed=true;
+//                else iter->second.collapsed=false;
+//                cout << iter->second.collapsed << endl;
+//                if (iter->second.collapsed) labelSize=1;
+//                else {
+//					labelSize=ravel.allSliceLabels().size();
+//				    cout  << labelSize << endl;	
+//				}	
+//					
+//				//	labelSize=ravel.allSliceLabels().size();
+//                vector<const char*> labels(labelSize);
+//                assert(ravel.allSliceLabels().size()==dims[j]);                          // CHECK IF NEEDS TO BE REFACTORED       
+//                for (size_t i=0; i<labelSize; ++i)
+//                  labels[i]=ravel.allSliceLabels()[i].c_str();
 //                assert(all_of(labels.begin(), labels.end(),
 //                              [](const char* i){return bool(i);}));
-//                xv.emplace_back(ravel_handleDescription(ravel.ravel,h));                                   // CHECK IF NEEDS TO BE REFACTORED                                           
+//                xv.emplace_back(ravel.description());                                   // CHECK IF NEEDS TO BE REFACTORED                                      
 //                auto dim=const_cast<Ravel&>(ravel).axisDimensions.find(xv.back().name);
 //                if (dim!=const_cast<Ravel&>(ravel).axisDimensions.end())
 //                  xv.back().dimension=dim->second;
@@ -848,33 +589,78 @@ namespace minsky
 //            cachedResult.hypercube(hc);
 //            assert(vector<unsigned>(dims.begin(), dims.end())==cachedResult.hypercube().dims());
 //
-//            //for (size_t i=0; i< cachedResult.size(); ++i)
-//            //  *(cachedResult.begin()+i)=temp[i];
-//          }
-//        else
-//          throw error(ravel_lastErr());
-//      }
-//     //cachedResult.hypercube({}); // ensure scalar data space allocated
+//            for (size_t i=0; i< (*arg).size(); ++i)
+//              *(cachedResult.begin()+i)==(*arg)[i];
+//          }	 
+//        else	 
+//          throw error(ravel.lastErr());	 
+//      }	 
+//    cachedResult.hypercube({}); // ensure scalar data space allocated	 
+//	
+//	
+//   //ravel.loadDataFromSlice(cachedResult); 	
+//   
+//   const_cast<Ravel&>(ravel).applyState(state); 
+	
+   	 vector<pair<double,double>> finalHandleCoords;
+	 for (auto& h: state.handleStates) finalHandleCoords.push_back(make_pair(h.second.x,h.second.y));        
+    
+    std::map<std::string, RavelState::HandleState>::iterator iter2 = find_if(state.handleStates.begin(),state.handleStates.end(),checkRotated(finalHandleCoords)); 
+    
+    if (iter1!=state.handleStates.end() || iter2!=state.handleStates.end())  {
+		cout << "Handle with description " <<  iter1->first << " has just been rotated to x-y coordinate pair: (" <<  iter1->second.x <<"," <<iter1->second.y << ")" << endl;
+		cout << "Handle with description " <<  iter2->first << " has just been rotated to x-y coordinate pair: (" <<  iter2->second.x <<"," <<iter2->second.y << ")" << endl;
+		m_timestamp = Timestamp::clock::now();   
+	}
+     
+		      
+
+      //m_timestamp = Timestamp::clock::now();
+    }    
+    CLASSDESC_ACCESS(Ravel);
+  public:
+    RavelTensor(const Ravel& ravel, const TensorPtr& arg={}, const std::string& dimName="", double av=0): ravel(ravel) {
+    RavelTensor::setArgument(arg,dimName,av);}
+    void setArgument(const TensorPtr& arg, const std::string& dimName,double argVal) override {  
+      DimensionedArgCachedOp::setArgument(arg,dimName,argVal);  
+      if (arg) {  
+       //cachedResult.index(arg->index());  
+       cachedResult.hypercube(arg->hypercube());  
+      }   
+    }  
+    //RavelTensor(const Ravel& ravel): ravel(ravel) {}   
+	//
+    //void setArgument(const TensorPtr& a,const std::string&,double) override {arg=a;			
+  	//cachedResult.index(cachedResult.index()); cachedResult.hypercube(cachedResult.hypercube());}
+    Timestamp timestamp() const override {return max(arg->timestamp(),cachedResult.timestamp());}
+  };
+  
+//  class RavelTensor: public civita::DimensionedArgCachedOp
+//  {
+//    const Ravel& ravel;
+//    void computeTensor() const override  
+//    {
+//	   
+//    //const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);      
 //     
-//      //ravel.loadDataFromSlice(cachedResult);  
-//
-//
-//
-//
-//      //m_timestamp = Timestamp::clock::now();
+//    ravel.loadDataFromSlice(cachedResult);          
+//    
+//     m_timestamp = Timestamp::clock::now();
 //    }    
 //    CLASSDESC_ACCESS(Ravel);
 //  public:
-//    RavelTensor(const Ravel& ravel): ravel(ravel) {}
-//    //std::function<void(double&,double,size_t)> f;
-//    //template <class F>
-//    //RavelTensor(F f, const TensorPtr& arg={}, const std::string& dimName="", double av=0): f(f) 
-//    //{RavelTensor::setArgument(arg,dimName,av);}      
-//
-//    void setArgument(const TensorPtr& a,const std::string&,double) override {arg=a;			
-//  	cachedResult.index(cachedResult.index()); cachedResult.hypercube(cachedResult.hypercube());}
+//    RavelTensor(const Ravel& ravel, const TensorPtr& arg={}, const std::string& dimName="", double av=0): ravel(ravel) {
+//		RavelTensor::setArgument(arg,dimName,av);}
+//    void setArgument(const TensorPtr& arg, const std::string& dimName,double argVal) override {
+//      DimensionedArgCachedOp::setArgument(arg,dimName,argVal);
+//      if (arg) {
+//		  cachedResult.index(cachedResult.index());
+//		   cachedResult.hypercube(cachedResult.hypercube());
+//		  } 
+//      }
 //    Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
-//  };
+//        
+//  };    
        
   std::shared_ptr<ITensor> TensorOpFactory::create
   (const Item& it, const TensorsFromPort& tfp)

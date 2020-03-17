@@ -492,10 +492,10 @@ namespace minsky
 	 
 	 RavelState initState=const_cast<Ravel&>(ravel).getState();
 	 
-	 vector<pair<double,double>> initHandleCoords;
-	 for (auto& h: initState.handleStates) initHandleCoords.push_back(make_pair(h.second.x,h.second.y));
-	 
-    std::map<std::string, RavelState::HandleState>::iterator iter1 = find_if(initState.handleStates.begin(),initState.handleStates.end(),checkRotated(initHandleCoords));	 
+	 //vector<pair<double,double>> initHandleCoords;
+	 //for (auto& h: initState.handleStates) initHandleCoords.push_back(make_pair(h.second.x,h.second.y));
+	 //
+     //std::map<std::string, RavelState::HandleState>::iterator iter1 = find_if(initState.handleStates.begin(),initState.handleStates.end(),checkRotated(initHandleCoords));	 
 	 
 	 RavelState state=const_cast<Ravel&>(ravel).getState(); 
 	 
@@ -607,9 +607,9 @@ namespace minsky
     
     std::map<std::string, RavelState::HandleState>::iterator iter2 = find_if(state.handleStates.begin(),state.handleStates.end(),checkRotated(finalHandleCoords)); 
     
-    if (iter1!=state.handleStates.end() || iter2!=state.handleStates.end())  {
-		cout << "Handle with description " <<  iter1->first << " has just been rotated to x-y coordinate pair: (" <<  iter1->second.x <<"," <<iter1->second.y << ")" << endl;
-		cout << "Handle with description " <<  iter2->first << " has just been rotated to x-y coordinate pair: (" <<  iter2->second.x <<"," <<iter2->second.y << ")" << endl;
+    if (iter2!=state.handleStates.end())  {
+		cout << "Handle with description " <<  const_cast<Ravel&>(ravel).description() << " has just been rotated to x-y coordinate pair: (" <<  iter2->second.x <<"," <<iter2->second.y << ")" << endl;
+		//cout << "Handle with description " <<  iter2->first << " has just been rotated to x-y coordinate pair: (" <<  iter2->second.x <<"," <<iter2->second.y << ")" << endl;
 		m_timestamp = Timestamp::clock::now();   
 	}
      

@@ -688,6 +688,7 @@ namespace minsky
             return; // early return, no need to redraw
           }
       }
+    update();  
     requestRedraw();
   }
 

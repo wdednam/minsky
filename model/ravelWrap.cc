@@ -490,11 +490,12 @@ namespace minsky
 
             for (size_t i=0; i< v.size(); ++i)
               *(v.begin()+i)=tmp[i];
+          return;
           }
         else
           throw error(ravel_lastErr());
       }
-    //v.hypercube({}); // ensure scalar data space allocated
+    v.hypercube({}); // ensure scalar data space allocated
   }
 
   void Ravel::loadDataCubeFromVariable(const ITensor& v)

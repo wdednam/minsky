@@ -457,8 +457,7 @@ namespace minsky
     }
   };
 
-
-  class RavelTensor: public civita::CachedTensorOp
+ class RavelTensor: public civita::CachedTensorOp
   {
     const Ravel& ravel;
     TensorPtr arg;
@@ -704,12 +703,39 @@ namespace minsky
     }    
     CLASSDESC_ACCESS(Ravel);
   public:
-    RavelTensor(const Ravel& r): ravel(r) {}
-    Timestamp timestamp() const override {return max(arg->timestamp(),cachedResult.timestamp());}    
-    void setArgument(const TensorPtr& a, const std::string&,double) override {arg=a;
-		{cachedResult.index(arg->index()); cachedResult.hypercube(arg->hypercube());}}
+    RavelTensor(const Ravel& ravel): ravel(ravel) {}   
+    void setArgument(const TensorPtr& a,const std::string&,double) override {
+      arg=a;			
+      hypercube(ravel.hypercube());
+    }
+    Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
   };
   
+  
+//  class RavelTensor: public civita::CachedTensorOp
+//  {
+//    const Ravel& ravel;
+//    TensorPtr arg;
+//   
+//    void computeTensor() const override  
+//    {
+//	  
+//	  if (arg->index().empty()) {	
+//	      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);	
+//	      ravel.loadDataFromSlice(cachedResult);	      
+//      } else throw runtime_error("ravel evaluation of sparse data not available");
+//      
+//      m_timestamp = Timestamp::clock::now();
+//    }    
+//    CLASSDESC_ACCESS(Ravel);
+//  public:
+//    RavelTensor(const Ravel& ravel): ravel(ravel) {}   
+//    void setArgument(const TensorPtr& a,const std::string&,double) override {
+//      arg=a;			
+//      hypercube(ravel.hypercube());
+//    }
+//    Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
+//  };  
        
   std::shared_ptr<ITensor> TensorOpFactory::create
   (const Item& it, const TensorsFromPort& tfp)

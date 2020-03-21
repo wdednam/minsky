@@ -476,30 +476,92 @@ namespace minsky
     //  vector<pair<double,double>> coords_;
     //};
     //
-    //struct checkDesc    
-    //{    
-    //  checkDesc(string desc) : desc_(desc) {}    
-    //  bool operator()( const std::pair<std::string, RavelState::HandleState>& v ) const     
-    //  {     
-    //    return v.first == desc_;     
-    //  }    
-    //private:    
-    //  string desc_;    
-    //};    
+    struct checkDesc    
+    {    
+      checkDesc(string desc) : desc_(desc) {}    
+      bool operator()( const std::pair<std::string, RavelState::HandleState>& v ) const     
+      {     
+        return v.first == desc_;     
+      }    
+    private:    
+      string desc_;    
+    };    
    
     void computeTensor() const override  
     {
-	
+	  
 	  double sparsityRatio =  static_cast<double>(1.0-static_cast<double>(arg->size())/arg->hypercube().numElements());  
 	  
-	   cout << " " << sparsityRatio << endl;
-	  if (sparsityRatio <= 0.5) {	
+	  if (arg->index().empty()) {	
 	      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);	
 	      ravel.loadDataFromSlice(cachedResult);	      
-      } else throw runtime_error("ravel evaluation of sparse data not available");
+      } else if (sparsityRatio <= 0.5) {
+		  const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);	
+		  ravel.loadDataFromSlice(cachedResult);	      
+	  } else throw runtime_error("ravel evaluation of sparse data not available");	
       
-	  
-	  
+   //  }
+	//	RavelState state=ravel.getState();
+	//	
+	//	if (ravel.selectedHandle() > -1) {
+	//		state.outputHandles.clear();
+	//		
+	//		state.outputHandles[0]=ravel.description();
+	//		
+	//		Hypercube hc; 
+	//		auto& xv=hc.xvectors;
+	//		
+	//		size_t labelSize;
+	//		
+	//		map<std::string, RavelState::HandleState>::iterator iter = find_if(state.handleStates.begin(),state.handleStates.end(),checkDesc(state.outputHandles[0])); 
+	//		if (iter!=state.handleStates.end()) {
+	//			if (iter->second.collapsed) labelSize=1;
+	//		    else labelSize=ravel.allSliceLabels().size();
+	//		}
+	//		
+	//		 vector<const char*> labels(labelSize);     
+	//		
+	//		for (size_t i=0; i<labelSize; ++i)
+	//		  labels[i]=ravel.allSliceLabelsAxis(j)[i].c_str();
+	//	  else ravel.loadDataFromSlice(cachedResult);	  
+	//		
+	//	  assert(all_of(labels.begin(), labels.end(),	  
+	//		              [](const char* i){return bool(i);}));
+	//	  xv.emplace_back(state.outputHandles[0]);     
+	//		
+	//	  double* tmp=nullptr;
+	//	  cachedResult.hypercube(hypercube(tmp));
+	//	  if (tmp)
+	//	    {
+	//	      for (size_t i=0; i< v.size(); ++i)
+	//	        *(v.begin()+i)=tmp[i];
+	//	      return;
+	//	    }
+	//	  else 
+	//		  throw error(ravel.lastErr());
+	//		
+	//		
+	//	} 
+		  
+		//for (size_t i=0; i<arg->size(); ++i)
+        //{
+        //  auto idx=(*arg)[i];
+        //  if (isfinite(idx))
+        //    {
+        //      if (idx>=0)
+        //          cachedResult[i]=(*arg)[idx];
+        //      else if (idx>-1)
+        //        cachedResult[i]=(*arg)[0];
+        //      else
+        //        cachedResult[i]=nan("");
+        //    }
+        //  else
+        //    cachedResult[i]=nan("");
+        //}   
+		  //ravel.loadDataFromSlice(cachedResult);	      
+	  //}
+      
+	  	  
 //	  RavelState state=const_cast<Ravel&>(ravel).getState(); 
 //	  
 //      vector<pair<double,double>> finalHandleCoords;
@@ -528,12 +590,7 @@ namespace minsky
 //	     }       
 //	   } 
       m_timestamp = Timestamp::clock::now();		
-		
-		
-	 
-
-	 
-	 
+			 
 //	 Hypercube hc; 
 //	 
 //     auto& xv=hc.xvectors;
@@ -707,6 +764,7 @@ namespace minsky
     void setArgument(const TensorPtr& a,const std::string&,double) override {
       arg=a;			
       hypercube(ravel.hypercube());
+      if (!arg->index().empty()) cachedResult.index(arg->index());
     }
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
   };

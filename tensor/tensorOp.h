@@ -141,6 +141,7 @@ namespace civita
     virtual void computeTensor() const=0;
   public:
     std::vector<size_t> index() const override {return cachedResult.index();}
+    //std::vector<size_t> index(const std::vector<size_t>& ix) override {return cachedResult.index(ix);}
     size_t size() const override {return cachedResult.size();}
     double operator[](size_t i) const override;
     const Hypercube& hypercube() const override {return cachedResult.hypercube();}

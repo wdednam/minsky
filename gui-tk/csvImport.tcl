@@ -114,6 +114,25 @@ proc CSVImportDialog {} {
         raise .wiring.csvImport
         csvDialog.requestRedraw
     }
+    
+    #set webfile [tk_getOpenFile -filetypes {{CSV {.csv}} {All {.*}}} -initialdir $workDir]
+    #if [string length $filename] {
+    #    set workDir [file dirname $filename]
+    #    csvDialog.loadFile $filename
+    #    set csvParms(filename) $filename
+    #    set csvParms(separator) [csvDialog.spec.separator]
+    #    set csvParms(decSeparator) [csvDialog.spec.decSeparator]
+    #    set csvParms(escape) [csvDialog.spec.escape]
+    #    set csvParms(quote) [csvDialog.spec.quote]
+    #    set csvParms(mergeDelimiters) [csvDialog.spec.mergeDelimiters]
+    #    set csvParms(missingValue) [csvDialog.spec.missingValue]
+    #    set csvParms(duplicateKeyValue) [csvDialog.spec.duplicateKeyAction]
+    #    set csvParms(horizontalDimension) [csvDialog.spec.horizontalDimName]
+    #    .wiring.csvImport.delimiters.colWidth set [csvDialog.colWidth]
+    #    wm deiconify .wiring.csvImport
+    #    raise .wiring.csvImport
+    #    csvDialog.requestRedraw
+    #}
 }
 
 proc csvImportDialogOK {} {
@@ -132,6 +151,31 @@ proc csvImportDialogOK {} {
         cancelWin .wiring.csvImport
     }
 }
+
+#proc openCSVFromURL {URL} {
+#    global tcl_platform
+#    if {[tk windowingsystem]=="win32"} {
+#        #shellOpen $URL
+#        set command [list {*}[auto_execok start] {}]
+#        if {[file isdirectory $url]} {
+#            # if there is an executable named eg ${url}.exe, avoid opening that instead:
+#            set url [file nativename [file join $url .]]             
+#    } elseif {$tcl_platform(os)=="Darwin"} {
+#        #exec open $URL
+#        set command [list open]
+#    #} elseif [catch {exec xdg-open $URL &}] {
+#    } elseif [catch {set command [list xdg-open]}] {
+#        # try a few likely suspects
+#        foreach browser {firefox konqueror seamonkey opera} {
+#            set browserNotFound [catch {exec $browser $URL &}]
+#            if {!$browserNotFound} break
+#        }
+#        if $browserNotFound {
+#            tk_messageBox -detail "Unable to find a working web browser, 
+#please consult $URL" -type ok -icon warning
+#        }
+#    }
+#}
 
 proc doReport {inputFname} {
     global workDir

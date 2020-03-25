@@ -27,6 +27,7 @@
 #include <cairo_base.h>
 #include <ctype.h>
 #include "minsky_epilogue.h"
+#include "latexMarkup.h"
 using namespace ecolab::cairo;
 using namespace ecolab;
 using namespace std;
@@ -38,7 +39,7 @@ namespace minsky
     struct OrderByName
     {
       bool operator()(const VariablePtr& x, const VariablePtr& y) const
-      {assert(x&&y); return x->name() < y->name();}    // Characeters stripped  valueIds by stripActive() seem to cause this to not work properly. For ticket 1165.
+      {assert(x&&y); return latexToPango(x->valueId()) < latexToPango(y->valueId());}    // Characeters stripped  valueIds by stripActive() seem to cause this to not work properly. For ticket 1165.
     };
 
     struct DrawVars

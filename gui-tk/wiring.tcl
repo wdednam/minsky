@@ -659,7 +659,7 @@ proc contextMenu {x y X Y} {
             .wiring.context add command -label "Flip" -command "$item.flip; flip_default"
             if {[$item.type]=="parameter"} {
                 .wiring.context add command -label "Import CSV" -command CSVImportDialog
-                #.wiring.context add command -label "Import CSV from web" -command CSVImportDialog
+                .wiring.context add command -label "Import CSV from web" -command CSVWebImportDialog
             }
             .wiring.context add command -label "Export as CSV" -command exportItemAsCSV
         }

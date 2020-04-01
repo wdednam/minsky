@@ -1,7 +1,7 @@
 #ifndef BOOST_CERTIFY_IMPL_EXTENSIONS_HPP
 #define BOOST_CERTIFY_IMPL_EXTENSIONS_HPP
 
-#include <boost/certify/extensions.hpp>
+#include "certify/extensions.hpp"
 
 namespace boost
 {

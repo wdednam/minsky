@@ -1,7 +1,7 @@
 #ifndef BOOST_CERTIFY_IMPL_CRLSET_PARSER_IPP
 #define BOOST_CERTIFY_IMPL_CRLSET_PARSER_IPP
 
-#include <boost/certify/crlset_parser.hpp>
+#include "certify/crlset_parser.hpp"
 
 namespace boost
 {

@@ -23,11 +23,16 @@
 #include <pango.h>
 #include "minsky_epilogue.h"
 
-#include <boost/beast/example/common/root_certificates.hpp>
+//#include <boost/beast/example/common/root_certificates.hpp>
 
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
+#include "beast/core.hpp"       //<boost/beast/core.hpp>
+#include "beast/http.hpp"       //<boost/beast/http.hpp>
+#include "beast/version.hpp"    //<boost/beast/version.hpp>
+
+#include "certify/extensions.hpp"         //<boost/certify/extensions.hpp>
+#include "certify/https_verification.hpp" //<boost/certify/https_verification.hpp>
+
+
 //#include <boost/asio/connect.hpp>
 //#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/error.hpp>
@@ -100,17 +105,30 @@ void CSVDialog::loadWebFile(const string& url)
         //boost::asio::io_service ioc;
         
         // The SSL context is required, and holds certificates
-        ssl::context ctx{ssl::context::sslv23_client};
+        //ssl::context ctx{ssl::context::sslv23_client};
+        ssl::context ctx{ssl::context::tls_client};
 		 
         // This holds the root certificate used for verification
-        load_root_certificates(ctx);
+        //load_root_certificates(ctx); 
+        
 		
         // Verify the remote server's certificate
-        ctx.set_verify_mode(ssl::verify_peer);    
-       
+        ctx.set_verify_mode(ssl::verify_peer | ssl::context::verify_fail_if_no_peer_cert);    
+        ctx.set_default_verify_paths();
+        
+        // tag::ctx_setup_source[]
+        boost::certify::enable_native_https_server_verification(ctx);
+        // end::ctx_setup_source[]
+        
         // These objects perform our I/O
         tcp::resolver resolver{ioc};
         ssl::stream<tcp::socket> stream{ioc, ctx};
+        
+        // tag::stream_setup_source[]
+        boost::certify::set_server_hostname(stream, string(what[2].first, what[2].second));
+        boost::certify::sni_hostname(stream, host);
+        // end::stream_setup_source[]        
+        
 
         // Look up the domain name
         auto const results = resolver.resolve(what[2], what[1]);
@@ -134,11 +152,11 @@ void CSVDialog::loadWebFile(const string& url)
 
 
         // Set SNI Hostname (many hosts need this to handshake successfully)
-        if(! SSL_set_tlsext_host_name(stream.native_handle(), what[2].first))
-        {
-            boost::system::error_code ec{static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category()};
-            throw boost::system::system_error{ec};
-        }                        
+        //if(! SSL_set_tlsext_host_name(stream.native_handle(), what[2].first))
+        //{
+        //    boost::system::error_code ec{static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category()};
+        //    throw boost::system::system_error{ec};
+        //}                        
              
         // Perform the SSL handshake
         stream.handshake(ssl::stream_base::client);             

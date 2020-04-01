@@ -535,10 +535,13 @@ namespace minsky
               assert(d[i]==ravel_numSliceLabels(ravel,outputHandles[i]));
           }
 #endif
-        vector<double> tmp(v.size());
-        if (v.index().empty()) 
-           for (size_t i=0; i<v.size(); ++i) tmp[i]=v[i];
-        else for (size_t i=0; i<v.size(); ++i) tmp[i]=v.atHCIndex(i);
+        //vector<double> tmp(v.size());
+        //if (v.index().empty()) 
+        //   for (size_t i=0; i<v.size(); ++i) tmp[i]=v[i];
+        //else for (size_t i=0; i<v.size(); ++i) tmp[i]=v.atHCIndex(i);
+        auto sz=v.size();
+        vector<double> tmp(sz);
+        for (size_t i=0; i<sz; ++i) tmp[i]=v[i];
         ravelDC_loadData(dataCube, ravel, &tmp[0]);
         applyState(state);
       }

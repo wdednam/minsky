@@ -25,6 +25,7 @@
 
 //#include <boost/beast/example/common/root_certificates.hpp>
 
+#define BOOST_BEAST_ALLOW_DEPRECATED
 #include "beast/core.hpp"       //<boost/beast/core.hpp>
 #include "beast/http.hpp"       //<boost/beast/http.hpp>
 #include "beast/version.hpp"    //<boost/beast/version.hpp>

@@ -87,9 +87,6 @@ void CSVDialog::loadWebFile(const string& url)
                 "    http-client-sync-ssl www.example.com 443 / 1.0\n";
             return;
         }
-        //auto const host = argv[1];
-        //auto const port = argv[2];
-        //auto const target = argv[3];
         auto const host = what[2];
         
         string port = string(what[1].first, what[1].second);
@@ -190,15 +187,20 @@ void CSVDialog::loadWebFile(const string& url)
         
         // Dump the buffer in a temporary file and load into CSVParser
         //FILE * tempFile;
+        //tempFile = tmpfile64();
         //char * fileptr;
-        //fileptr = tmpnam(NULL);
+        //tmpnam_r(fileptr);
+        //std::ofstream outFile(fileptr, std::ofstream::out);
+        
+        //outFile << res.body();
         //tempFile = fopen(fileptr,"wb+");
         
         //std::ostringstream ss;
         //
         //ss << res.body();   //boost::beast::buffers(buffer.data())
 		//
-        //fputs(ss.str().data(),tempFile);        
+        //fputs(res.body().data(),tempFile);   
+        //rewind(tempFile);     
 
         spec=DataSpec();        
         spec.guessFromFile(p.filename().c_str());        
@@ -229,10 +231,14 @@ void CSVDialog::loadWebFile(const string& url)
         if(ec)
             throw boost::system::system_error{ec}; 
             
-        // close the output file
+        // close the output file and delete it
         outFile.close();
         //fclose(tempFile);    
-            
+        
+          //if( remove( p.filename() ) != 0 )
+          //  perror( "Error deleting file" );
+          //else
+          //  puts( "File successfully deleted" );
 
         // If we get here then the connection is closed gracefully
     }

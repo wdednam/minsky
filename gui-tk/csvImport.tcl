@@ -217,8 +217,8 @@ proc CSVWebImportDialog {} {
     }
     
     # Example CSV file that Minsky can import, but to be replaced by user input
-    set url "https://raw.githubusercontent.com/datasets/covid-19/master/data/countries-aggregated.csv"   
-    #set url "https://raw.githubusercontent.com/datasets/covid-19/master/data/worldwide-aggregated.csv"
+    #set url "https://raw.githubusercontent.com/datasets/covid-19/master/data/countries-aggregated.csv"   
+    set url "https://raw.githubusercontent.com/datasets/covid-19/master/data/worldwide-aggregated.csv"
     #set url "http://samplecsvs.s3.amazonaws.com/TechCrunchcontinentalUSA.csv"
                  
     #set initUrl {} 

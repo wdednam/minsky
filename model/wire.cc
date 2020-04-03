@@ -476,7 +476,7 @@ namespace
     {
       float d=sqrt(sqr(x1-x0)+sqr(y1-y0));
       float d1=sqrt(sqr(x-x0)+sqr(y-y0)), d2=sqrt(sqr(x-x1)+sqr(y-y1));
-      return d1+d2<=d+5;
+      return d1+d2<=d+0.05*d;
     }
     
     inline float d2(float x0, float y0, float x1, float y1)
@@ -494,16 +494,43 @@ namespace
       vector<pair<float,float>> p=allHandleCoords(c);
          
       unsigned k=0; // nearest index
-      float closestD=d2(p[p.size()-1].first,p[p.size()-1].second,x,y);
-      for (size_t i=0; i<p.size()-1; i++)
-        {
-          float d=d2(p[i].first,p[i].second,x,y);
-          if (d<=closestD)
-            {
-              closestD=d;
-              k=i;
-            }
-        }
+      
+      float closestD1=d2(p[0].first,p[0].second,x,y);
+      float closestD2=d2(p[p.size()/2].first,p[p.size()/2].second,x,y);
+      float closestD3=d2(p[p.size()-1].first,p[p.size()-1].second,x,y);
+      float closestD=min(closestD3,min(closestD1,closestD2));
+      
+     for (size_t i=0; i<p.size()-1; i++)
+       {
+         float d=d2(p[i].first,p[i].second,x,y);
+         if (d<=closestD)
+           {
+             closestD=d;
+             k=i;
+           }
+       }
+     
+     //vector<pair<float,float>>::iterator i;
+     // for (i=p.begin(); i!=p.end(); i++)
+     //   {
+     //     float d=d2((*i).first,(*i).second,x,y);
+     //     if (d<=closestD)
+     //       {
+     //         closestD=d;
+     //         k=i-p.begin();
+     //       }
+     //   }
+        
+    //float d=d2(p[k].first,p[k].second,x,y);    
+    //if (k>0)
+    //    if (k==p.size()-1 || d<closestD)
+    //        return segNear(p[k-1].first,p[k-1].second,p[k].first,p[k].second,x,y);       
+    //        
+    //if (k<p.size()-1)
+    //    if (k==0 || d<closestD)
+    //        return segNear(p[k].first,p[k].second,p[k+1].first,p[k+1].second,x,y);        
+    //    
+    //if (k>0) return (segNear(p[k-1].first,p[k-1].second,p[k].first,p[k].second,x,y) || segNear(p[k].first,p[k].second,p[k+1].first,p[k+1].second,x,y));               
       
       // Check for proximity to line segments about index k
       if (k>0 && k<p.size()-1)  

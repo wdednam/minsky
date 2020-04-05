@@ -44,7 +44,8 @@ namespace minsky
     DataSpec spec;
     void redraw(int, int, int width, int height) override;
     void loadFile(const std::string& fname);
-    void loadWebFile(const std::string& url);
+    std::string loadWebFile(const std::string& url); 
+    //void loadWebFile(const std::string& url);
     //void loadWebFile(int argc, char** argv);
     //void loadWebFile(const char *argv);
     void reportFromFile(const std::string& input, const std::string& output);

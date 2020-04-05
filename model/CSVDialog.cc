@@ -24,14 +24,15 @@
 #include "minsky_epilogue.h"
 
 //#include <boost/beast/example/common/root_certificates.hpp>
+#include "root_certificates.hpp"
 
 //#define BOOST_BEAST_ALLOW_DEPRECATED
 #include <boost/beast/core.hpp>      //"beast/core.hpp"       
 #include <boost/beast/http.hpp>      //"beast/http.hpp"       
 #include <boost/beast/version.hpp>   //"beast/version.hpp"    
 
-#include "certify/extensions.hpp"         //<boost/certify/extensions.hpp>
-#include "certify/https_verification.hpp" //<boost/certify/https_verification.hpp>
+//#include "certify/extensions.hpp"         //<boost/certify/extensions.hpp>
+//#include "certify/https_verification.hpp" //<boost/certify/https_verification.hpp>
 
 
 //#include <boost/asio/connect.hpp>
@@ -61,32 +62,32 @@ void CSVDialog::reportFromFile(const std::string& input, const std::string& outp
 
 // Performs an HTTP GET and prints the response
 //void CSVDialog::loadWebFile(int argc, char** argv)
-void CSVDialog::loadWebFile(const string& url)
+std::string CSVDialog::loadWebFile(const std::string& url)
 {
     try
     {
         boost::regex ex("(http|https)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\x3f?([^ #]*)#?([^ ]*)");
         boost::cmatch what;
-        if(regex_match(url.c_str(), what, ex)) 
-        {
-            cout << "protocol: " << string(what[1].first, what[1].second) << endl;
-            cout << "domain:   " << string(what[2].first, what[2].second) << endl;
-            cout << "port:     " << string(what[3].first, what[3].second) << endl;
-            cout << "path:     " << string(what[4].first, what[4].second) << endl;
-            cout << "query:    " << string(what[5].first, what[5].second) << endl;
-            cout << "fragment: " << string(what[6].first, what[6].second) << endl;  
-        }		
+        //if(regex_match(url.c_str(), what, ex)) 
+        //{
+        //    cout << "protocol: " << string(what[1].first, what[1].second) << endl;
+        //    cout << "domain:   " << string(what[2].first, what[2].second) << endl;
+        //    cout << "port:     " << string(what[3].first, what[3].second) << endl;
+        //    cout << "path:     " << string(what[4].first, what[4].second) << endl;
+        //    cout << "query:    " << string(what[5].first, what[5].second) << endl;
+        //    cout << "fragment: " << string(what[6].first, what[6].second) << endl;  
+        //}		
 		
         // Check command line arguments.
-        if (string(what[2].first, what[2].second).empty())
-        {
-            std::cerr <<
-                "Usage: http-client-sync-ssl <host> <port> <target> [<HTTP version: 1.0 or 1.1(default)>]\n" <<
-                "Example:\n" <<
-                "    http-client-sync-ssl www.example.com 443 /\n" <<
-                "    http-client-sync-ssl www.example.com 443 / 1.0\n";
-            return;
-        }
+        //if (string(what[2].first, what[2].second).empty())
+        //{
+        //    std::cerr <<
+        //        "Usage: http-client-sync-ssl <host> <port> <target> [<HTTP version: 1.0 or 1.1(default)>]\n" <<
+        //        "Example:\n" <<
+        //        "    http-client-sync-ssl www.example.com 443 /\n" <<
+        //        "    http-client-sync-ssl www.example.com 443 / 1.0\n";
+        //    return;
+        //}
         auto const host = what[2];
         
         string port = string(what[1].first, what[1].second);
@@ -107,15 +108,15 @@ void CSVDialog::loadWebFile(const string& url)
         ssl::context ctx{ssl::context::tls_client};
 		 
         // This holds the root certificate used for verification
-        //load_root_certificates(ctx); 
+        load_root_certificates(ctx); 
         
 		
         // Verify the remote server's certificate
-        ctx.set_verify_mode(ssl::verify_peer | ssl::context::verify_fail_if_no_peer_cert);    
-        ctx.set_default_verify_paths();
+        //ctx.set_verify_mode(ssl::verify_peer | ssl::context::verify_fail_if_no_peer_cert);    
+        //ctx.set_default_verify_paths();
         
         // tag::ctx_setup_source[]
-        boost::certify::enable_native_https_server_verification(ctx);
+        //boost::certify::enable_native_https_server_verification(ctx);
         // end::ctx_setup_source[]
         
         // These objects perform our I/O
@@ -123,8 +124,8 @@ void CSVDialog::loadWebFile(const string& url)
         ssl::stream<tcp::socket> stream{ioc, ctx};
         
         // tag::stream_setup_source[]
-        boost::certify::set_server_hostname(stream, string(what[2].first, what[2].second));
-        boost::certify::sni_hostname(stream, host);
+        //boost::certify::set_server_hostname(stream, string(what[2].first, what[2].second));
+        //boost::certify::sni_hostname(stream, host);
         // end::stream_setup_source[]        
         
 
@@ -150,11 +151,11 @@ void CSVDialog::loadWebFile(const string& url)
 
 
         // Set SNI Hostname (many hosts need this to handshake successfully)
-        //if(! SSL_set_tlsext_host_name(stream.native_handle(), what[2].first))
-        //{
-        //    boost::system::error_code ec{static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category()};
-        //    throw boost::system::system_error{ec};
-        //}                        
+        if(! SSL_set_tlsext_host_name(stream.native_handle(), what[2].first))
+        {
+            boost::system::error_code ec{static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category()};
+            throw boost::system::system_error{ec};
+        }                        
              
         // Perform the SSL handshake
         stream.handshake(ssl::stream_base::client);             
@@ -171,7 +172,9 @@ void CSVDialog::loadWebFile(const string& url)
         boost::beast::flat_buffer buffer;
 
         // Declare a container to hold the response
-        http::response<http::string_body> res;
+        http::response_parser<http::string_body> res;
+        res.body_limit((std::numeric_limits<std::uint64_t>::max)());
+        //http::response<http::string_body> res;
 
         // Receive the HTTP response
         http::read(stream, buffer, res);
@@ -180,10 +183,20 @@ void CSVDialog::loadWebFile(const string& url)
         boost::filesystem::path p(string(what[4].first, what[4].second));        
         cout << "filename and extension : " << p.filename() << std::endl; // file.ext
         cout << "filename only          : " << p.stem() << std::endl;     // file         
+  
+        //boost::beast::error_code ec_file;
+        //res.get().body().open(p.filename().c_str(), boost::beast::file_mode::write, ec_file);        
+       
+        // Dump the outstream into a temporary file for loading it into Minsky' CSV parser 
+        //boost::filesystem::path temp = boost::filesystem::unique_path();
+        //const std::string tempstr    = temp.native();
         
         // Dump the outstream into a CSV file and load into CSVParser        
         std::ofstream outFile(p.filename().c_str(), std::ofstream::out);        
-        outFile << res.body();                                      
+        outFile << res.get().body();                                      
+        //std::ofstream outFile(tempstr, std::ofstream::out);  
+        //outFile << res.get().body();                                      
+        //outFile << res.get().body().str();//open(p.filename().c_str(), boost::beast::file_mode::write, ec_file);        
         
         // Dump the buffer in a temporary file and load into CSVParser
         //FILE * tempFile;
@@ -202,19 +215,21 @@ void CSVDialog::loadWebFile(const string& url)
         //fputs(res.body().data(),tempFile);   
         //rewind(tempFile);     
 
-        spec=DataSpec();        
-        spec.guessFromFile(p.filename().c_str());        
-        ifstream is(p.filename().c_str());        
+        //spec=DataSpec();        
+        //spec.guessFromFile(p.filename().c_str());        
+        //ifstream is(p.filename().c_str());        
         //spec.guessFromFile(fileptr); 
-        //ifstream is(fileptr);        
-        initialLines.clear();        
-        for (size_t i=0; i<numInitialLines && is; ++i)        
-          {        
-            initialLines.emplace_back();        
-            getline(is, initialLines.back());        
-          }              
-        // Ensure dimensions.size() is the same as nColAxes() upon first load of a CSV file. For ticket 974.        
-        if (spec.dimensions.size()<spec.nColAxes()) spec.setDataArea(spec.nRowAxes(),spec.nColAxes());    
+        //ifstream is(fileptr);                
+        //spec.guessFromFile(tempstr); 
+        //ifstream is(tempstr);        
+        //initialLines.clear();        
+        //for (size_t i=0; i<numInitialLines && is; ++i)        
+        //  {        
+        //    initialLines.emplace_back();        
+        //    getline(is, initialLines.back());        
+        //  }              
+        //// Ensure dimensions.size() is the same as nColAxes() upon first load of a CSV file. For ticket 974.        
+        //if (spec.dimensions.size()<spec.nColAxes()) spec.setDataArea(spec.nRowAxes(),spec.nColAxes());    
         
         // Write the message to standard out
         //std::cout << res << std::endl;
@@ -232,7 +247,7 @@ void CSVDialog::loadWebFile(const string& url)
             throw boost::system::system_error{ec}; 
             
         // close the output file and delete it
-        outFile.close();
+        //outFile.close();
         //fclose(tempFile);    
         
           //if( remove( p.filename() ) != 0 )
@@ -240,14 +255,16 @@ void CSVDialog::loadWebFile(const string& url)
           //else
           //  puts( "File successfully deleted" );
 
+        //return tempstr;
+        return p.filename().c_str();
+
         // If we get here then the connection is closed gracefully
     }
     catch(std::exception const& e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
-        return;
+        return "";
     }
-    //return EXIT_SUCCESS;
 }
 
 //void CSVDialog::loadWebFile(const char *argv) {

@@ -44,6 +44,7 @@ namespace minsky
     DataSpec spec;
     void redraw(int, int, int width, int height) override;
     void loadFile(const std::string& fname);
+    // Return file name after downloading a CSV file from the web. 
     std::string loadWebFile(const std::string& url); 
     //void loadWebFile(const std::string& url);
     //void loadWebFile(int argc, char** argv);

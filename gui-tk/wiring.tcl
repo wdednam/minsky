@@ -146,7 +146,7 @@ foreach op [availableOperations] {
 }
 
 tooltip .wiring.menubar.var.menu -index 0 "variable toolbar"
-tooltip .wiring.menubar.constops.menu -index 0 "constant operations toolbox"
+#tooltip .wiring.menubar.constops.menu -index 0 "constant operations toolbox"
 tooltip .wiring.menubar.binops.menu -index 0 "binary operations toolbox"
 tooltip .wiring.menubar.fnops.menu -index 0 "function toolbar"
 tooltip .wiring.menubar.reductionops.menu -index 0 "reduction operations toolbox"

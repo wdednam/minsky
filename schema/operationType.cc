@@ -58,6 +58,9 @@ namespace minsky
     template <> int numArguments<OperationType::or_>() {return 2;}
     template <> int numArguments<OperationType::not_>() {return 1;}
     template <> int numArguments<OperationType::time>() {return 0;}
+    template <> int numArguments<OperationType::euler>() {return 0;}
+    template <> int numArguments<OperationType::pi>() {return 0;}    
+    template <> int numArguments<OperationType::feigenbaum>() {return 0;}
     template <> int numArguments<OperationType::copy>() {return 1;}
     template <> int numArguments<OperationType::integrate>() {return 2;}
     template <> int numArguments<OperationType::differentiate>() {return 1;}

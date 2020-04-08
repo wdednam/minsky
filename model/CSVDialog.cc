@@ -64,208 +64,106 @@ void CSVDialog::reportFromFile(const std::string& input, const std::string& outp
 //void CSVDialog::loadWebFile(int argc, char** argv)
 std::string CSVDialog::loadWebFile(const std::string& url)
 {
-    try
-    {
-        boost::regex ex("(http|https)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\x3f?([^ #]*)#?([^ ]*)");
-        boost::cmatch what;
-        if(regex_match(url.c_str(), what, ex)) 
-        {
-            cout << "protocol: " << string(what[1].first, what[1].second) << endl;
-            cout << "domain:   " << string(what[2].first, what[2].second) << endl;
-            cout << "port:     " << string(what[3].first, what[3].second) << endl;
-            cout << "path:     " << string(what[4].first, what[4].second) << endl;
-            cout << "query:    " << string(what[5].first, what[5].second) << endl;
-            cout << "fragment: " << string(what[6].first, what[6].second) << endl;  
-        }		
-		
-        // Check command line arguments.
-        //if (string(what[2].first, what[2].second).empty())
-        //{
-        //    std::cerr <<
-        //        "Usage: http-client-sync-ssl <host> <port> <target> [<HTTP version: 1.0 or 1.1(default)>]\n" <<
-        //        "Example:\n" <<
-        //        "    http-client-sync-ssl www.example.com 443 /\n" <<
-        //        "    http-client-sync-ssl www.example.com 443 / 1.0\n";
-        //    return "";
-        //}
-        auto const host = what[2];
-        
-        string port = string(what[1].first, what[1].second);
-        if (string(what[1].first, what[1].second)=="https") port = "https";  //what[3].second;
-        else port = "http";
-        auto const target = string(what[4].first, what[4].second);   //what[5].second;
-        
-        int version;
-        if (!string(what[6].first, what[6].second).empty() && !std::strcmp("1.0", what[6].second)) version= 11;
-        else version=10;
+  // Parse input URL. Also handles URLs of the type username:password@example.com/pathname#section. See https://stackoverflow.com/questions/2616011/easy-way-to-parse-a-url-in-c-cross-platform
+  boost::regex ex(R"((http|https)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\??([^ #]*)#?([^ ]*)|^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)");
+  boost::cmatch what;
+  if (regex_match(url.c_str(), what, ex)) {
+   // what[0] contains the whole string 	 
+   // what[1] is the protocol
+   // what[2] is the domain  
+   // what[3] is the port    
+   // what[4] is the path    
+   // what[5] is the query   
+   // what[6] is the fragment		  
+  } else throw runtime_error("Failure to match URL: "+url);
 
-        // The io_context is required for all I/O
-        boost::asio::io_context ioc;
-        //boost::asio::io_service ioc;
-        
-        // The SSL context is required, and holds certificates
-        //ssl::context ctx{ssl::context::sslv23_client};
-        ssl::context ctx{ssl::context::tls_client};
-		 
-        // This holds the root certificate used for verification
-        //load_root_certificates(ctx); 
-        
-		
-        // Verify the remote server's certificate
-        ctx.set_verify_mode(ssl::verify_peer | ssl::context::verify_fail_if_no_peer_cert);    
-        ctx.set_default_verify_paths();
-        
-        // tag::ctx_setup_source[]
-        boost::certify::enable_native_https_server_verification(ctx);
-        // end::ctx_setup_source[]
-        
-        // These objects perform our I/O
-        tcp::resolver resolver{ioc};
-        ssl::stream<tcp::socket> stream{ioc, ctx};
-        
-        // tag::stream_setup_source[]
-        boost::certify::set_server_hostname(stream, string(what[2].first, what[2].second));
-        boost::certify::sni_hostname(stream, host);
-        // end::stream_setup_source[]        
-        
+  auto const protocol =what[1];
+  auto const host = what[2];
+  //auto const port = what[3];
+  auto const target = what[4];
+  //auto const query = what[5];
+  //auto const fragment = what[6];  
 
-        // Look up the domain name
-        auto const results = resolver.resolve(what[2], what[1]);
-        //tcp::resolver::query query(what[2], what[1]);
-        //tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-        //tcp::resolver::iterator end;
-        
-        // Make the connection on the IP address we get from a lookup
-        boost::asio::connect(stream.next_layer(), results.begin(), results.end());
-        
-        //tcp::socket socket{ioc};
-        //tcp::socket socket(io_service);
-        //boost::system::error_code error = boost::asio::error::host_not_found;
-        //while (error && endpoint_iterator != end) {
-        //    socket.close();
-        //    socket.connect(*endpoint_iterator++, error);
-        //}
-        //if (error)        
-        //    throw boost::system::system_error(error);        
+  // The io_context is required for all I/O
+  boost::asio::io_context ioc;
 
+  // The SSL context is required, and holds certificates
+  ssl::context ctx{ssl::context::tls_client};
 
+  // Verify the remote server's certificate. See https://github.com/djarek/certify/blob/master/examples/get_page.cpp
+  ctx.set_verify_mode(ssl::verify_peer | ssl::context::verify_fail_if_no_peer_cert);    
+  ctx.set_default_verify_paths();
 
-        // Set SNI Hostname (many hosts need this to handshake successfully)
-        //if(! SSL_set_tlsext_host_name(stream.native_handle(), what[2].first))
-        //{
-        //    boost::system::error_code ec{static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category()};
-        //    throw boost::system::system_error{ec};
-        //}                        
-             
-        // Perform the SSL handshake
-        stream.handshake(ssl::stream_base::client);             
+  // tag::ctx_setup_source[]
+  boost::certify::enable_native_https_server_verification(ctx);
+  // end::ctx_setup_source[]        
 
-        // Set up an HTTP GET request message
-        http::request<http::string_body> req{http::verb::get, target, version};
-        req.set(http::field::host, host);
-        req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+  // These objects perform our I/O
+  tcp::resolver resolver{ioc};
+  ssl::stream<tcp::socket> stream{ioc, ctx};        
 
-        // Send the HTTP request to the remote host
-        http::write(stream, req);
+  // tag::stream_setup_source[]. See https://github.com/djarek/certify/blob/master/examples/get_page.cpp
+  boost::certify::set_server_hostname(stream, host.str());
+  boost::certify::sni_hostname(stream, host);
+  // end::stream_setup_source[]         
 
-        // This buffer is used for reading and must be persisted
-        boost::beast::flat_buffer buffer;
-
-        // Declare a container to hold the response
-        http::response_parser<http::string_body> res;
-        res.body_limit((std::numeric_limits<std::uint64_t>::max)());
-        //http::response<http::string_body> res;
-
-        // Receive the HTTP response
-        http::read(stream, buffer, res);
-                    
-        // Extract the file name and extension
-        //boost::filesystem::path p(string(what[4].first, what[4].second));        
-        //cout << "filename and extension : " << p.filename() << std::endl; // file.ext
-        //cout << "filename only          : " << p.stem() << std::endl;     // file         
+  // Look up the domain name
+  auto const results = resolver.resolve(host, protocol);
   
-        //boost::beast::error_code ec_file;
-        //res.get().body().open(p.filename().c_str(), boost::beast::file_mode::write, ec_file);        
-       
-        // Dump the outstream into a temporary file for loading it into Minsky' CSV parser 
-        boost::filesystem::path temp = boost::filesystem::unique_path();
-        const std::string tempStr    = temp.native();
-        
-        // Dump the outstream into a CSV file and load into CSVParser        
-        //std::ofstream outFile(p.filename().c_str(), std::ofstream::out);        
-        //outFile << res.get().body();                                      
-        std::ofstream outFile(tempStr, std::ofstream::out);  
-        outFile << res.get().body();                                      
-        //outFile << res.get().body().str();//open(p.filename().c_str(), boost::beast::file_mode::write, ec_file);        
-        
-        // Dump the buffer in a temporary file and load into CSVParser
-        //FILE * tempFile;
-        //tempFile = tmpfile64();
-        //char * fileptr;
-        //tmpnam_r(fileptr);
-        //std::ofstream outFile(fileptr, std::ofstream::out);
-        
-        //outFile << res.body();
-        //tempFile = fopen(fileptr,"wb+");
-        
-        //std::ostringstream ss;
-        //
-        //ss << res.body();   //boost::beast::buffers(buffer.data())
-		//
-        //fputs(res.body().data(),tempFile);   
-        //rewind(tempFile);     
+  // Make the connection on the IP address we get from a lookup
+  boost::asio::connect(stream.next_layer(), results.begin(), results.end());                   
 
-        //spec=DataSpec();        
-        //spec.guessFromFile(p.filename().c_str());        
-        //ifstream is(p.filename().c_str());        
-        //spec.guessFromFile(fileptr); 
-        //ifstream is(fileptr);                
-        //spec.guessFromFile(tempstr); 
-        //ifstream is(tempstr);        
-        //initialLines.clear();        
-        //for (size_t i=0; i<numInitialLines && is; ++i)        
-        //  {        
-        //    initialLines.emplace_back();        
-        //    getline(is, initialLines.back());        
-        //  }              
-        //// Ensure dimensions.size() is the same as nColAxes() upon first load of a CSV file. For ticket 974.        
-        //if (spec.dimensions.size()<spec.nColAxes()) spec.setDataArea(spec.nRowAxes(),spec.nColAxes());    
-        
-        // Write the message to standard out
-        //std::cout << res << std::endl;
-        
-        // Gracefully close the socket
-        boost::system::error_code ec;
-        stream.shutdown(ec);
-        if (ec == boost::asio::error::eof)
-        {
-            // Rationale:
-            // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
-            ec.assign(0, ec.category());
-        }
-        if(ec)
-            throw boost::system::system_error{ec}; 
-            
-        // close the output file and delete it
-        //outFile.close();
-        //fclose(tempFile);    
-        
-          //if( remove( p.filename() ) != 0 )
-          //  perror( "Error deleting file" );
-          //else
-          //  puts( "File successfully deleted" );
+  // Perform the SSL handshake
+  stream.handshake(ssl::stream_base::client);             
 
-        return tempStr;
-        //return p.filename().c_str();
+  // Set up an HTTP GET request message
+  http::request<http::string_body> req;
+  req.method(http::verb::get);  
+  req.target(target.str());     
+  req.version(10);
+  req.set(http::field::host, host);
+  req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
 
-        // If we get here then the connection is closed gracefully
-    }
-    catch(std::exception const& e)
-    {
-        //std::cerr << "Error: " << e.what() << std::endl;
-        throw runtime_error("Web import failed: "+*e.what());
-        return "";
-    }
+  // Send the HTTP request to the remote host
+  http::write(stream, req);
+
+  // This buffer is used for reading and must be persisted
+  boost::beast::flat_buffer buffer;
+
+  // Declare a container to hold the response
+  http::response_parser<http::string_body> res;
+  res.body_limit((std::numeric_limits<std::uint64_t>::max)());
+
+  // Receive the HTTP response
+  http::read(stream, buffer, res);
+
+  res.eager(true);  // See https://github.com/boostorg/beast/issues/1352
+  // Check response status and throw error all values 400 and above. See https://www.boost.org/doc/libs/master/boost/beast/http/status.hpp for status codes
+  if (res.get().result_int() >= 400) throw runtime_error("Invalid HTTP response. Response code: " + std::to_string(res.get().result_int()));
+
+  // Dump the outstream into a temporary file for loading it into Minsky' CSV parser 
+  boost::filesystem::path temp = boost::filesystem::unique_path();
+  const std::string tempStr    = temp.native();
+
+  std::ofstream outFile(tempStr, std::ofstream::out);  
+  outFile << res.get().body();                                            
+
+  // Gracefully close the socket
+  boost::system::error_code ec;
+  stream.shutdown(ec);
+  if (ec == boost::asio::error::eof)
+  {
+      // Rationale:
+      // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
+      ec.assign(0, ec.category());
+  }
+  if (ec)
+      throw boost::system::system_error{ec}; 
+
+  // If we get here then the connection is closed gracefully         
+
+  // Return the file name for loading the in csvimport.tcl 
+  return tempStr;
 }
 
 //void CSVDialog::loadWebFile(const char *argv) {

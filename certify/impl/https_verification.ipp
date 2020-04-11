@@ -1,7 +1,7 @@
 #ifndef BOOST_CERTIFY_IMPL_RFC2818_VERIFICATION_IPP
 #define BOOST_CERTIFY_IMPL_RFC2818_VERIFICATION_IPP
 
-#include <boost/certify/https_verification.hpp>
+#include "certify/https_verification.hpp"
 
 #include <boost/asio/ip/address.hpp>
 #include <openssl/x509v3.h>

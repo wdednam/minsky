@@ -68,6 +68,6 @@ struct is_error_code_enum<::boost::certify::crlset_error>
 
 } // namespace boost
 
-#include <boost/certify/impl/crlset_parser.ipp>
+#include "certify/impl/crlset_parser.ipp"
 
 #endif // BOOST_CERTIFY_CRLSET_PARSER_HPP

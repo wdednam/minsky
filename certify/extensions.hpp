@@ -1,7 +1,7 @@
 #ifndef BOOST_CERTIFY_EXTENSIONS_HPP
 #define BOOST_CERTIFY_EXTENSIONS_HPP
 
-#include <boost/certify/detail/config.hpp>
+#include "certify/detail/config.hpp"
 
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/utility/string_view.hpp>
@@ -29,5 +29,5 @@ sni_hostname(asio::ssl::stream<AsyncStream>& stream,
 } // namespace certify
 } // namespace boost
 
-#include <boost/certify/impl/extensions.hpp>
+#include "certify/impl/extensions.hpp"
 #endif // BOOST_CERTIFY_EXTENSIONS_HPP

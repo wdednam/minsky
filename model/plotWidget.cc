@@ -232,7 +232,8 @@ namespace minsky
 
             cairo_rectangle(cairo,x-0.5*width,y-0.5*height,width,height);
           }
-        if (onResizeHandles) drawResizeHandles(cairo);   
+        //if (onResizeHandles) drawResizeHandles(cairo);   
+        drawResizeHandles(cairo);   
       }
     justDataChanged=false;
     

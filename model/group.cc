@@ -857,8 +857,9 @@ namespace minsky
     if (mouseFocus)
       {
         displayTooltip(cairo,tooltip);
+        drawResizeHandles(cairo);
       }
-    if (onResizeHandles) drawResizeHandles(cairo);
+    //if (onResizeHandles) drawResizeHandles(cairo);
 
     cairo_rectangle(cairo,-0.5*width,-0.5*height,width,height);
     cairo_clip(cairo);

@@ -22,16 +22,6 @@
 #include "minsky.h"
 #include "ravelWrap.h"
 #include "minsky_epilogue.h"
-static const int ravelVersion=2;
-
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
-
-#include <vector>
-#include <limits>
 
 using namespace civita;
 namespace classdesc
@@ -44,7 +34,6 @@ namespace classdesc
 namespace minsky
 {
   using namespace classdesc;
-  using namespace std;
 
   TensorOpFactory tensorOpFactory;
 
@@ -60,6 +49,14 @@ namespace minsky
     double operator[](size_t) const override {return EvalOpBase::t;}
     Timestamp timestamp() const override {return {};}
   };
+  
+  struct ConstOp: public ITensor
+  {
+    size_t size() const override {return 1;}
+    vector<size_t> index() const override {return {};}
+    double operator[](size_t) const override {return {};}
+    Timestamp timestamp() const override {return {};}
+  };  
   
   // Default template calls the regular legacy double function
   template <OperationType::Type op> struct MinskyTensorOp: public civita::ElementWiseOp, public DerivativeMixin
@@ -172,7 +169,7 @@ namespace minsky
 //    static const double init;
 //  };
 
-  template <OperationType::Type op> struct GeneralTensorOp;  
+  template <OperationType::Type op> struct GeneralTensorOp;
                                                                                       
   namespace
   {
@@ -197,6 +194,9 @@ namespace minsky
   TensorOpFactory::TensorOpFactory()
   {
     registerType<TimeOp>(OperationType::time);
+    registerType<ConstOp>(OperationType::euler);
+    registerType<ConstOp>(OperationType::pi);
+    registerType<ConstOp>(OperationType::feigenbaum);
     registerOps<MultiWireBinOp, OperationType::add, OperationType::log>(*this);
     registerOps<TensorBinOp, OperationType::log, OperationType::copy>(*this);
     registerOps<MinskyTensorOp, OperationType::copy, OperationType::sum>(*this);
@@ -484,306 +484,16 @@ namespace minsky
     }
   };
 
- class RavelTensor: public civita::CachedTensorOp
+  class RavelTensor: public civita::CachedTensorOp
   {
     const Ravel& ravel;
     TensorPtr arg;
-    //mutable TensorVal out;
-	
-    //struct checkRotated
-    //{
-    //  checkRotated( vector<pair<double,double>>& coords) : coords_(coords) {}
-    //  bool operator()( const std::pair<std::string, RavelState::HandleState>& v ) const 
-    //  { 
-	//	for (auto i: coords_)
-    //       if (v.second.x == i.first && v.second.y == i.second) return true;
-    //     return false;   
-    //  }
-    //private:
-    //  vector<pair<double,double>> coords_;
-    //};
-    //
-    struct checkDesc    
-    {    
-      checkDesc(string desc) : desc_(desc) {}    
-      bool operator()( const std::pair<std::string, RavelState::HandleState>& v ) const     
-      {     
-        return v.first == desc_;     
-      }    
-    private:    
-      string desc_;    
-    };    
    
     void computeTensor() const override  
     {
-	  
-	  double sparsityRatio =  static_cast<double>(1.0-static_cast<double>(arg->size())/arg->hypercube().numElements());  
-	  
-	  if (arg->index().empty()) {	
-	      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);	
-	      ravel.loadDataFromSlice(cachedResult);	      
-      } else if (sparsityRatio <= 0.5) {
-		  const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);	
-		  ravel.loadDataFromSlice(cachedResult);	      
-	  } else throw runtime_error("ravel evaluation of sparse data not available");	
-      
-   //  }
-	//	RavelState state=ravel.getState();
-	//	
-	//	if (ravel.selectedHandle() > -1) {
-	//		state.outputHandles.clear();
-	//		
-	//		state.outputHandles[0]=ravel.description();
-	//		
-	//		Hypercube hc; 
-	//		auto& xv=hc.xvectors;
-	//		
-	//		size_t labelSize;
-	//		
-	//		map<std::string, RavelState::HandleState>::iterator iter = find_if(state.handleStates.begin(),state.handleStates.end(),checkDesc(state.outputHandles[0])); 
-	//		if (iter!=state.handleStates.end()) {
-	//			if (iter->second.collapsed) labelSize=1;
-	//		    else labelSize=ravel.allSliceLabels().size();
-	//		}
-	//		
-	//		 vector<const char*> labels(labelSize);     
-	//		
-	//		for (size_t i=0; i<labelSize; ++i)
-	//		  labels[i]=ravel.allSliceLabelsAxis(j)[i].c_str();
-	//	  else ravel.loadDataFromSlice(cachedResult);	  
-	//		
-	//	  assert(all_of(labels.begin(), labels.end(),	  
-	//		              [](const char* i){return bool(i);}));
-	//	  xv.emplace_back(state.outputHandles[0]);     
-	//		
-	//	  double* tmp=nullptr;
-	//	  cachedResult.hypercube(hypercube(tmp));
-	//	  if (tmp)
-	//	    {
-	//	      for (size_t i=0; i< v.size(); ++i)
-	//	        *(v.begin()+i)=tmp[i];
-	//	      return;
-	//	    }
-	//	  else 
-	//		  throw error(ravel.lastErr());
-	//		
-	//		
-	//	} 
-		  
-		//for (size_t i=0; i<arg->size(); ++i)
-        //{
-        //  auto idx=(*arg)[i];
-        //  if (isfinite(idx))
-        //    {
-        //      if (idx>=0)
-        //          cachedResult[i]=(*arg)[idx];
-        //      else if (idx>-1)
-        //        cachedResult[i]=(*arg)[0];
-        //      else
-        //        cachedResult[i]=nan("");
-        //    }
-        //  else
-        //    cachedResult[i]=nan("");
-        //}   
-		  //ravel.loadDataFromSlice(cachedResult);	      
-	  //}
-      
-	  	  
-//	  RavelState state=const_cast<Ravel&>(ravel).getState(); 
-//	  
-//      vector<pair<double,double>> finalHandleCoords;
-//      for (auto& hs: state.handleStates) finalHandleCoords.push_back(make_pair(hs.second.x,hs.second.y));                      
-//      
-//      map<std::string, RavelState::HandleState>::iterator iter1 = find_if(state.handleStates.begin(),state.handleStates.end(),checkRotated(finalHandleCoords)); 						 
-//      
-//      // need to swap xvector dimensions and labels
-//      if (!iter1->second.collapsed && iter1!=state.handleStates.end()) {
-//		  vector<XVector> tmpXVector(move(cachedResult.hypercube().xvectors));
-//		  tmpXVector[0].swap(tmpXVector[1]);
-//		  cachedResult.hypercube(move(tmpXVector));
-//		  
-//		  
-//		  //for (size_t i=0; i< (*arg).size(); ++i) 
-//		  //    *(cachedResult.begin()+i)==(*arg)[i];
-//		  
-//	     size_t stride=1;
-//	     for (size_t i=0; i<cachedResult.hypercube().numElements(); i+=stride)
-//	      {
-//	       for (size_t j=0; j<stride; ++j)
-//	         {
-//	           *(cachedResult.begin()+i+j)=(*arg)[j];
-//	         }
-//	       stride*=cachedResult.hypercube().xvectors.back().size();  
-//	     }       
-//	   } 
-      m_timestamp = Timestamp::clock::now();		
-			 
-//	 Hypercube hc; 
-//	 
-//     auto& xv=hc.xvectors;
-//     
-//     if (state.outputHandles.size()>0)
-//     {
-//     
-//         vector<size_t> labelSize(state.outputHandles.size());
-//
-//         
-//         size_t outHandle=0;
-//         
-//         for (auto h: state.outputHandles) {
-//		             map<std::string, RavelState::HandleState>::iterator iter2 = find_if(state.handleStates.begin(),state.handleStates.end(),checkDesc(h));  
-//                     if (!iter2->second.collapsed && iter2!=state.handleStates.end()) {
-//                            vector<pair<double,double>> finalHandleCoords;
-//                            for (auto& hs: state.handleStates) finalHandleCoords.push_back(make_pair(hs.second.x,hs.second.y));                      
-//                            map<std::string, RavelState::HandleState>::iterator iter1 = find_if(state.handleStates.begin(),state.handleStates.end(),checkRotated(finalHandleCoords)); 						 
-//                            if (!iter1->second.collapsed && iter1!=state.handleStates.end()) {						 
-//						             labelSize[outHandle]=const_cast<Ravel&>(ravel).allSliceLabelsAxis(outHandle).size();
-//                                     outHandle++;  
-//						   } else labelSize[outHandle]=1;
-//		            }  else labelSize[outHandle]=1;
-//		       }
-//            
-//            else   
-//             
-//		}
-//         
-//
-//         for (size_t j=0;j<state.outputHandles.size();j++) 
-//         {
-//             vector<const char*> labels(labelSize[j]);     
-//            
-//            for (size_t i=0; i<labelSize[j]; ++i)
-//              labels[i]=const_cast<Ravel&>(ravel).allSliceLabelsAxis(j)[i].c_str();
-//            
-//            cout << " " << const_cast<Ravel&>(ravel).description() << " " << state.outputHandles[j] << " " << labelSize[j] << endl;               
-//              
-//            assert(all_of(labels.begin(), labels.end(),
-//                          [](const char* i){return bool(i);}));
-//            xv.emplace_back(state.outputHandles[j]);     
-//            
-//            cout << " " << xv.back().name << endl;
-//		    
-//            auto dim=const_cast<Ravel&>(ravel).axisDimensions.find(xv.back().name);
-//            if (dim!=const_cast<Ravel&>(ravel).axisDimensions.end())
-//              xv.back().dimension=dim->second;
-//            else
-//              {       
-//                auto dim=cminsky().dimensions.find(xv.back().name);    
-//                if (dim!=cminsky().dimensions.end())     
-//                  xv.back().dimension=dim->second;     
-//              }     
-//              
-//            for (size_t i=0; i<labels.size(); ++i)    
-//              xv.back().push_back(labels[i]);   		                
-//           }
-//
-//           cachedResult.hypercube(move(hc));
-//           
-//           //if (iter1!=state.handleStates.end()) {
-//            
-//               size_t stride=1;
-//               for (size_t i=0; i<hc.numElements(); i+=stride)
-//                {
-//                 for (size_t j=0; j<stride; ++j)
-//                   {
-//                     *(cachedResult.begin()+i+j)=(*arg)[j];
-//                   }
-//                 stride*=xv.back().size();  
-//               }       
-		//  } else
-		//	  for (size_t i=0; i< (*arg).size(); ++i) 
-		//	      *(cachedResult.begin()+i)==(*arg)[i]; 	                  
-          
-	   //} else ravel.loadDataFromSlice(cachedResult);
-//     
-// 
-//      if (&ravel.ravel)
-//      {
-//        vector<size_t> dims(const_cast<Ravel&>(ravel).rank());
-//        for (int i=0; i<dims.size(); i++) {
-//			dims[i]=ravel.allSliceLabels().size();
-//		    cout << dims[i];
-//		} 	
-//        if (dims.empty() || dims[0]==0)
-//          {
-//            cachedResult.hypercube({});
-//            if (dims.empty()) cachedResult[0]=(*arg)[0];
-//            return; // do nothing if ravel data is empty
-//          }
-//        if (arg)
-//          {
-//            Hypercube hc; 
-//            auto& xv=hc.xvectors;
-//            for (size_t j=0; j<state.outputHandles.size(); ++j)
-//              {
-//                auto h=state.outputHandles[j];
-//                //cout << dims[j] << endl;
-//                //auto handleDesc=ravel.description();
-//                size_t labelSize;
-//                map<std::string, RavelState::HandleState>::iterator iter = find_if(state.handleStates.begin(),state.handleStates.end(),checkCollapsed(true)); 
-//                if (iter!=state.handleStates.end()) iter->second.collapsed=true;
-//                else iter->second.collapsed=false;
-//                cout << iter->second.collapsed << endl;
-//                if (iter->second.collapsed) labelSize=1;
-//                else {
-//					labelSize=ravel.allSliceLabels().size();
-//				    cout  << labelSize << endl;	
-//				}	
-//					
-//				//	labelSize=ravel.allSliceLabels().size();
-//                vector<const char*> labels(labelSize);
-//                assert(ravel.allSliceLabels().size()==dims[j]);                          // CHECK IF NEEDS TO BE REFACTORED       
-//                for (size_t i=0; i<labelSize; ++i)
-//                  labels[i]=ravel.allSliceLabels()[i].c_str();
-//                assert(all_of(labels.begin(), labels.end(),
-//                              [](const char* i){return bool(i);}));
-//                xv.emplace_back(ravel.description());                                   // CHECK IF NEEDS TO BE REFACTORED                                      
-//                auto dim=const_cast<Ravel&>(ravel).axisDimensions.find(xv.back().name);
-//                if (dim!=const_cast<Ravel&>(ravel).axisDimensions.end())
-//                  xv.back().dimension=dim->second;
-//                else
-//                  {
-//                    auto dim=cminsky().dimensions.find(xv.back().name);
-//                    if (dim!=cminsky().dimensions.end())
-//                      xv.back().dimension=dim->second;
-//                  }
-//                // else otherwise dimension is a string (default type)
-//                for (size_t i=0; i<labels.size(); ++i)
-//                  xv.back().push_back(labels[i]);
-//              }
-//            cachedResult.hypercube(hc);
-//            assert(vector<unsigned>(dims.begin(), dims.end())==cachedResult.hypercube().dims());
-//
-//            for (size_t i=0; i< (*arg).size(); ++i)
-//              *(cachedResult.begin()+i)==(*arg)[i];
-//          }	 
-//        else	 
-//          throw error(ravel.lastErr());	 
-//      }	 
-//    cachedResult.hypercube({}); // ensure scalar data space allocated	 
-//	
-//	
-//   //ravel.loadDataFromSlice(cachedResult); 	
-//   
-//   const_cast<Ravel&>(ravel).applyState(state); 
-	
-   	 //vector<pair<double,double>> finalHandleCoords;
-	 //for (auto& h: state.handleStates) finalHandleCoords.push_back(make_pair(h.second.x,h.second.y));        
-	 //
-     //std::map<std::string, RavelState::HandleState>::iterator iter2 = find_if(state.handleStates.begin(),state.handleStates.end(),checkRotated(finalHandleCoords)); 
-     
-    //map<std::string, RavelState::HandleState>::iterator iter = find_if(state.handleStates.begin(),state.handleStates.end(),checkCollapsed(true)); 
-    //if (iter!=state.handleStates.end()) iter->second.collapsed=true;
-    //else iter->second.collapsed=false;
-    //cout << iter->second.collapsed << endl;
-    
-    //if (iter2!=state.handleStates.end())  {
-	//	cout << "Handle with description " <<  state.outputHandles[0] << " has just been rotated to x-y coordinate pair: (" <<  iter2->second.x <<"," <<iter2->second.y << ")" << endl;
-	//	//cout << "Handle with description " <<  iter2->first << " has just been rotated to x-y coordinate pair: (" <<  iter2->second.x <<"," <<iter2->second.y << ")" << endl;
-	//	m_timestamp = Timestamp::clock::now();   
-	//}
-     
-
+      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg); 	 
+      ravel.loadDataFromSlice(cachedResult);
+      m_timestamp = Timestamp::clock::now();
     }    
     CLASSDESC_ACCESS(Ravel);
   public:
@@ -791,36 +501,9 @@ namespace minsky
     void setArgument(const TensorPtr& a,const std::string&,double) override {
       arg=a;			
       hypercube(ravel.hypercube());
-      if (!arg->index().empty()) cachedResult.index(arg->index());
     }
     Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
   };
-  
-  
-//  class RavelTensor: public civita::CachedTensorOp
-//  {
-//    const Ravel& ravel;
-//    TensorPtr arg;
-//   
-//    void computeTensor() const override  
-//    {
-//	  
-//	  if (arg->index().empty()) {	
-//	      const_cast<Ravel&>(ravel).loadDataCubeFromVariable(*arg);	
-//	      ravel.loadDataFromSlice(cachedResult);	      
-//      } else throw runtime_error("ravel evaluation of sparse data not available");
-//      
-//      m_timestamp = Timestamp::clock::now();
-//    }    
-//    CLASSDESC_ACCESS(Ravel);
-//  public:
-//    RavelTensor(const Ravel& ravel): ravel(ravel) {}   
-//    void setArgument(const TensorPtr& a,const std::string&,double) override {
-//      arg=a;			
-//      hypercube(ravel.hypercube());
-//    }
-//    Timestamp timestamp() const override {return arg? arg->timestamp(): Timestamp();}
-//  };  
        
   std::shared_ptr<ITensor> TensorOpFactory::create
   (const Item& it, const TensorsFromPort& tfp)

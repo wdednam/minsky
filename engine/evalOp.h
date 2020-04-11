@@ -148,17 +148,6 @@ namespace minsky
     double value;
     double evaluate(double in1=0, double in2=0) const override;
  };
- 
-//   struct RavelEvalOp: public EvalOp<minsky::OperationType::ravel>
-//  {
-//    VariableValue in, out;
-//    RavelEvalOp() {}
-//    RavelEvalOp(const VariableValue& in, const VariableValue& out):
-//      in(in), out(out) {}
-//    void eval(double*, const double* sv) override;
-//    void deriv(double df[], const double ds[], 
-//               const double sv[], const double fv[]) override {}
-//  };
 
   struct EvalOpPtr: public classdesc::shared_ptr<EvalOpBase>, 
                     public OperationType

@@ -516,9 +516,9 @@ namespace minsky
   }
 
   Units Time::units(bool) const {return cminsky().timeUnit;}
-  Units Eu::units(bool) const {}
-  Units Pi::units(bool) const {}
-  Units Fb::units(bool) const {}
+  //Units Eu::units(bool) const {}
+  //Units Pi::units(bool) const {}
+  //Units Fb::units(bool) const {}
   Units Derivative::units(bool check) const {
     Units r=ports[1]->units(check);
     if (!cminsky().timeUnit.empty())
@@ -640,9 +640,9 @@ namespace minsky
     switch (type)
       {
       case time: return new Time;
-      case euler: return new Eu;
-      case pi: return new Pi;
-      case feigenbaum: return new Fb;
+      //case euler: return new Eu;
+      //case pi: return new Pi;
+      //case feigenbaum: return new Fb;
       case copy: return new Copy;
       case integrate: return new IntOp;
       case differentiate: return new Derivative;

@@ -52,14 +52,14 @@ FLAGS+=-DENABLE_DARWIN_EVENTS -DMAC_OSX_TK
 LIBS+=-Wl,-framework -Wl,Security
 endif
 
-FLAGS+=-std=c++11 -Ischema -Iengine -Itensor -Imodel -IRESTService $(OPT) -UECOLAB_LIB -DECOLAB_LIB=\"library\" -Wno-unused-local-typedefs
+FLAGS+=-std=c++11 -Ischema -Iengine -Itensor -Imodel -Icertify/include -IRESTService $(OPT) -UECOLAB_LIB -DECOLAB_LIB=\"library\" -Wno-unused-local-typedefs
 
 VPATH= schema model engine tensor gui-tk RESTService $(ECOLAB_HOME)/include
 
 .h.xcd:
 # xml_pack/unpack need to -typeName option, as well as including privates
 	$(CLASSDESC) -typeName -nodef -respect_private -I $(CDINCLUDE) \
-	-I $(ECOLAB_HOME)/include -I RESTService -i $< xml_pack xml_unpack xsd_generate \
+	-I $(ECOLAB_HOME)/include -I $(CERTIFY_HOME)/certify -I RESTService -i $< xml_pack xml_unpack xsd_generate \
 	json_pack json_unpack >$@
 
 # assorted performance profiling stuff using gperftools, or Russell's custom

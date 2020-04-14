@@ -391,13 +391,6 @@ namespace MathDAG
   {
     return zero;
   }
-  
-  template <>
-  NodePtr SystemOfEquations::derivative
-  (const OperationDAG<OperationType::feigenbaum>& expr)
-  {
-    return zero;
-  }
 
   template <>
   NodePtr SystemOfEquations::derivative

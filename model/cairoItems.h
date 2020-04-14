@@ -38,6 +38,7 @@ namespace minsky
   public:
     // render a variable to a given cairo context
     RenderOperation(const OperationBase& var, cairo_t* cairo=NULL);
+    
     /// render the cairo image
     void draw();
     /// half width of unrotated image
@@ -63,6 +64,8 @@ namespace minsky
     RenderVariable(const VariableBase& var, cairo_t* cairo=NULL);
     /// render the cairo image
     void draw();
+    ///// resize the cairo image
+    //void resize(const LassoBox& b);
     /// compute and update port locations
     void updatePortLocs() const;
     /// half width of unrotated image

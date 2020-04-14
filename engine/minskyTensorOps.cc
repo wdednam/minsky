@@ -49,15 +49,7 @@ namespace minsky
     double operator[](size_t) const override {return EvalOpBase::t;}
     Timestamp timestamp() const override {return {};}
   };
-  
-  struct ConstOp: public ITensor
-  {
-    size_t size() const override {return 1;}
-    vector<size_t> index() const override {return {};}
-    double operator[](size_t) const override {return {};}
-    Timestamp timestamp() const override {return {};}
-  };  
-  
+   
   // Default template calls the regular legacy double function
   template <OperationType::Type op> struct MinskyTensorOp: public civita::ElementWiseOp, public DerivativeMixin
   {
@@ -194,11 +186,8 @@ namespace minsky
   TensorOpFactory::TensorOpFactory()
   {
     registerType<TimeOp>(OperationType::time);
-    registerType<ConstOp>(OperationType::euler);
-    registerType<ConstOp>(OperationType::pi);
-    registerType<ConstOp>(OperationType::feigenbaum);
     registerOps<MultiWireBinOp, OperationType::add, OperationType::log>(*this);
-    registerOps<TensorBinOp, OperationType::log, OperationType::copy>(*this);
+    registerOps<TensorBinOp, OperationType::log, OperationType::copy>(*this);    
     registerOps<MinskyTensorOp, OperationType::copy, OperationType::sum>(*this);
     registerOps<GeneralTensorOp, OperationType::sum, OperationType::numOps>(*this);
   }

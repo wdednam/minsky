@@ -22,7 +22,7 @@
 #include "dimension.h"
 #include "minsky.h"
 #include "minsky_epilogue.h"
-static const int ravelVersion=2;
+static const int ravelVersion=3;
 
 #include <string>
 #include <cmath>

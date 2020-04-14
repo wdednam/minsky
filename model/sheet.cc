@@ -167,11 +167,11 @@ void Sheet::draw(cairo_t* cairo) const
   catch (...) {/* exception most likely invalid variable value */}
 }
 
-void Sheet::resize(const LassoBox& b)
-{
-  auto invZ=1/zoomFactor();
-  m_width=abs(b.x1-b.x0)*invZ;
-  m_height=abs(b.y1-b.y0)*invZ;
-  moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
-  bb.update(*this);
-}
+//void Sheet::resize(const LassoBox& b)
+//{
+//  auto invZ=1/zoomFactor();
+//  m_width=abs(b.x1-b.x0)*invZ;
+//  m_height=abs(b.y1-b.y0)*invZ;
+//  moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
+//  bb.update(*this);
+//}

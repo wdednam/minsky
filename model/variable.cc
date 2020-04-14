@@ -84,6 +84,12 @@ ClickType::Type VariableBase::clickType(float xx, float yy)
       double hpy=-z*rv.height();
       if (type()!=constant && hypot(xx-x() - r.x(hpx,hpy), yy-y()-r.y(hpx,hpy)) < 5)
         return ClickType::onSlider;
+      double dx=xx-this->x(), dy=yy-this->y();  
+      double w=0.5*rv.width()*z, h=0.5*rv.height()*z;
+      if (fabs(fabs(dx)-w) < portRadiusMult*z &&
+          fabs(fabs(dy)-h) < portRadiusMult*z &&
+          fabs(hypot(dx,dy)-hypot(w,h)) < portRadiusMult*z)
+        return ClickType::onResize;
     }
   catch (...) {}
   return Item::clickType(xx,yy);
@@ -552,6 +558,7 @@ void VariableBase::draw(cairo_t *cairo) const
       cairo::CairoSave cs(cairo);
       drawPorts(cairo);
       displayTooltip(cairo,tooltip);
+      drawResizeHandles(cairo);
     }
 
   cairo_new_path(cairo);
@@ -560,10 +567,18 @@ void VariableBase::draw(cairo_t *cairo) const
   if (selected) drawSelected(cairo);
 }
 
-void VariablePtr::makeConsistentWithValue()
+void VariableBase::resize(const LassoBox& b)
 {
-  retype(minsky::cminsky().variableValues[get()->valueId()].type());
+  float invZ=1/zoomFactor();
+  double w=abs(b.x1-b.x0)*invZ;
+  double h=abs(b.y1-b.y0)*invZ;  
+  moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
+  bb.update(*this);	  
 }
 
+void VariablePtr::makeConsistentWithValue()
+{
+	retype(minsky::cminsky().variableValues[get()->valueId()].type());
+}
 
 int VarConstant::nextId=0;

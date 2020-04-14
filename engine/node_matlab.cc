@@ -320,6 +320,17 @@ namespace MathDAG
   ostream& OperationDAG<OperationType::time>::matlab(ostream& o) const
   {
     return o<<"t";
+  }    
+
+  template <>
+  ostream& OperationDAG<OperationType::copy>::matlab(ostream& o) const
+  {
+    if (arguments.size()>0 && arguments[0].size()>=1)
+      {
+        assert(arguments[0][0]);
+        o<<arguments[0][0]->matlab();
+      }
+    return o;
   }
   
   template <>
@@ -332,24 +343,7 @@ namespace MathDAG
   ostream& OperationDAG<OperationType::pi>::matlab(ostream& o) const
   {
     return o<<"π";
-  }      
-  
-  template <>
-  ostream& OperationDAG<OperationType::feigenbaum>::matlab(ostream& o) const
-  {
-    return o<<"δ";
-  }  
-
-  template <>
-  ostream& OperationDAG<OperationType::copy>::matlab(ostream& o) const
-  {
-    if (arguments.size()>0 && arguments[0].size()>=1)
-      {
-        assert(arguments[0][0]);
-        o<<arguments[0][0]->matlab();
-      }
-    return o;
-  }
+  }    
 
   template <>
   ostream& OperationDAG<OperationType::integrate>::matlab(ostream& o) const

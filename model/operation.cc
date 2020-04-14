@@ -311,7 +311,7 @@ namespace minsky
 
     // compute port coordinates relative to the icon's
     // point of reference
-    double x0=r-2, y0=0, x1=l, y1=numPorts() > 2? -h+3: 0, 
+    double x0=r, y0=0, x1=l, y1=numPorts() > 2? -h+3: 0, 
       x2=l, y2=numPorts() > 2? h-3: 0;
                   
     if (textFlipped) swap(y1,y2);
@@ -434,10 +434,14 @@ namespace minsky
     // default operations are dimensionless, but check that inputs are also
     switch (classify(type()))
       {
+      case constop:
+        if (check && !ports[0]->units(check).empty())
+          throw_error("constant output not dimensionless");
+        return {};  		  
       case function: case reduction: case scan: case tensor:
         if (check && !ports[1]->units(check).empty())
           throw_error("function input not dimensionless");
-        return {};
+        return {};    
       case binop:
         switch (type())
           {
@@ -516,9 +520,6 @@ namespace minsky
   }
 
   Units Time::units(bool) const {return cminsky().timeUnit;}
-  //Units Eu::units(bool) const {}
-  //Units Pi::units(bool) const {}
-  //Units Fb::units(bool) const {}
   Units Derivative::units(bool check) const {
     Units r=ports[1]->units(check);
     if (!cminsky().timeUnit.empty())
@@ -640,9 +641,6 @@ namespace minsky
     switch (type)
       {
       case time: return new Time;
-      //case euler: return new Eu;
-      //case pi: return new Pi;
-      //case feigenbaum: return new Fb;
       case copy: return new Copy;
       case integrate: return new IntOp;
       case differentiate: return new Derivative;
@@ -834,25 +832,7 @@ namespace minsky
   {
     cairo_move_to(cairo,-4,2);
     cairo_show_text(cairo,"t");
-  }
-  
-  template <> void Operation<OperationType::euler>::iconDraw(cairo_t* cairo) const
-  {
-    cairo_move_to(cairo,-4,2);
-    cairo_show_text(cairo,"e");
-  }
-  
-  template <> void Operation<OperationType::feigenbaum>::iconDraw(cairo_t* cairo) const
-  {
-    cairo_move_to(cairo,-4,2);
-    cairo_show_text(cairo,"δ");
-  }
-  
-    template <> void Operation<OperationType::pi>::iconDraw(cairo_t* cairo) const
-  {
-    cairo_move_to(cairo,-4,2);
-    cairo_show_text(cairo,"π");
-  }    
+  } 
 
   template <> void Operation<OperationType::copy>::iconDraw(cairo_t* cairo) const
   {
@@ -862,6 +842,18 @@ namespace minsky
     pango.setMarkup("→");
     pango.show();
   }
+  
+  template <> void Operation<OperationType::euler>::iconDraw(cairo_t* cairo) const
+  {
+    cairo_move_to(cairo,-4,2);
+    cairo_show_text(cairo,"e");
+  }
+  
+    template <> void Operation<OperationType::pi>::iconDraw(cairo_t* cairo) const
+  {
+    cairo_move_to(cairo,-4,2);
+    cairo_show_text(cairo,"π");
+  }     
 
   template <> void Operation<OperationType::integrate>::iconDraw(cairo_t* cairo) const
   {

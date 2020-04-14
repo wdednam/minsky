@@ -374,6 +374,13 @@ namespace MathDAG
   {
     return o<<" t ";
   }
+
+  template <>
+  ostream& OperationDAG<OperationType::copy>::latex(ostream& o) const
+  {
+    checkArg(0,0);
+    return o;
+  }
   
   template <>
   ostream& OperationDAG<OperationType::euler>::latex(ostream& o) const
@@ -385,20 +392,7 @@ namespace MathDAG
   ostream& OperationDAG<OperationType::pi>::latex(ostream& o) const
   {
     return o<<" π ";
-  }    
-  
-  template <>
-  ostream& OperationDAG<OperationType::feigenbaum>::latex(ostream& o) const
-  {
-    return o<<" δ ";
-  }  
-
-  template <>
-  ostream& OperationDAG<OperationType::copy>::latex(ostream& o) const
-  {
-    checkArg(0,0);
-    return o;
-  }
+  }      
 
   template <>
   ostream& OperationDAG<OperationType::integrate>::latex(ostream& o) const

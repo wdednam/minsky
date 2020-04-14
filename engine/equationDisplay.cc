@@ -338,19 +338,16 @@ namespace MathDAG
   }
   template <>
   void OperationDAG<OperationType::time>::render(Surface& surf) const 
-  {print(surf.cairo(),"<i>t</i>",Anchor::nw);}
+  {print(surf.cairo(),"<i>t</i>",Anchor::nw);}  
+  template <>
+  void OperationDAG<OperationType::copy>::render(Surface& surf) const
+  {print(surf.cairo(),"=",Anchor::nw);}
   template <>
   void OperationDAG<OperationType::euler>::render(Surface& surf) const 
   {print(surf.cairo(),"<i>e</i>",Anchor::nw);}
   template <>
   void OperationDAG<OperationType::pi>::render(Surface& surf) const 
   {print(surf.cairo(),"<i>π</i>",Anchor::nw);}    
-  template <>
-  void OperationDAG<OperationType::feigenbaum>::render(Surface& surf) const 
-  {print(surf.cairo(),"<i>δ</i>",Anchor::nw);}
-  template <>
-  void OperationDAG<OperationType::copy>::render(Surface& surf) const
-  {print(surf.cairo(),"=",Anchor::nw);}
   template <>
   void OperationDAG<OperationType::integrate>::render(Surface& surf) const
   {throw error("should not be rendering integration operations");}

@@ -433,11 +433,7 @@ namespace minsky
   {
     // default operations are dimensionless, but check that inputs are also
     switch (classify(type()))
-      {
-      case constop:
-        if (check && !ports[0]->units(check).empty())
-          throw_error("constant output not dimensionless");
-        return {};  		  
+      {		  
       case function: case reduction: case scan: case tensor:
         if (check && !ports[1]->units(check).empty())
           throw_error("function input not dimensionless");

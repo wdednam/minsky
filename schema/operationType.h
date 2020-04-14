@@ -27,12 +27,12 @@ namespace minsky
   struct OperationType
   {
     enum Type {constant, // deprecated - left to support legacy schemas
-               time, // zero input port ops
+               time,  // zero input port ops
                integrate, 
                differentiate, // with respect to time
                data, // an interpolated data item
                ravel, // Ravel™
-               euler, pi, // fundamental constants with zero input ports
+               euler, pi, // fundamental constants
                // multiwire binary ops
                add, subtract, multiply, divide, min, max, 
                and_, or_,

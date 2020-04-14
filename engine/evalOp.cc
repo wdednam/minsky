@@ -138,16 +138,6 @@ namespace minsky
   template <>
   double EvalOp<OperationType::time>::d2(double x1, double x2) const
   {return 0;}
-
-  template <>
-  double EvalOp<OperationType::copy>::evaluate(double in1, double in2) const
-  {return in1;}
-  template <>
-  double EvalOp<OperationType::copy>::d1(double x1, double x2) const
-  {return 1;}
-  template <>
-  double EvalOp<OperationType::copy>::d2(double x1, double x2) const
-  {return 0;}
   
   template <>
   double EvalOp<OperationType::euler>::evaluate(double in1, double in2) const
@@ -167,7 +157,17 @@ namespace minsky
   {return 0;}
   template <>
   double EvalOp<OperationType::pi>::d2(double x1, double x2) const
-  {return 0;}        
+  {return 0;}      
+  
+  template <>
+  double EvalOp<OperationType::copy>::evaluate(double in1, double in2) const
+  {return in1;}
+  template <>
+  double EvalOp<OperationType::copy>::d1(double x1, double x2) const
+  {return 1;}
+  template <>
+  double EvalOp<OperationType::copy>::d2(double x1, double x2) const
+  {return 0;}
 
   template <> double
   EvalOp<OperationType::integrate>::evaluate(double in1, double in2) const
@@ -516,9 +516,9 @@ namespace minsky
   {
     switch (classify(op))
       {
-      case constop:		  
       case general:
       case binop:
+      case constop:
       case function:
         switch (op)
           {
@@ -898,7 +898,7 @@ namespace minsky
       case 1:
         switch (OperationType::classify(op))
           {
-          case general: case function: 
+          case general: case constop: case function: 
             if (to.idx()==-1 || to.rank()==0)
               to.hypercube(from1.hypercube());
             if (to.hypercube()==from1.hypercube())
@@ -919,7 +919,7 @@ namespace minsky
 #ifndef NDEBUG
     switch (OperationType::classify(op))
       {
-      case constop: case general: case binop: case function: case scan:
+      case general: case binop: case constop: case function: case scan:
         assert(t->numArgs()<1 || to.size()==t->in1.size());
         assert(t->numArgs()<2 || to.size()==t->in2.size());
         break;

@@ -76,7 +76,7 @@ button .wiring.menubar.constops -image eulerImg -width 37 -height 24 -command {
     tk_popup .wiring.menubar.constops.menu [winfo pointerx .wiring.canvas] [winfo pointery .wiring.canvas]}
 tooltip .wiring.menubar.constops "fundamental constants"
 set helpTopics(.wiring.menubar.constops) Operations
-menu .wiring.menubar.constops.menu -tearoff 1 -tearoffcommand {addToolTipToTearOff "constant operations toolbox"}
+menu .wiring.menubar.constops.menu -tearoff 1 -tearoffcommand {addToolTipToTearOff "fundamental constants toolbox"}
 
 button .wiring.menubar.binops -image addImg -width 37 -height 24 -command {
     tk_popup .wiring.menubar.binops.menu [winfo pointerx .wiring.canvas] [winfo pointery .wiring.canvas]}
@@ -293,8 +293,8 @@ foreach op [availableOperations] {
         default {
             switch [classifyOp $op] {
                 function {.menubar.ops.functions add command -label $label  -command "minsky.addOperation $op"}
-                constop {.menubar.ops.constops add command -label $label -command "minsky.addOperation $op"}                 
-                binop {.menubar.ops.binops add command -label $label  -command "minsky.addOperation $op"}               
+                constop {.menubar.ops.constops add command -label $label -command "minsky.addOperation $op"}                                
+                binop {.menubar.ops.binops add command -label $label  -command "minsky.addOperation $op"}
                 reduction {.menubar.ops.reductions add command -label $label  -command "minsky.addOperation $op"}
                 "scan" {.menubar.ops.scans add command -label $label  -command "minsky.addOperation $op"}
                 tensor {.menubar.ops.tensors add command -label $label  -command "minsky.addOperation $op"}

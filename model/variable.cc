@@ -82,9 +82,9 @@ ClickType::Type VariableBase::clickType(float xx, float yy)
     {
       double hpx=z*rv.handlePos();
       double hpy=-z*rv.height();
-      if (type()!=constant && hypot(xx-x() - r.x(hpx,hpy), yy-y()-r.y(hpx,hpy)) < 5)
-        return ClickType::onSlider;
-      double dx=xx-this->x(), dy=yy-this->y();  
+      double dx=xx-x(), dy=yy-y(); 
+      if (type()!=constant && hypot(dx - r.x(hpx,hpy), dy-r.y(hpx,hpy)) < 5)
+        return ClickType::onSlider; 
       double w=0.5*rv.width()*z, h=0.5*rv.height()*z;
       if (fabs(fabs(dx)-w) < portRadiusMult*z &&
           fabs(fabs(dy)-h) < portRadiusMult*z &&
@@ -569,9 +569,10 @@ void VariableBase::draw(cairo_t *cairo) const
 
 void VariableBase::resize(const LassoBox& b)
 {
+  RenderVariable rv(*this);	
   float invZ=1/zoomFactor();
-  double w=abs(b.x1-b.x0)*invZ;
-  double h=abs(b.y1-b.y0)*invZ;  
+  rv.width(abs(b.x1-b.x0)*invZ);
+  rv.height(abs(b.y1-b.y0)*invZ);  
   moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
   bb.update(*this);	  
 }

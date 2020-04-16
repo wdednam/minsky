@@ -85,10 +85,10 @@ ClickType::Type VariableBase::clickType(float xx, float yy)
       double dx=xx-x(), dy=yy-y(); 
       if (type()!=constant && hypot(dx - r.x(hpx,hpy), dy-r.y(hpx,hpy)) < 5)
         return ClickType::onSlider; 
-      double w=0.5*rv.width()*z, h=0.5*rv.height()*z;
-      if (fabs(fabs(dx)-w) < portRadiusMult*z &&
-          fabs(fabs(dy)-h) < portRadiusMult*z &&
-          fabs(hypot(dx,dy)-hypot(w,h)) < portRadiusMult*z)
+      w=rv.width()*z, h=rv.height()*z;
+      if (fabs(fabs(dx)-w) < portRadius*z &&
+          fabs(fabs(dy)-h) < portRadius*z &&
+          fabs(hypot(dx,dy)-hypot(w,h)) < portRadius*z)
         return ClickType::onResize;
     }
   catch (...) {}
@@ -459,7 +459,7 @@ void VariableBase::draw(cairo_t *cairo) const
   rv.angle=angle+(notflipped? 0: M_PI);
 
   // parameters of icon in userspace (unscaled) coordinates
-  float w, h, hoffs;
+  float hoffs;
   w=rv.width()*z; 
   h=rv.height()*z;
   hoffs=rv.top()*z;
@@ -569,10 +569,9 @@ void VariableBase::draw(cairo_t *cairo) const
 
 void VariableBase::resize(const LassoBox& b)
 {
-  RenderVariable rv(*this);	
   float invZ=1/zoomFactor();
-  rv.width(abs(b.x1-b.x0)*invZ);
-  rv.height(abs(b.y1-b.y0)*invZ);  
+  w=abs(b.x1-b.x0)*invZ;
+  h=abs(b.y1-b.y0)*invZ;  
   moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
   bb.update(*this);	  
 }

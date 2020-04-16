@@ -183,14 +183,14 @@ namespace minsky
   }
   
   // Refactor resize() code for all canvas items here. For feature 25
-  //void Item:resize(const LassoBox& b) const
-  //{
-  //  float invZ=1/zoomFactor();
-  //  width=abs(x.x1-x.x0)*invZ;
-  //  height=abs(x.y1-x.y0)*invZ;
-  //  moveTo(0.5*(x.x0+x.x1), 0.5*(x.y0+x.y1));
-  //  bb.update(*this);	  
-  //}
+  void Item::resize(const LassoBox& b)
+  {
+    float invZ=1/zoomFactor();
+    bb.right=abs(b.x1-b.x0)*invZ+bb.left;
+    bb.bottom=abs(b.y1-b.y0)*invZ+bb.top;
+    moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
+    bb.update(*this);	  
+  }
   
   void Item::drawResizeHandles(cairo_t* cairo) const
   {
@@ -226,7 +226,10 @@ namespace minsky
     cairo_move_to(cairo,r.x(-w+1,-h+2), r.y(-w+1,-h+2));
     pango.show();
 
-    if (mouseFocus) displayTooltip(cairo,tooltip);
+    if (mouseFocus) {
+		displayTooltip(cairo,tooltip);
+		drawResizeHandles(cairo);
+	}
     cairo_move_to(cairo,r.x(-w,-h), r.y(-w,-h));
     cairo_line_to(cairo,r.x(w,-h), r.y(w,-h));
     cairo_line_to(cairo,r.x(w,h), r.y(w,h));

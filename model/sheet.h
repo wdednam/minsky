@@ -35,7 +35,7 @@ namespace minsky
     float m_width=100, m_height=100;
     Sheet();
     void draw(cairo_t* cairo) const override;
-    //void resize(const LassoBox& b) override;
+    void resize(const LassoBox& b) override;
     ClickType::Type clickType(float x, float y) override;
   };
 }

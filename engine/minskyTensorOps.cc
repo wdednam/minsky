@@ -604,11 +604,12 @@ namespace minsky
         assert(result.idx()>=0);
         assert(result.size()==rhs->size());
         result.ev->update(fv, sv);
+        auto ev_sav=result.ev.get();
         for (size_t i=0; i<rhs->size(); ++i)
           {
-            result[i]=(*rhs)[i];
-            assert(!finite(result[i]) || fv[result.idx()+i]==(*rhs)[i]);
-            //            cout << "i="<<i<<"idx="<<result.idx()<<" set to "<< (*rhs)[i] << " should be "<<fv[result.idx()]<<endl;
+            auto v=(*rhs)[i];
+            result[i]=v;
+            assert(!finite(result[i]) || fv[result.idx()+i]==v);
           }
       }
   }

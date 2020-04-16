@@ -636,7 +636,36 @@ proc incrCase {delta} {
     canvas.requestRedraw
 }
 
+proc gotoInstance {vid} {
+    global .instanceList$vid.variableList
+    [set .instanceList$vid.variableList].gotoInstance [.instanceList$vid.listbox curselection]
+    canvas.requestRedraw
+}
 
+proc deleteInstance vid {
+    global .instanceList$vid.variableList
+    if [llength [info commands [set .instanceList$vid.variableList].delete]] {
+        [set .instanceList$vid.variableList].delete
+    }
+}
+
+proc findAllInstances {} {
+    # check if variable selected
+    if {![llength [info commands minsky.canvas.item.valueId]]} return
+    set vid [minsky.canvas.item.valueId]
+    if {![winfo exists .instanceList[minsky.canvas.item.valueId]]} {
+        toplevel .instanceList$vid
+        listbox .instanceList$vid.listbox -listvariable .instanceList$vid.listIds -selectmode single
+        button .instanceList$vid.ok -text "OK" -command "destroy .instanceList$vid"
+        pack .instanceList$vid.listbox .instanceList$vid.ok
+        bind .instanceList$vid.listbox <Double-Button> "gotoInstance $vid"
+    }
+    global .instanceList$vid.listIds .instanceList$vid.variableList
+    set .instanceList$vid.variableList [listAllInstances]
+    set .instanceList$vid.listIds [[set .instanceList$vid.variableList].names]
+    bind .instanceList$vid <Destroy> "deleteInstance $vid"
+    raise .instanceList$vid
+}
 
 #  
 # context menu
@@ -658,6 +687,9 @@ proc contextMenu {x y X Y} {
             .wiring.context add command -label "Find definition" -command "findDefinition"
             .wiring.context add command -label "Select all instances" -command {
                 canvas.selectAllVariables
+            }
+            .wiring.context add command -label "Find all instances" -command {
+                findAllInstances
             }
             .wiring.context add command -label "Rename all instances" -command {
                 renameVariableInstances
@@ -718,6 +750,13 @@ proc contextMenu {x y X Y} {
             .wiring.context add command -label "Set currency" -command {
                 textEntryPopup .godleyCurrency {} {minsky.canvas.item.setCurrency [.godleyCurrency.entry get]}
             }
+            global editorMode buttonDisplay variableDisplay
+            set editorMode [$item.editorMode]
+            set buttonDisplay [$item.buttonDisplay]
+            set variableDisplay [$item.variableDisplay]
+            .wiring.context add checkbutton -label "Editor mode" -command "$item.toggleEditorMode" -variable editorMode
+            .wiring.context add checkbutton -label "Row/Col buttons" -command "$item.toggleButtons" -variable buttonDisplay
+            .wiring.context add checkbutton -label "Display variables" -command "$item.toggleVariableDisplay" -variable variableDisplay
             .wiring.context add command -label "Copy flow variables" -command "canvas.copyAllFlowVars"
             .wiring.context add command -label "Copy stock variables" -command "canvas.copyAllStockVars"
             .wiring.context add command -label "Export to file" -command "godley::export"

@@ -80,6 +80,8 @@ namespace minsky
     virtual void addPorts();
 
     void draw(cairo_t*) const override;
+    void resize(const LassoBox& b) override;
+    ClickType::Type clickType(float x, float y) override;        
 
     /// current value of output port
     double value() const override;
@@ -137,7 +139,7 @@ namespace minsky
   {
   public:
     Units units(bool) const override;
-  };    
+  };
   
   class Derivative: public Operation<OperationType::differentiate>
   {

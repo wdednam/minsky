@@ -393,18 +393,6 @@ namespace MathDAG
     checkArg(0,0);
     return o;
   }
-  
-  template <>
-  ostream& OperationDAG<OperationType::euler>::latex(ostream& o) const
-  {
-    return o<<" e ";
-  }
- 
-  template <>
-  ostream& OperationDAG<OperationType::pi>::latex(ostream& o) const
-  {
-    return o<<" π ";
-  }      
 
   template <>
   ostream& OperationDAG<OperationType::integrate>::latex(ostream& o) const

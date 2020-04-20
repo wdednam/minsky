@@ -321,6 +321,18 @@ namespace MathDAG
   {
     return o<<"t";
   }    
+ 
+  template <>
+  ostream& OperationDAG<OperationType::euler>::matlab(ostream& o) const
+  {
+    return o<<"e";
+  }
+
+  template <>
+  ostream& OperationDAG<OperationType::pi>::matlab(ostream& o) const
+  {
+    return o<<"pi";
+  }      
 
   template <>
   ostream& OperationDAG<OperationType::copy>::matlab(ostream& o) const
@@ -332,18 +344,6 @@ namespace MathDAG
       }
     return o;
   }
-  
-  template <>
-  ostream& OperationDAG<OperationType::euler>::matlab(ostream& o) const
-  {
-    return o<<"e";
-  }
-
-  template <>
-  ostream& OperationDAG<OperationType::pi>::matlab(ostream& o) const
-  {
-    return o<<"π";
-  }    
 
   template <>
   ostream& OperationDAG<OperationType::integrate>::matlab(ostream& o) const

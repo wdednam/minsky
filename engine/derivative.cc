@@ -391,7 +391,7 @@ namespace MathDAG
   {
     return zero;
   }
-
+  
   template <>
   NodePtr SystemOfEquations::derivative
   (const OperationDAG<OperationType::copy>& expr)

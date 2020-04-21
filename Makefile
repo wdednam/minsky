@@ -99,7 +99,8 @@ endif
 LIBS+=	-ljson_spirit \
 	-lboost_system$(BOOST_EXT) -lboost_regex$(BOOST_EXT) \
 	-lboost_date_time$(BOOST_EXT) -lboost_program_options$(BOOST_EXT) \
-	-lboost_filesystem$(BOOST_EXT) -lboost_thread$(BOOST_EXT) -lgsl -lgslcblas -lssl -lcrypto
+	-lboost_filesystem$(BOOST_EXT) -lboost_thread$(BOOST_EXT) \
+	-lboost_iostreams$(BOOST_EXT) -lgsl -lgslcblas -lssl -lcrypto
 
 ifdef MXE
 LIBS+=-lcrypt32

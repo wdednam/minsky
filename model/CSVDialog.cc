@@ -47,8 +47,17 @@
 #include <boost/asio.hpp>
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/iostreams/categories.hpp> // input_filter_tag
+#include <boost/iostreams/operations.hpp> // get
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 
 using namespace std;
@@ -58,6 +67,7 @@ using ecolab::cairo::CairoSave;
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
+namespace boostio = boost::iostreams;
 
 
 void CSVDialog::reportFromFile(const std::string& input, const std::string& output)
@@ -87,10 +97,10 @@ std::string CSVDialog::loadWebFile(const std::string& url)
          
   auto const protocol =what[1];
   auto const host = what[2];
-  //auto const port = what[3];
+  auto const port = what[3];
   auto const target = what[4];
-  //auto const query = what[5];
-  //auto const fragment = what[6];  
+  auto const query = what[5];
+  auto const fragment = what[6];  
   
   // The io_context is required for all I/O
   boost::asio::io_context ioc;
@@ -151,10 +161,18 @@ std::string CSVDialog::loadWebFile(const std::string& url)
                                                  
   // Dump the outstream into a temporary file for loading it into Minsky' CSV parser 
   boost::filesystem::path temp = boost::filesystem::unique_path();
-  const std::string tempStr    = temp.string();
-          
-  std::ofstream outFile(tempStr, std::ofstream::out);  
+  const std::string tempStr    = temp.string();    
+  std::ofstream outFile(tempStr, std::ofstream::out);
   outFile << res.get().body();                                            
+  
+  // Deal with zipped csv files
+  //if (fragment.str().find(".zip")) {
+  //    std::ifstream file(temp.native(), ios_base::in | ios_base::binary);
+  //    boostio::filtering_streambuf<boostio::input> in;
+  //    in.push(boostio::zlib_decompressor());
+  //    in.push(file);
+  //    boostio::copy(in, outFile);
+  //}// else outFile << res.get().body();                                            
        
   // Gracefully close the socket
   boost::system::error_code ec;

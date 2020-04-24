@@ -272,13 +272,10 @@ namespace minsky
     canvas.selection.clear();    
     auto copyOfItems=g->items;
     for (auto& i: copyOfItems)
-      {	
-          //if ((i->variableCast())->type()!=VariableType::flow && (i->variableCast())->type()!=VariableType::stock && !(dynamic_cast<GodleyIcon*>(i.get())))
-          //{
-	         canvas.model->addItem(i);			  
-			 canvas.selection.ensureItemInserted(i);	
-			 assert(!i->ioVar());
-	      //}
+      {		
+         canvas.model->addItem(i);			  
+         canvas.selection.ensureItemInserted(i);		 
+         assert(!i->ioVar());
       }
     // Attach mouse focus only to first item in selection. For ticket 1098.      
     if (!copyOfItems.empty()) canvas.setItemFocus(copyOfItems[0]);	      

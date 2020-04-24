@@ -404,17 +404,11 @@ namespace minsky
     margins(left,right,top,bottom);
     float dx=(x-this->x())*cos(rotation()*M_PI/180)-
       (y-this->y())*sin(rotation()*M_PI/180);
-    //float dy=(x-this->x())*sin(rotation()*M_PI/180)+
-    //  (y-this->y())*cos(rotation()*M_PI/180);      
     float w=0.5*iconWidth*z,h=0.5*iconHeight*z;
     if (w-right*edgeScale()<dx)
       return IORegion::output;
     else if (-w+left*edgeScale()>dx)
       return IORegion::input;
-    //else if (h-bottom*edgeScale()<dy)
-    //  return IORegion::footer;
-    //else if (-h+top*edgeScale()>dy)
-    //  return IORegion::header;
     else     
       return IORegion::none;
   }
@@ -489,7 +483,7 @@ namespace minsky
     // rescale contents to fit
     double x0, x1, y0, y1;
     contentBounds(x0,y0,x1,y1);
-    double sx=(fabs(b.x0-b.x1)-z*(l+r))/(x1-x0), sy=(fabs(b.y0-b.y1)-z*(t+bm))/(y1-y0);
+    double sx=fabs(fabs(b.x0-b.x1)-z*(l+r))/(x1-x0), sy=fabs(fabs(b.y0-b.y1)-z*(t+bm))/(y1-y0);
     resizeItems(items,sx,sy);
     resizeItems(groups,sx,sy);
     moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));

@@ -148,6 +148,14 @@ namespace minsky
         fabs(hypot(dx,dy)-hypot(iWidth(),iHeight())) < portRadius*z)
       return ClickType::onResize;
     return Item::clickType(xx,yy);
+  }
+  
+  float OperationBase::scaleFactor() const
+  {
+	float z=zoomFactor();
+    float l=OperationBase::l*z, r=OperationBase::r*z, 
+      h=OperationBase::h*z;	  
+    return std::max(1.0,std::min(iWidth()*z/(std::max(l,r)),iHeight()*z/h));  
   }  
 
   void OperationBase::draw(cairo_t* cairo) const
@@ -175,7 +183,7 @@ namespace minsky
           auto& c=dynamic_cast<const DataOp&>(*this);
           
           Pango pango(cairo);
-          pango.setFontSize(10*z);
+          pango.setFontSize(10*scaleFactor()*z);
           pango.setMarkup(latexToPango(c.description()));
           pango.angle=angle + (textFlipped? M_PI: 0);
           Rotate r(rotation()+ (textFlipped? 180: 0),0,0);
@@ -236,11 +244,9 @@ namespace minsky
               // we need to add some translation if the variable is bound
               cairo_rotate(cairo,rotation()*M_PI/180.0);
               coupledIntTranslation=-0.5*(i->intVarOffset+2*rv.width()+2+r)*z;
-              //if (rv.width()<iv.iWidth()) coupledIntTranslation=-0.5*(i->intVarOffset+2*iv.iWidth()+2+r)*z;
+              if (rv.width()<iv.iWidth()) coupledIntTranslation=-0.5*(i->intVarOffset+2*iv.iWidth()+2+r)*z;
               //            cairo_translate(cairo, coupledIntTranslation, 0);
               cairo_rotate(cairo,-rotation()*M_PI/180.0);
-              //float scaleFactor=std::max(1.0,std::min(iv.iWidth()/rv.width(),iv.iHeight()/rv.height())); 
-	          //cairo_scale(cairo,scaleFactor,scaleFactor);
             }
         cairo_save(cairo);
         cairo_scale(cairo,z,z);
@@ -257,11 +263,11 @@ namespace minsky
 
     float l=OperationBase::l*z, r=OperationBase::r*z, 
       h=OperationBase::h*z;
-    float ll=l, rr=r, hh=h;
       
-    if (fabs(ll)<iWidth()*z) ll=-iWidth()*z;  
-    if (rr<iWidth()*z) rr=iWidth()*z;
-    if (hh<iHeight()*z) hh=iHeight()*z;
+    if (fabs(l)<iWidth()*z) l=-iWidth()*z;        
+    if (r<iWidth()*z) r=iWidth()*z;    
+    if (h<iHeight()*z) h=iHeight()*z;
+      
     int intVarWidth=0;
     cairo_save(cairo);
     cairo_rotate(cairo, angle);
@@ -273,11 +279,11 @@ namespace minsky
          cairo_line_to(cairo,r,0);    
 	   }      
 	 } else {
-         cairo_move_to(cairo,-rr,-hh);
-         cairo_line_to(cairo,-rr,hh);
-         cairo_line_to(cairo,rr,hh);
-         cairo_line_to(cairo,rr+2*z,0);
-         cairo_line_to(cairo,rr,-hh);        
+         cairo_move_to(cairo,-r,-h);
+         cairo_line_to(cairo,-r,h);
+         cairo_line_to(cairo,r,h);
+         cairo_line_to(cairo,r+2*z,0);
+         cairo_line_to(cairo,r,-h);        
 	 }
      cairo_close_path(cairo);		  	 
 
@@ -301,7 +307,7 @@ namespace minsky
           RenderVariable rv(*intVar, cairo);
           // save the render width for later use in setting the clip
           intVarWidth=rv.width()*z;
-          //if (rv.width()<intVar->iWidth()) intVarWidth=intVar->iWidth()*z;
+          if (rv.width()<intVar->iWidth()) intVarWidth=intVar->iWidth()*z;
           // set the port location...
           intVar->moveTo(i->x()+r+ivo+intVarWidth, i->y());
             
@@ -321,8 +327,8 @@ namespace minsky
           cairo_line_to(cairo,r,0);
           cairo_line_to(cairo,r+ivo,0);
           float rvw=rv.width()*z, rvh=rv.height()*z;
-          //if (rv.width()<intVar->iWidth()) rvw=intVar->iWidth()*z;
-          //if (rv.height()<intVar->iHeight()) rvw=intVar->iHeight()*z;
+          if (rv.width()<intVar->iWidth()) rvw=intVar->iWidth()*z;
+          if (rv.height()<intVar->iHeight()) rvh=intVar->iHeight()*z;
           cairo_line_to(cairo,r+ivo,-rvh);
           cairo_line_to(cairo,r+ivo+2*rvw,-rvh);
           cairo_line_to(cairo,r+ivo+2*rvw+2*z,0);
@@ -331,16 +337,14 @@ namespace minsky
           cairo_line_to(cairo,r+ivo,0);
           cairo_line_to(cairo,r,0);
           cairo_close_path(cairo);
-          //float scaleFactor=std::max(1.0,std::min(intVar->iWidth()/rv.width(),intVar->iHeight()/rv.height())); 
-	      //cairo_scale(cairo,scaleFactor,scaleFactor); 
         }
 
     cairo::Path clipPath(cairo);
 
     // compute port coordinates relative to the icon's
     // point of reference. Move out port 2 pixels right for ticket For ticket 362.
-    double x0=rr, y0=0, x1=ll, y1=numPorts() > 2? -hh+3: 0, 
-      x2=ll, y2=numPorts() > 2? hh-3: 0;
+    double x0=r, y0=0, x1=l, y1=numPorts() > 2? -h+3: 0, 
+      x2=l, y2=numPorts() > 2? h-3: 0;
                   
     if (textFlipped) swap(y1,y2);
 
@@ -399,7 +403,7 @@ namespace minsky
   
   void OperationBase::resize(const LassoBox& b)
   {
-    float invZ=1/zoomFactor();
+    float invZ=1/zoomFactor();  
     moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
     iWidth(std::abs(b.x1-b.x0)*invZ);
     iHeight(std::abs(b.y1-b.y0)*invZ);
@@ -886,7 +890,7 @@ namespace minsky
   {
     cairo_move_to(cairo,-4,-5);
     Pango pango(cairo);
-    pango.setFontSize(7*zoomFactor());
+    pango.setFontSize(7*scaleFactor()*zoomFactor());
     pango.setMarkup("→");
     pango.show();
   }
@@ -902,7 +906,7 @@ namespace minsky
   {
     cairo_save(cairo);
     cairo_move_to(cairo,-7,-1);
-    cairo_set_font_size(cairo,8);
+    cairo_set_font_size(cairo,8*scaleFactor());
     cairo_show_text(cairo,"d");
     cairo_move_to(cairo,-7,0);cairo_line_to(cairo,2,0);
     cairo_set_line_width(cairo,0.5);cairo_stroke(cairo);
@@ -914,7 +918,7 @@ namespace minsky
   template <> void Operation<OperationType::sqrt>::iconDraw(cairo_t* cairo) const
   {
     cairo_save(cairo);
-    cairo_set_font_size(cairo,10);   
+    cairo_set_font_size(cairo,10*scaleFactor());   
     cairo_move_to(cairo,-7,6);
     cairo_show_text(cairo,"\xE2\x88\x9a");
     cairo_set_line_width(cairo,0.5);
@@ -931,7 +935,7 @@ namespace minsky
     cairo_move_to(cairo,-7,3);
     cairo_show_text(cairo,"e");
     cairo_rel_move_to(cairo,0,-4);
-    cairo_set_font_size(cairo,7);
+    cairo_set_font_size(cairo,7*scaleFactor());
     cairo_show_text(cairo,"x");
   }
 
@@ -940,9 +944,9 @@ namespace minsky
     cairo_move_to(cairo,-6,3);
     cairo_show_text(cairo,"x");
     cairo_rel_move_to(cairo,0,-4);
-    cairo_set_font_size(cairo,7);
+    cairo_set_font_size(cairo,7*scaleFactor());
     cairo_show_text(cairo,"y");
-    cairo_set_font_size(cairo,5);
+    cairo_set_font_size(cairo,5*scaleFactor());
     cairo_move_to(cairo, l+1, -h+6);
 #ifdef DISPLAY_POW_UPSIDE_DOWN
     cairo_show_text(cairo,"y");
@@ -1023,13 +1027,13 @@ namespace minsky
 
   template <> void Operation<OperationType::log>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"log");
     cairo_rel_move_to(cairo,0,3);
-    cairo_set_font_size(cairo,7);
+    cairo_set_font_size(cairo,7*scaleFactor());
     cairo_show_text(cairo,"b");
-    cairo_set_font_size(cairo,5);
+    cairo_set_font_size(cairo,5*scaleFactor());
     cairo_move_to(cairo, l+1, -h+6);
     cairo_show_text(cairo,"x");
     cairo_move_to(cairo, l+1, h-3);
@@ -1039,82 +1043,82 @@ namespace minsky
 
   template <> void Operation<OperationType::sin>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"sin");
   }
 
   template <> void Operation<OperationType::cos>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"cos");
   }
 
   template <> void Operation<OperationType::tan>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"tan");
   }
 
   template <> void Operation<OperationType::asin>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,9);
+    cairo_set_font_size(cairo,9*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"sin");
     cairo_rel_move_to(cairo,0,-3);
-    cairo_set_font_size(cairo,7);
+    cairo_set_font_size(cairo,7*scaleFactor());
     cairo_show_text(cairo,"-1");
     cairo_rel_move_to(cairo,0,-2);
   }
 
   template <> void Operation<OperationType::acos>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,9);
+    cairo_set_font_size(cairo,9*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"cos");
     cairo_rel_move_to(cairo,0,-3);
-    cairo_set_font_size(cairo,7);
+    cairo_set_font_size(cairo,7*scaleFactor());
     cairo_show_text(cairo,"-1");
     cairo_rel_move_to(cairo,0,-2);
   }
 
   template <> void Operation<OperationType::atan>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,9);
+    cairo_set_font_size(cairo,9*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"tan");
     cairo_rel_move_to(cairo,0,-3);
-    cairo_set_font_size(cairo,7);
+    cairo_set_font_size(cairo,7*scaleFactor());
     cairo_show_text(cairo,"-1");
     cairo_rel_move_to(cairo,0,-2);
   }
 
   template <> void Operation<OperationType::sinh>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,8);
+    cairo_set_font_size(cairo,8*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"sinh");
   }
 
   template <> void Operation<OperationType::cosh>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,8);
+    cairo_set_font_size(cairo,8*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"cosh");
   }
 
   template <> void Operation<OperationType::tanh>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,8);
+    cairo_set_font_size(cairo,8*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"tanh");
   }
 
   template <> void Operation<OperationType::abs>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,9);
+    cairo_set_font_size(cairo,9*scaleFactor());
     cairo_move_to(cairo,-6,3);
     cairo_show_text(cairo,"|x|");
   }
@@ -1123,13 +1127,13 @@ namespace minsky
 //    cairo_set_font_size(cairo,8);
     cairo_move_to(cairo,-7,-7);
     Pango pango(cairo);
-    pango.setFontSize(7*zoomFactor());
+    pango.setFontSize(7*scaleFactor()*zoomFactor());
     pango.setMarkup("⌊x⌋");
     pango.show();
   }
   template <> void Operation<OperationType::frac>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,8);
+    cairo_set_font_size(cairo,8*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"frac");
   }
@@ -1169,7 +1173,7 @@ namespace minsky
   {
     cairo_move_to(cairo,-4,-7);
     Pango pango(cairo);
-    pango.setFontSize(7*zoomFactor());
+    pango.setFontSize(7*scaleFactor()*zoomFactor());
     pango.setMarkup("∑");
     pango.show();
   }
@@ -1178,49 +1182,49 @@ namespace minsky
   {
     cairo_move_to(cairo,-4,-7);
     Pango pango(cairo);
-    pango.setFontSize(7*zoomFactor());
+    pango.setFontSize(7*scaleFactor()*zoomFactor());
     pango.setMarkup("∏");
     pango.show();
   }
 
   template <> void Operation<OperationType::infimum>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"inf");
   }
 
  template <> void Operation<OperationType::supremum>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"sup");
   }
   
   template <> void Operation<OperationType::infIndex>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"infi");
   }
 
  template <> void Operation<OperationType::supIndex>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"supi");
   }
 
   template <> void Operation<OperationType::any>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"any");
   }
 
   template <> void Operation<OperationType::all>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"all");
   }
@@ -1229,7 +1233,7 @@ namespace minsky
   {
     cairo_move_to(cairo,-7,-7);
     Pango pango(cairo);
-    pango.setFontSize(7*zoomFactor());
+    pango.setFontSize(7*scaleFactor()*zoomFactor());
     pango.setMarkup("∑+");
     pango.show();
   }
@@ -1238,7 +1242,7 @@ namespace minsky
   {
     cairo_move_to(cairo,-6,-7);
     Pango pango(cairo);
-    pango.setFontSize(7*zoomFactor());
+    pango.setFontSize(7*scaleFactor()*zoomFactor());
     pango.setMarkup("∏×");
     pango.show();
   }
@@ -1247,7 +1251,7 @@ namespace minsky
   {
     cairo_move_to(cairo,-4,-7);
     Pango pango(cairo);
-    pango.setFontSize(7*zoomFactor());
+    pango.setFontSize(7*scaleFactor()*zoomFactor());
     pango.setMarkup("Δ");
     pango.show();
   }
@@ -1256,7 +1260,7 @@ namespace minsky
   {
     cairo_move_to(cairo,-4,-10);
     Pango pango(cairo);
-    pango.setFontSize(14*zoomFactor());
+    pango.setFontSize(14*scaleFactor()*zoomFactor());
     pango.setMarkup("·");
     pango.show();
   }
@@ -1265,24 +1269,24 @@ namespace minsky
   {
     cairo_move_to(cairo,-4,-10);
     Pango pango(cairo);
-    pango.setFontSize(10*zoomFactor());
+    pango.setFontSize(10*scaleFactor()*zoomFactor());
     pango.setMarkup("⊗");
     pango.show();
   }
 
   template <> void Operation<OperationType::index>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,10);
+    cairo_set_font_size(cairo,10*scaleFactor());
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"idx");
   }
 
   template <> void Operation<OperationType::gather>::iconDraw(cairo_t* cairo) const
   {
-    cairo_set_font_size(cairo,8);
+    cairo_set_font_size(cairo,8*scaleFactor());
     cairo_move_to(cairo,-7,3);
     cairo_show_text(cairo,"x[i]");
-    cairo_set_font_size(cairo,5);
+    cairo_set_font_size(cairo,5*scaleFactor());
     cairo_move_to(cairo, l+1, -h+6);
     cairo_show_text(cairo,"x");
     cairo_move_to(cairo, l+1, h-3);

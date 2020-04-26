@@ -460,13 +460,13 @@ void VariableBase::draw(cairo_t *cairo) const
   rv.angle=angle+(notflipped? 0: M_PI);
 
   // parameters of icon in userspace (unscaled) coordinates
-  float w, h, hoffs, fontFactor;
+  float w, h, hoffs, scaleFactor;
   w=rv.width()*z; 
   h=rv.height()*z;
+  scaleFactor=max(1.0,min(iWidth()*z/w,iHeight()*z/h));
   if (rv.width()<iWidth()) w=iWidth()*z;
   if (rv.height()<iHeight()) h=iHeight()*z;
-  fontFactor=max(1.0,min(iWidth()/rv.width(),iHeight()/rv.height()));  
-  rv.setFontSize(12*fontFactor*z);
+  rv.setFontSize(12*scaleFactor*z);
   hoffs=rv.top()*z;
   
 
@@ -485,16 +485,16 @@ void VariableBase::draw(cairo_t *cairo) const
   
       Pango pangoVal(cairo);
       if (!isnan(value())) {
-		   pangoVal.setFontSize(6*fontFactor*z);
+		   pangoVal.setFontSize(6*scaleFactor*z);
 		   pangoVal.setMarkup(mantissa(val));
 	   }
       else if (isinf(value())) { // Display non-zero divide by zero as infinity. For ticket 1155
-		  pangoVal.setFontSize(8*fontFactor*z);
+		  pangoVal.setFontSize(8*scaleFactor*z);
 		  if (signbit(value())) pangoVal.setMarkup("-∞");
           else pangoVal.setMarkup("∞");
 	  }
 	  else {  // Display all other NaN cases as ???. For ticket 1155
-		  pangoVal.setFontSize(6*fontFactor*z);
+		  pangoVal.setFontSize(6*scaleFactor*z);
 		  pangoVal.setMarkup("???");
 	  }
       pangoVal.angle=angle+(notflipped? 0: M_PI);
@@ -533,9 +533,6 @@ void VariableBase::draw(cairo_t *cairo) const
     cairo_line_to(cairo,w+2*z,0);
     cairo_line_to(cairo,w,-h);
     cairo_close_path(cairo);
-    if (type()==integral) {
-	   cairo_scale(cairo,fontFactor,fontFactor); 
-    }
     clipPath.reset(new cairo::Path(cairo));
     cairo_stroke(cairo);
     if (type()!=constant && !ioVar())
@@ -572,6 +569,7 @@ void VariableBase::draw(cairo_t *cairo) const
 
   cairo_new_path(cairo);
   clipPath->appendToCurrent(cairo);
+  // Rescale size of variable attached to intop. For ticket 94
   cairo_clip(cairo);
   if (selected) drawSelected(cairo);
 }
@@ -581,7 +579,7 @@ void VariableBase::resize(const LassoBox& b)
   float invZ=1/zoomFactor();
   moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));  
   iWidth(abs(b.x1-b.x0)*invZ);
-  iHeight(abs(b.y1-b.y0)*invZ);
+  iHeight(abs(b.y1-b.y0)*invZ);   
 }
 
 void VariablePtr::makeConsistentWithValue()

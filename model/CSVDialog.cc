@@ -59,6 +59,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <zlib.h>
 
 using namespace std;
 using namespace minsky;
@@ -158,6 +159,12 @@ std::string CSVDialog::loadWebFile(const std::string& url)
   res.eager(true);  // See https://github.com/boostorg/beast/issues/1352
   // Check response status and throw error all values 400 and above. See https://www.boost.org/doc/libs/master/boost/beast/http/status.hpp for status codes
   if (res.get().result_int() >= 400) throw runtime_error("Invalid HTTP response. Response code: " + std::to_string(res.get().result_int()));
+  
+  //classdesc::pack_t& b;
+  //std::ofstream x;
+  //b>>a.name>>a.dimension>>size;
+  //b>>x;
+  //a.push_back(x);  
                                                  
   // Dump the outstream into a temporary file for loading it into Minsky' CSV parser 
   boost::filesystem::path temp = boost::filesystem::unique_path();

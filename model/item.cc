@@ -89,6 +89,14 @@ namespace minsky
       return 1;
   }
   
+  float Item::scaleFactor() const
+  {
+	float z=zoomFactor();
+	float w=0.5*width()*z, h=0.5*height()*z; 
+    if (w < 0.5*iWidth()*z && h < 0.5*iHeight()*z) return std::min(iWidth()*z/w,iHeight()*z/h);  
+    return m_sf;
+  }     
+  
   void Item::deleteAttachedWires()
   {
     for (auto& p: ports)
@@ -132,7 +140,7 @@ namespace minsky
       }          
      
     // then, check whether a resize handle has been selected  
-	double w=0.5*width()*zoomFactor(), h=0.5*height()*zoomFactor(); 
+	float w=0.5*width()*zoomFactor(), h=0.5*height()*zoomFactor(); 
     if (abs(abs(x-this->x())-w) < portRadiusMult*zoomFactor() &&	  
             abs(abs(y-this->y())-h) < portRadiusMult*zoomFactor() &&	  
             abs(hypot((x-this->x()),(y-this->y()))-hypot(w,h)) < portRadiusMult*zoomFactor())	  
@@ -219,7 +227,7 @@ namespace minsky
   // default is just to display the detailed text (ie a "note")
   void Item::draw(cairo_t* cairo) const
   {
-    Rotate r(rotation(),0,0);
+    Rotate r(rotation(),0,0);  
     Pango pango(cairo);
     float w, h, z=zoomFactor();
     pango.angle=rotation() * M_PI / 180.0; 
@@ -234,8 +242,8 @@ namespace minsky
 
     if (mouseFocus) {
 		displayTooltip(cairo,tooltip);	
+		if (onResizeHandles) drawResizeHandles(cairo);	
 	}
-	if (onResizeHandles) drawResizeHandles(cairo);	
     cairo_move_to(cairo,r.x(-w,-h), r.y(-w,-h));
     cairo_line_to(cairo,r.x(w,-h), r.y(w,-h));
     cairo_line_to(cairo,r.x(w,h), r.y(w,h));

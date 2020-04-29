@@ -30,6 +30,7 @@ but any renamed attributes require bumping the schema number.
 #include "model/sheet.h"
 #include "schema/schema2.h"
 #include "schemaHelper.h"
+#include "zStream.h"
 #include "classdesc.h"
 #include "polyXMLBase.h"
 #include "polyJsonBase.h"

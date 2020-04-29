@@ -187,6 +187,8 @@ namespace minsky
     {return intVar->valueId();}
 
     void removeControlledItems() const override;
+    float x() const override;
+    float y() const override;
 
    /// return reference to integration variable
     VariablePtr intVar; 

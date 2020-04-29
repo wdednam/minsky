@@ -22,6 +22,8 @@
 #include "selection.h"
 #include <pango.h>
 #include "minsky_epilogue.h"
+#include "zStream.h"
+#include "a85.h"
 
 //#include <boost/beast/example/common/root_certificates.hpp>
 //#include "root_certificates.hpp"
@@ -39,7 +41,6 @@
 #include "certify/include/boost/certify/https_verification.hpp" 
 
 
-
 //#include <boost/asio/connect.hpp>
 //#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/error.hpp>
@@ -47,19 +48,9 @@
 #include <boost/asio.hpp>
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/iostreams/categories.hpp> // input_filter_tag
-#include <boost/iostreams/operations.hpp> // get
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
 
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <zlib.h>
 
 using namespace std;
 using namespace minsky;
@@ -68,7 +59,7 @@ using ecolab::cairo::CairoSave;
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
-namespace boostio = boost::iostreams;
+//namespace boostio = boost::iostreams;
 
 
 void CSVDialog::reportFromFile(const std::string& input, const std::string& output)
@@ -159,27 +150,30 @@ std::string CSVDialog::loadWebFile(const std::string& url)
   res.eager(true);  // See https://github.com/boostorg/beast/issues/1352
   // Check response status and throw error all values 400 and above. See https://www.boost.org/doc/libs/master/boost/beast/http/status.hpp for status codes
   if (res.get().result_int() >= 400) throw runtime_error("Invalid HTTP response. Response code: " + std::to_string(res.get().result_int()));
-  
-  //classdesc::pack_t& b;
-  //std::ofstream x;
-  //b>>a.name>>a.dimension>>size;
-  //b>>x;
-  //a.push_back(x);  
                                                  
   // Dump the outstream into a temporary file for loading it into Minsky' CSV parser 
   boost::filesystem::path temp = boost::filesystem::unique_path();
   const std::string tempStr    = temp.string();    
   std::ofstream outFile(tempStr, std::ofstream::out);
-  outFile << res.get().body();                                            
+  
+  std::string targetStr = target.str();
+  std::string fileExt = ".zip";
+  std::size_t found = targetStr.find(fileExt);
   
   // Deal with zipped csv files
-  //if (fragment.str().find(".zip")) {
-  //    std::ifstream file(temp.native(), ios_base::in | ios_base::binary);
-  //    boostio::filtering_streambuf<boostio::input> in;
-  //    in.push(boostio::zlib_decompressor());
-  //    in.push(file);
-  //    boostio::copy(in, outFile);
-  //}// else outFile << res.get().body();                                            
+  if (found!=std::string::npos) {
+      vector<unsigned char> zbuf(res.get().body().size());
+      DeflateZStream zs(res.get().body(), zbuf);
+      zs.deflate();  
+      
+      vector<char> cbuf(a85::size_for_a85(zs.total_out,false));
+      a85::to_a85(&zbuf[0],zs.total_out, &cbuf[0], false);
+      // this ensures that the escape sequence ']]>' never appears in the data
+      replace(cbuf.begin(),cbuf.end(),']','~');      
+    
+      outFile << cbuf.data();
+  }
+  else outFile << res.get().body();                                                                                          
        
   // Gracefully close the socket
   boost::system::error_code ec;

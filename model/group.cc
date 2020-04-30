@@ -677,8 +677,10 @@ namespace minsky
     float readjust=zoomFactor()/edgeScale() / (displayZoom>1? displayZoom:1);
     margins(l,r,t,bm);
     l*=readjust; r*=readjust; t*=zoomFactor(); bm*=zoomFactor();
+    //displayZoom = max(displayZoom, 
+    //                  float(max((x1-x())/(0.5f*iconWidth-r), max((x()-x0)/(0.5f*iconWidth-l), max((y1-y())/(0.5f*iconHeight-bm), (y()-y0)/(0.5f*iconHeight-t)) ))));
     displayZoom = max(displayZoom, 
-                      float(max((x1-x())/(0.5f*iconWidth-r), max((x()-x0)/(0.5f*iconWidth-l), max((y1-y())/(0.5f*iconHeight-bm), (y()-y0)/(0.5f*iconHeight-t)) ))));
+                  float(max((x1-x())/(0.5f*iconWidth-r), (x()-x0)/(0.5f*iconWidth-l))));
   
     displayZoom*=1.1*rotFactor()/lz;
 
@@ -855,7 +857,7 @@ namespace minsky
         //cairo_fill(cairo);
 
         // display text
-        cairo_move_to(cairo, -w+1, h-4-0.5*(height+top)/z);
+        cairo_move_to(cairo, -w+1, h-2-top-0.5*(height)/z);
         cairo_set_source_rgba(cairo,0,0,0,transparency);
         cairo_show_text(cairo,title.c_str());
       }

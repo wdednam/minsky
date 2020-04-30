@@ -850,12 +850,12 @@ namespace minsky
         //double offset = - displayContents()*0.45*this->iconHeight;
         // prepare a background for the text, partially obscuring graphic
         double transparency=displayContents()? 0.25: 1;
-        cairo_set_source_rgba(cairo,0,1,1,0.5*transparency);
-        cairo_rectangle(cairo,-w,-h+4-0.5*(height-topMargin)/z,2*w,2*h);
-        cairo_fill(cairo);
+        //cairo_set_source_rgba(cairo,0,1,1,0.5*transparency);
+        //cairo_rectangle(cairo,-w,-h+4-0.5*(height-topMargin)/z,2*w,2*h);
+        //cairo_fill(cairo);
 
         // display text
-        cairo_move_to(cairo, -w+1, h-4-0.5*(height-topMargin)/z);
+        cairo_move_to(cairo, -w+1, h-4-0.5*(height+top)/z);
         cairo_set_source_rgba(cairo,0,0,0,transparency);
         cairo_show_text(cairo,title.c_str());
       }
@@ -971,21 +971,11 @@ namespace minsky
     cairo_fill(cairo);
     
     // draw top margin. for feature 88
-    cairo_move_to(cairo,-w,-h);
-    cairo_line_to(cairo,-w,-h-top);
-    cairo_line_to(cairo,w,-h-top);
-    cairo_line_to(cairo,w,-h);
-    cairo_line_to(cairo,-w,-h);
-    cairo_close_path(cairo);
+    cairo_rectangle(cairo,-w,-h,2*w,-top);
     cairo_fill(cairo);    
     
     // draw bottom margin. for feature 88
-    cairo_move_to(cairo,-w,h);
-    cairo_line_to(cairo,-w,h+bottom);
-    cairo_line_to(cairo,w,h+bottom);
-    cairo_line_to(cairo,w,h);
-    cairo_line_to(cairo,-w,h);
-    cairo_close_path(cairo);
+    cairo_rectangle(cairo,-w,h,2*w,bottom);
     cairo_fill(cairo);    
     
     cairo_restore(cairo);

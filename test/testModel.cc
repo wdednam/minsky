@@ -590,7 +590,7 @@ SUITE(Canvas)
         mouseDown(x+0.5*w, y+0.5*h);
         mouseUp(x+w, y+h);
         CHECK_CLOSE(1.5*w,group.iconWidth,1);
-        CHECK_CLOSE(1.5*h,group.iconHeight,1);
+        CHECK_CLOSE(1.6*h,group.iconHeight,1);
       }
 
     TEST_FIXTURE(Canvas, moveIntoThenOutOfGroup)

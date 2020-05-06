@@ -274,13 +274,9 @@ namespace minsky
     bool displayContentsChanged() const {return m_displayContentsChanged;}
 
     /// margin sizes to allow space for edge variables. 
-    //void margins(float& left, float& right, float& top, float& bottom) const;
     void margins(float& left, float& right) const;    
 
     /// for debugging purposes
-    //std::vector<float> marginsV() const {
-    //  float l, r, t, bm; margins(l,r,t,bm);  return {l,r,t,bm};
-    //}
     std::vector<float> marginsV() const {
       float l, r; margins(l,r);  return {l,r};
     }    

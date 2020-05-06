@@ -400,8 +400,6 @@ namespace minsky
   
   Group::IORegion::type Group::inIORegion(float x, float y) const
   {
-    //float left, right, top, bottom, z=zoomFactor();
-    //margins(left,right,top,bottom);
     float left, right, z=zoomFactor();
     margins(left,right);    
     float dx=(x-this->x())*cos(rotation()*M_PI/180)-
@@ -413,7 +411,6 @@ namespace minsky
       return IORegion::output;
     else if (-w+left*edgeScale()>dx)
       return IORegion::input;
-    //else if (-h+top>dy || h-bottom<dy) 
     else if (-h+10*z>dy || h-10*z<dy)     
       return IORegion::topBottom;  
     else     
@@ -450,11 +447,9 @@ namespace minsky
     contentBounds(x0,y0,x1,y1);
     double xx=0.5*(x0+x1), yy=0.5*(y0+y1);
     double dx=xx-x(), dy=yy-y();
-    //float l,r,t,bm; margins(l,r,t,bm);
     float l,r; margins(l,r);    
     float z=zoomFactor();
     iconWidth=((x1-x0)+l+r)/z;
-    //iconHeight=((y1-y0)+t+bm)/z;
     iconHeight=((y1-y0))/z+20;
 
     // adjust contents by the offset
@@ -487,14 +482,11 @@ namespace minsky
     iconWidth=fabs(b.x0-b.x1)/z;
     iconHeight=fabs(b.y0-b.y1)/z;
     // account for margins
-    //float l, r, t, bm;
-    //margins(l,r,t,bm);
     float l, r;
     margins(l,r);    
     // rescale contents to fit
     double x0, x1, y0, y1;
     contentBounds(x0,y0,x1,y1);
-    //double sx=fabs(fabs(b.x0-b.x1)-z*(l+r))/(x1-x0), sy=fabs(fabs(b.y0-b.y1)-z*(t+bm))/(y1-y0);
     double sx=(fabs(b.x0-b.x1)-z*(l+r))/(x1-x0), sy=fabs(b.y0-b.y1)/(y1-y0);    
     resizeItems(items,sx,sy);
     resizeItems(groups,sx,sy);
@@ -684,10 +676,6 @@ namespace minsky
 
     // account for shrinking margins
     float readjust=zoomFactor()/edgeScale() / (displayZoom>1? displayZoom:1);
-    //margins(l,r,t,bm);
-    //l*=readjust; r*=readjust; t*=zoomFactor(); bm*=zoomFactor();
-    //displayZoom = max(displayZoom, 
-    //                  float(max((x1-x())/(0.5f*iconWidth-r), max((x()-x0)/(0.5f*iconWidth-l), max((y1-y())/(0.5f*iconHeight-bm), (y()-y0)/(0.5f*iconHeight-t)) ))));
     margins(l,r);
     l*=readjust; r*=readjust;    
     displayZoom = max(displayZoom, 
@@ -705,13 +693,9 @@ namespace minsky
     double x0, x1, y0, y1, z=zoomFactor();
     relZoom=1;
     contentBounds(x0,y0,x1,y1);
-    //float l, r, t, bm;
-    //margins(l,r,t,bm);
     float l, r;
     margins(l,r);    
     double dx=x1-x0, dy=y1-y0;
-    //if (iconWidth-l-r>0 && iconHeight-t-bm>0 && dx>0 && dy>0)
-    //  relZoom=std::min(1.0, std::min((iconWidth-l-r)/(z*dx), (iconHeight-t-bm)/(z*dy)));
     if (iconWidth-l-r>0 && dx>0 && dy>0)
       relZoom=std::min(1.0, std::min((iconWidth-l-r)/(z*dx), (iconHeight-20)/(z*dy)));    
   }
@@ -790,12 +774,9 @@ namespace minsky
 
     // determine how big the group icon should be to allow
     // sufficient space around the side for the edge variables
-    //float leftMargin, rightMargin, topMargin, bottomMargin;
-    //margins(leftMargin, rightMargin, topMargin, bottomMargin);
     float leftMargin, rightMargin;
     margins(leftMargin, rightMargin);    
     float z=zoomFactor();
-    //leftMargin*=edgeScale(); rightMargin*=edgeScale(); topMargin*=z; bottomMargin*=z;
     leftMargin*=edgeScale(); rightMargin*=edgeScale();
 
     unsigned width=z*this->iconWidth, height=z*this->iconHeight;
@@ -866,15 +847,10 @@ namespace minsky
         else
           cairo_rotate(cairo, angle+M_PI);
 
-        //double offset = - displayContents()*0.45*this->iconHeight;
         // prepare a background for the text, partially obscuring graphic
         double transparency=displayContents()? 0.25: 1;
-        //cairo_set_source_rgba(cairo,0,1,1,0.5*transparency);
-        //cairo_rectangle(cairo,-w,-h+4-0.5*(height-topMargin)/z,2*w,2*h);
-        //cairo_fill(cairo);
 
         // display text
-        //cairo_move_to(cairo, -w+1, h-2-topMargin-0.5*(height)/z);
         cairo_move_to(cairo, -w+1, h-12-0.5*(height)/z);
         cairo_set_source_rgba(cairo,0,0,0,transparency);
         cairo_show_text(cairo,title.c_str());
@@ -928,7 +904,6 @@ namespace minsky
 
   void Group::drawEdgeVariables(cairo_t* cairo) const
   {
-    //float left, right, top, bottom; margins(left,right,top,bottom);
     float left, right; margins(left,right);    
     left*=edgeScale();
     right*=edgeScale();
@@ -943,14 +918,10 @@ namespace minsky
   void Group::drawIORegion(cairo_t* cairo) const
   {
     cairo_save(cairo);
-    //float left, right, top, bottom, z=zoomFactor();
-    //margins(left,right,top,bottom);
     float left, right, z=zoomFactor();
     margins(left,right);    
     left*=edgeScale();
     right*=edgeScale();
-    //top*=zoomFactor();
-    //bottom*=zoomFactor();
     float y=0, dy=10*edgeScale();
     for (auto& i: inVariables)
       {
@@ -994,38 +965,16 @@ namespace minsky
     cairo_fill(cairo);
     
     // draw top margin. for feature 88
-    //cairo_rectangle(cairo,-w,-h,2*w,-top);
     cairo_rectangle(cairo,-w,-h,2*w,-10*z);
     cairo_fill(cairo);    
     
     // draw bottom margin. for feature 88
-    //cairo_rectangle(cairo,-w,h,2*w,bottom);
     cairo_rectangle(cairo,-w,h,2*w,10*z);
     cairo_fill(cairo);    
     
     cairo_restore(cairo);
   }
 
-
-  //void Group::margins(float& left, float& right, float& top, float& bottom) const
-  //{
-  //  left=right=top=bottom=10;
-  //  auto tmpMouseFocus=mouseFocus;
-  //  mouseFocus=false; // disable mouseFocus for this calculation
-  //  for (auto& i: inVariables)
-  //    {
-  //      assert(i->type()!=VariableType::undefined);
-  //      i->bb.update(*i);
-  //      if (i->width()>left) left=i->width();
-  //    }
-  //  for (auto& i: outVariables)
-  //    {
-  //      assert(i->type()!=VariableType::undefined);
-  //      i->bb.update(*i);
-  //      if (i->width()>right) right=i->width();
-  //    }
-  //  mouseFocus=tmpMouseFocus;
-  //}
 
   void Group::margins(float& left, float& right) const
   {

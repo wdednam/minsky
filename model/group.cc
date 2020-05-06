@@ -414,7 +414,7 @@ namespace minsky
     else if (-w+left*edgeScale()>dx)
       return IORegion::input;
     //else if (-h+top>dy || h-bottom<dy) 
-    else if (-h+10>dy || h-10<dy)     
+    else if (-h+10*z>dy || h-10*z<dy)     
       return IORegion::topBottom;  
     else     
       return IORegion::none;
@@ -455,7 +455,7 @@ namespace minsky
     float z=zoomFactor();
     iconWidth=((x1-x0)+l+r)/z;
     //iconHeight=((y1-y0)+t+bm)/z;
-    iconHeight=((y1-y0)+20)/z;
+    iconHeight=((y1-y0))/z+20;
 
     // adjust contents by the offset
     for (auto& i: items)
@@ -713,7 +713,7 @@ namespace minsky
     //if (iconWidth-l-r>0 && iconHeight-t-bm>0 && dx>0 && dy>0)
     //  relZoom=std::min(1.0, std::min((iconWidth-l-r)/(z*dx), (iconHeight-t-bm)/(z*dy)));
     if (iconWidth-l-r>0 && dx>0 && dy>0)
-      relZoom=std::min(1.0, std::min((iconWidth-l-r)/(z*dx), iconHeight/(z*dy)));    
+      relZoom=std::min(1.0, std::min((iconWidth-l-r)/(z*dx), (iconHeight-20)/(z*dy)));    
   }
   
   const Group* Group::minimalEnclosingGroup(float x0, float y0, float x1, float y1, const Item* ignore) const
@@ -995,12 +995,12 @@ namespace minsky
     
     // draw top margin. for feature 88
     //cairo_rectangle(cairo,-w,-h,2*w,-top);
-    cairo_rectangle(cairo,-w,-h,2*w,-10);
+    cairo_rectangle(cairo,-w,-h,2*w,-10*z);
     cairo_fill(cairo);    
     
     // draw bottom margin. for feature 88
     //cairo_rectangle(cairo,-w,h,2*w,bottom);
-    cairo_rectangle(cairo,-w,h,2*w,10);
+    cairo_rectangle(cairo,-w,h,2*w,10*z);
     cairo_fill(cairo);    
     
     cairo_restore(cairo);

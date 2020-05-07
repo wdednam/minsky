@@ -58,51 +58,6 @@ void CSVDialog::reportFromFile(const std::string& input, const std::string& outp
   reportFromCSVFile(is,of,spec);
 }
 
-//namespace    // Adapted from https://pastebin.com/DiUME7Z1. Fails with "operator << not defined for Pc", which google search returns nothing on.
-//{
-// //** Decompress an STL string using zlib and return the original data. */
-//  std::string decompressString(const std::string& str)
-//  {
-//      z_stream zs;                        // z_stream is zlib's control structure
-//      memset(&zs, 0, sizeof(zs));
-//   
-//      if (inflateInit(&zs) != Z_OK)
-//          throw(std::runtime_error("inflateInit failed while decompressing."));
-//   
-//      zs.next_in = (Bytef*)str.data();
-//      zs.avail_in = str.size();
-//   
-//      int ret=0;
-//      char outbuffer[3276800];
-//      std::string outstring;
-//   
-//      // get the decompressed bytes blockwise using repeated calls to inflate
-//      do {
-//          zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
-//          zs.avail_out = sizeof(outbuffer);
-//   
-//          ret = inflate(&zs, 0);
-//   
-//          if (outstring.size() < zs.total_out) {
-//              outstring.append(outbuffer,
-//                  zs.total_out - outstring.size());
-//          }
-//   
-//      } while (ret == Z_OK);
-//   
-//      inflateEnd(&zs);
-//   
-//      if (ret != Z_STREAM_END) {          // an error occurred that was not EOF
-//          std::ostringstream oss;
-//          oss << "Exception during zlib decompression: (" << ret << ") "
-//              << zs.msg;
-//          throw(std::runtime_error(oss.str()));
-//      }
-//   
-//      return outstring;
-//  }
-//}
-
 // Return file name after downloading a CSV file from the web.
 std::string CSVDialog::loadWebFile(const std::string& url)
 {
@@ -159,7 +114,7 @@ std::string CSVDialog::loadWebFile(const std::string& url)
   stream.handshake(ssl::stream_base::client);             
 
   // Set up an HTTP GET request message
-  http::request<http::string_body> req;
+  http::request<http::dynamic_body> req;
   req.method(http::verb::get);     
   req.target(target.str());     
   req.version(10);
@@ -186,21 +141,25 @@ std::string CSVDialog::loadWebFile(const std::string& url)
   const std::string tempStr    = temp.string();
           
   std::ofstream outFile(tempStr, std::ofstream::binary);  
-   
+  
+  // Handle zipped CSV files. Not working... 
   if (res[http::field::content_type]=="application/zip") {
 	   
+	  string responseBody=boost::beast::buffers_to_string(res.body().data());
 	  
-	   std::string responseBody = boost::beast::buffers_to_string(res.body().data());  //res.body();
-	   
-	   InflateFileZStream zs(&responseBody);
-	       	   
-       zs.inflate();
-         
-       //outFile << decompressString(responseBody).c_str();        
-       
-       outFile << zs.output.data();  // Fails with compression failure: invalid stored block lengths, as if all zipped CSV files are corrupt, which I doubt: https://stackoverflow.com/questions/10577045/what-might-explain-an-invalid-stored-block-lengths-error                     
+	  //outFile << responseBody;  downloads file correctly as zip file. the problem is definitely in z_stream implementation.
     
-  }  else outFile << boost::beast::buffers_to_string(res.body().data());  //res.body();
+       vector<unsigned char> zbuf(responseBody.begin(),responseBody.end());
+       //vector<char> zbuf(responseBody.length()+1,0);                   // None work. See answers https://stackoverflow.com/questions/7378087/how-to-efficiently-copy-a-stdstring-into-a-vector 
+       //std::strncpy(&zbuf[0],&responseBody[0],responseBody.length());
+	   	   
+	   InflateFileZStream zs(zbuf);
+	       	   
+       zs.inflate(); 
+       
+       outFile << zs.output;  // Fails with compression failure: invalid stored block lengths, as if all zipped CSV files were corrupt, which I doubt: https://stackoverflow.com/questions/10577045/what-might-explain-an-invalid-stored-block-lengths-error                     
+    
+  }  else outFile << boost::beast::buffers_to_string(res.body().data());
        
   // Gracefully close the socket
   boost::system::error_code ec;

@@ -100,12 +100,12 @@ namespace minsky
       
     template <class I>
     InflateFileZStream(const I& input):
-      ZStream((Bytef*)input, input->size(), 0,0),
-      inputData((Bytef*)input),inputSize(input->size())
+      ZStream((Bytef*)input.data(), input.size(), 0,0),
+      inputData((Bytef*)input.data()),inputSize(input.size())
     {
       next_out=(Bytef*)output.data();
       avail_out=output.size();
-      if (inflateInit2(this,-MAX_WBITS)!=Z_OK) throwError();  //none n of MAX_WBITS + 16, MAX_WBITS or -MAX_WBITS works. see https://stackoverflow.com/questions/1838699/how-can-i-decompress-a-gzip-stream-with-zlib
+      if (inflateInit2(this,-MAX_WBITS)!=Z_OK) throwError();  //none of MAX_WBITS + 16, MAX_WBITS or -MAX_WBITS works. see https://stackoverflow.com/questions/1838699/how-can-i-decompress-a-gzip-stream-with-zlib
     }
     ~InflateFileZStream() {inflateEnd(this);}
 

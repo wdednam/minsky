@@ -904,14 +904,41 @@ namespace minsky
     cairo_move_to(cairo,-4,2);
     cairo_show_text(cairo,"e");
   }
-   
+  
     template <> void Operation<OperationType::pi>::iconDraw(cairo_t* cairo) const
   {
 	float sf = scaleFactor();  
     cairo_scale(cairo,sf,sf);		  
     cairo_move_to(cairo,-4,2);
     cairo_show_text(cairo,"π");
-  }    
+  }           
+   
+    template <> void Operation<OperationType::zero>::iconDraw(cairo_t* cairo) const
+  {
+	float sf = scaleFactor();  
+    cairo_scale(cairo,sf,sf);		  
+    cairo_move_to(cairo,-4,2);
+    cairo_show_text(cairo,"0");
+  }
+  
+  template <> void Operation<OperationType::one>::iconDraw(cairo_t* cairo) const
+  {
+	float sf = scaleFactor();  
+    cairo_scale(cairo,sf,sf);		  
+    cairo_move_to(cairo,-4,2);
+    cairo_show_text(cairo,"1");
+  }
+  
+  template <> void Operation<OperationType::inf>::iconDraw(cairo_t* cairo) const
+  {
+	float sf = scaleFactor();  
+    cairo_scale(cairo,sf,sf);		  
+    cairo_move_to(cairo,-4,-5);
+    Pango pango(cairo);
+    pango.setFontSize(7*sf*zoomFactor());
+    pango.setMarkup("∞");
+    pango.show();    
+  }   
 
   template <> void Operation<OperationType::copy>::iconDraw(cairo_t* cairo) const
   {

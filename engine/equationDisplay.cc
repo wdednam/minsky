@@ -346,6 +346,15 @@ namespace MathDAG
   void OperationDAG<OperationType::pi>::render(Surface& surf) const 
   {print(surf.cairo(),"<i>π</i>",Anchor::nw);}    
   template <>
+  void OperationDAG<OperationType::zero>::render(Surface& surf) const 
+  {print(surf.cairo(),"<i>0</i>",Anchor::nw);}
+  template <>
+  void OperationDAG<OperationType::one>::render(Surface& surf) const 
+  {print(surf.cairo(),"<i>1</i>",Anchor::nw);}    
+  template <>
+  void OperationDAG<OperationType::inf>::render(Surface& surf) const 
+  {print(surf.cairo(),"<i>∞</i>",Anchor::nw);}       
+  template <>
   void OperationDAG<OperationType::copy>::render(Surface& surf) const
   {print(surf.cairo(),"=",Anchor::nw);} 
   template <>

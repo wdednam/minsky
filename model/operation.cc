@@ -752,8 +752,12 @@ namespace minsky
   string OperationBase::portValues() const
   {
     string r="equations not yet constructed, please reset";
-    if (ports.size()>0)
-      r="[out]="+to_string(ports[0]->value());
+    if (ports.size()>0 && ports[0]->value()==fabs(numeric_limits<double>::max())) // format outport value for infty operator. for ticket 1188 and feature 50.
+    {
+      std::stringstream ss;
+      ss <<"[out]="<<ports[0]->value();		
+      r=ss.str();
+    } else r="[out]="+to_string(ports[0]->value());
     if (ports.size()>1)
       r+=" [in1]="+ to_string(ports[1]->value());
     if (ports.size()>2)
@@ -933,9 +937,9 @@ namespace minsky
   {
 	float sf = scaleFactor();  
     cairo_scale(cairo,sf,sf);		  
-    cairo_move_to(cairo,-4,-5);
+    cairo_move_to(cairo,-4,-10);
     Pango pango(cairo);
-    pango.setFontSize(7*sf*zoomFactor());
+    pango.setFontSize(9*sf*zoomFactor());
     pango.setMarkup("∞");
     pango.show();    
   }   

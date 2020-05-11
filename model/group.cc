@@ -239,9 +239,7 @@ namespace minsky
             }
         v->init(init); //NB calls ensureValueExists()
       }
-     if (auto g=dynamic_cast<GodleyIcon*>(it.get()))
-       g->update(); // handle scoping of contained variables
-     
+
     // move wire to highest common group
     for (auto& p: it->ports)
       {
@@ -268,7 +266,8 @@ namespace minsky
             intOp->intVar->controller=it;
           else
             intOp->intVar->controller.reset();
-        }
+        }       
+        
     items.push_back(it);
     return items.back();
   }
@@ -411,7 +410,7 @@ namespace minsky
       return IORegion::output;
     else if (-w+left*edgeScale()>dx)
       return IORegion::input;
-    else if (-h+10*z>dy || h-10*z<dy)     
+    else if ((fabs(-h-10*z)>fabs(dy) && dy<0) || (h+10*z>dy && dy>0))     
       return IORegion::topBottom;  
     else     
       return IORegion::none;

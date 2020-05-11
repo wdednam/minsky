@@ -37,13 +37,12 @@ namespace minsky
   // Godley variables broken out in a separate structure, as copying is non-default
   struct GodleyVars
   {
-  public:	    
-	  
+  public:	      
     GodleyVars() {}
-    //virtual ~GodleyVars() {}
+    virtual ~GodleyVars() {}
     // copy operations not deleted to allow ItemT<GodleyIcon> to compile
     GodleyVars(const GodleyVars& x) {}
-    GodleyVars& operator=(const GodleyVars&) {}
+    GodleyVars& operator=(const GodleyVars&) {return *this;}
 
     virtual void update() = 0;     
             
@@ -130,7 +129,6 @@ namespace minsky
     
     GodleyIcon* clone() const override {
       auto r=new GodleyIcon(*this);
-      //r->group.reset();
       r->update();
       return r;
     }    

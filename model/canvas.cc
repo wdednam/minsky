@@ -657,7 +657,9 @@ namespace minsky
         if (auto intop=dynamic_cast<IntOp*>(item.get()))
           newItem.reset(intop->intVar->clone());
         else if (auto group=dynamic_cast<Group*>(item.get()))
-          newItem=group->copy();
+          newItem=group->copy();         
+        if (auto godley=dynamic_cast<GodleyIcon*>(item.get()))
+          newItem.reset(godley->clone());          
         else
           {
             newItem.reset(item->clone());

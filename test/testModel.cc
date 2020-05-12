@@ -438,15 +438,15 @@ SUITE(Canvas)
     }
     
     TEST_FIXTURE(TestFixture,resizeItem)
-    {
-      cairo::Surface surf(cairo_recording_surface_create(CAIRO_CONTENT_COLOR,nullptr));
-      c->draw(surf.cairo());// reposition ports
-      float xc=c->x()+0.5*c->width(), yc=c->y()+0.5*c->height();      
+    { 
+      float w=c->group.lock()? 0.5*c->width():c->iWidth(),h=c->group.lock()? 0.5*c->height():c->iHeight();
+      float xc=c->x()+w, yc=c->y()+h;      
       CHECK(c->clickType(xc,yc) == ClickType::onResize); 
       canvas.mouseDown(xc,yc);
       canvas.mouseUp(800,1000);
-      CHECK_EQUAL(1062,c->x()+0.5*c->width());
-      CHECK_EQUAL(1460,c->y()+0.5*c->height());
+      // Default item resize does not work properly due to Pango width and height members. See ticket 94
+      CHECK_CLOSE(800-xc,c->group.lock()? 0.5*c->width():c->iWidth(),4*portRadiusMult); //ClickType::onResize covers 2*portRadiusMult at each corner, so uncertainty in new width/height up to two times that
+      CHECK_CLOSE(1000-yc,c->group.lock()? 0.5*c->height():c->iHeight(),4*portRadiusMult);
     }    
 
     TEST_FIXTURE(TestFixture,onSlider)
@@ -613,8 +613,8 @@ SUITE(Canvas)
         CHECK_EQUAL(0,g->inVariables.size());
 
         // move b into group. 
-        mouseDown(b->x()+5,b->y()+5);   
-        mouseUp(g->x()+5,g->y()+5);  // small offset added because resize handles grabbed otherwise, for feature 94. don't understand why?
+        mouseDown(b->x(),b->y());   
+        mouseUp(g->x(),g->y());  // small offset added because resize handles grabbed otherwise, for feature 94. don't understand why?
         CHECK(b->group.lock()==g);
         CHECK_EQUAL(2,model->numWires());
         CHECK_EQUAL(3,model->numItems());
@@ -623,7 +623,7 @@ SUITE(Canvas)
         // move b out of group
         item=g;
         zoomToDisplay();
-        mouseDown(b->x()+5,b->y()+5);  
+        mouseDown(b->x(),b->y());  
         mouseUp(200,200);
         CHECK(b->group.lock()==model);
         CHECK_EQUAL(1,model->numWires());

@@ -33,22 +33,8 @@
 namespace minsky
 {
   class GodleyTableEditor;
-  
-  // Godley variables broken out in a separate structure, as copying is non-default
-  struct GodleyVars
-  {
-  public:	      
-    GodleyVars() {}
-    virtual ~GodleyVars() {}
-    // copy operations not deleted to allow ItemT<GodleyIcon> to compile
-    GodleyVars(const GodleyVars& x) {}
-    GodleyVars& operator=(const GodleyVars&) {return *this;}
 
-    virtual void update() = 0;     
-            
-  };	  
-
-  class GodleyIcon: public ItemT<GodleyIcon>, public GodleyVars
+  class GodleyIcon: public ItemT<GodleyIcon>
   {
     /// for placement of bank icon within complex
     float flowMargin=0, stockMargin=0, iconWidth=100, iconHeight=100;
@@ -76,7 +62,7 @@ namespace minsky
     }
   public:
     static SVGRenderer svgRenderer;
-    
+
     ~GodleyIcon() {removeControlledItems();}
 
     /// indicate whether icon is in editor mode or icon mode
@@ -125,13 +111,14 @@ namespace minsky
     const Variables& stockVars() const {return m_stockVars;}
     GodleyTable table;
     /// updates the variable lists with the Godley table
-    void update() override;
+    void update();
     
     GodleyIcon* clone() const override {
       auto r=new GodleyIcon(*this);
+      r->group.reset();
       r->update();
       return r;
-    }    
+    }        
 
     /// returns the variable if point (x,y) is within a
     /// variable icon, null otherwise, indicating that the Godley table
@@ -163,20 +150,6 @@ namespace minsky
     void positionVariables() const;
     Variables m_flowVars, m_stockVars;
   };
-}
-
-#ifdef CLASSDESC
-// omit these, because weak/shared pointers cause problems, and its
-// not needed anyway
-#pragma omit pack minsky::GodleyIcon
-#pragma omit unpack minsky::GodleyIcon
-#endif
-namespace classdesc_access
-{
-  template <> struct access_pack<minsky::GodleyIcon>: 
-    public classdesc::NullDescriptor<classdesc::pack_t> {};
-  template <> struct access_unpack<minsky::GodleyIcon>: 
-    public classdesc::NullDescriptor<classdesc::unpack_t> {};
 }
 
 #include "godleyIcon.cd"

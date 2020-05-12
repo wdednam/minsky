@@ -81,11 +81,11 @@ namespace minsky
             break;
           case ClickType::onResize:
             lassoMode=LassoMode::itemResize;
-            // set x0,y0 to the opposite corner of (x,y)
+            // set x0,y0 to the opposite corner of (x,y). groups and default item are resized differently.
             lasso.x0 = itemFocus->x() +
-              0.5*itemFocus->width()*z * (x>itemFocus->x()? -1:1);
+              0.5*(itemFocus->group.lock()? itemFocus->width():itemFocus->iWidth())*z * (x>itemFocus->x()? -1:1);
             lasso.y0 = itemFocus->y() +
-              0.5*itemFocus->height()*z * (y>itemFocus->y()? -1:1);
+              0.5*(itemFocus->group.lock()? itemFocus->height():itemFocus->iHeight())*z * (y>itemFocus->y()? -1:1);
             lasso.x1=x;
             lasso.y1=y;
             item=itemFocus;
@@ -168,26 +168,17 @@ namespace minsky
         if (item)
           {
             // resize both operator and variable in coupled integral variable. for feature 94
-            if (auto i=dynamic_cast<IntOp*>(item.get())) {
-               if (i->coupled()) {
-				  i->resize(lasso); 
-				   
-				  float invZ=1.0/i->zoomFactor(); 
-				  
-                  float oldIWidth=i->iWidth();
-                  
-                  i->intVar->iWidth(std::abs(lasso.x1-lasso.x0)*invZ);
-                  i->intVar->iWidth(i->intVar->iWidth() * i->iWidth()/oldIWidth);
-             
-                  float oldIHeight=i->iHeight();
-                  
-                  i->intVar->iHeight(std::abs(lasso.y1-lasso.y0)*invZ);
-                  i->intVar->iHeight(i->intVar->iHeight() * i->iHeight()/oldIHeight);
-                  
-                  item->bb.update(*item);
-                  
-			  } else item->resize(lasso);
-			} else item->resize(lasso);  
+            //if (auto i=dynamic_cast<IntOp*>(item.get())) {
+            //   if (i->coupled()) {
+            //      float invZ=1.0/item->zoomFactor();
+            //      item->moveTo(0.5*(lasso.x0+lasso.x1), 0.5*(lasso.y0+lasso.y1));
+            //      i->intVar->iWidth(std::abs(lasso.x1-lasso.x0)*invZ);
+            //      i->intVar->iHeight(std::abs(lasso.y1-lasso.y0)*invZ);
+            //      item->bb.update(*item);
+			//  }
+			//  i->resize(lasso);	  
+			//} else item->resize(lasso);
+			item->resize(lasso);         
             requestRedraw();
           }
         break;
@@ -657,11 +648,9 @@ namespace minsky
         if (auto intop=dynamic_cast<IntOp*>(item.get()))
           newItem.reset(intop->intVar->clone());
         else if (auto group=dynamic_cast<Group*>(item.get()))
-          newItem=group->copy();         
-        if (auto godley=dynamic_cast<GodleyIcon*>(item.get()))
-          newItem.reset(godley->clone());          
+          newItem=group->copy();
         else
-          {
+          {    			    
             newItem.reset(item->clone());
             // if copied from a Godley table or I/O var, set orientation to default
             if (auto v=item->variableCast())

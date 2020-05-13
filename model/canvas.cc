@@ -167,17 +167,6 @@ namespace minsky
       case LassoMode::itemResize:
         if (item)
           {
-            // resize both operator and variable in coupled integral variable. for feature 94
-            //if (auto i=dynamic_cast<IntOp*>(item.get())) {
-            //   if (i->coupled()) {
-            //      float invZ=1.0/item->zoomFactor();
-            //      item->moveTo(0.5*(lasso.x0+lasso.x1), 0.5*(lasso.y0+lasso.y1));
-            //      i->intVar->iWidth(std::abs(lasso.x1-lasso.x0)*invZ);
-            //      i->intVar->iHeight(std::abs(lasso.y1-lasso.y0)*invZ);
-            //      item->bb.update(*item);
-			//  }
-			//  i->resize(lasso);	  
-			//} else item->resize(lasso);
 			item->resize(lasso);         
             requestRedraw();
           }
@@ -651,7 +640,10 @@ namespace minsky
           newItem=group->copy();
         else
           {    			    
-            newItem.reset(item->clone());
+			//  Use GodleyIcon's native clone() method. for tickets 1180/1183  
+            if (auto godley=dynamic_cast<GodleyIcon*>(item.get()))
+              newItem.reset(godley->clone());      			    
+            else newItem.reset(item->clone());
             // if copied from a Godley table or I/O var, set orientation to default
             if (auto v=item->variableCast())
               if (v->controller.lock())

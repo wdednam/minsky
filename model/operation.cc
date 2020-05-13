@@ -144,14 +144,14 @@ namespace minsky
     double z=zoomFactor();
     float dx=xx-x(), dy=yy-y(), w=iWidth()*z, h=iHeight()*z;
     // make sure resize handles can be grabbed at corners of coupled integral variable. for feature 94.
-    //if (const IntOp* i=dynamic_cast<const IntOp*>(this))
-    //  if (i->coupled()) {    
-	//	  float dl=xx-i->x(), dr=xx-i->intVar->x(), wl=w, wr=i->intVar->iWidth()*z;
-    //      if (((fabs(fabs(dl)-wl) < portRadiusMult*z) || (fabs(fabs(dr)-wr) < portRadiusMult*z)) &&
-    //      fabs(fabs(dy)-h) < portRadiusMult*z &&
-    //      (fabs(hypot(dl,dy)-hypot(wl,h)) < portRadiusMult*z) || (fabs(hypot(dr,dy)-hypot(wr,h)) < portRadiusMult*z))
-    //          return ClickType::onResize;		  
-	//  }
+    if (const IntOp* i=dynamic_cast<const IntOp*>(this))
+      if (i->coupled()) {    
+		  float dl=xx-i->x(), dr=xx-i->intVar->x(), wl=i->iWidth()*z, wr=i->intVar->iWidth()*z+i->intVarOffset;
+          if (((fabs(fabs(dl)-wl) < 0.5*portRadius*z) || (fabs(fabs(dr)-wr) < 0.5*portRadius*z)) &&
+          fabs(fabs(dy)-h) < 0.5*portRadius*z &&
+          (fabs(hypot(dl,dy)-hypot(wl,h)) < 0.5*portRadius*z) || (fabs(hypot(dr,dy)-hypot(wr,h)) < 0.5*portRadius*z))
+              return ClickType::onResize;		  
+	  }
     if (fabs(fabs(dx)-w) < portRadius*z &&
         fabs(fabs(dy)-h) < portRadius*z &&
         fabs(hypot(dx,dy)-hypot(w,h)) < portRadius*z)
@@ -638,7 +638,7 @@ namespace minsky
     r.normalise();
     return r;
   }
-  
+    
 namespace
 {
 	
@@ -664,7 +664,7 @@ namespace
     auto z=zoomFactor();
     double xl=iWidth()*z, xr=xl, y=iHeight()*z, sf=portRadiusMult*z; 
     // make sure resize handles appear at corners of coupled integral variable. for feature 94.
-    if (coupled()) xr+=2.0*intVar->iWidth()*z;     
+    if (coupled()) xr=xl+intVarOffset+2.0*intVar->iWidth()*z;     
     drawResizeHandle(cairo,xr,y,sf);
     cairo_rotate(cairo,0.5*M_PI);
     drawResizeHandle(cairo,y,xl,sf);
@@ -808,8 +808,8 @@ namespace
       {
         drawPorts(cairo);
         displayTooltip(cairo,tooltip);
-        if (onResizeHandles) drawResizeHandles(cairo);
       }
+    if (onResizeHandles) drawResizeHandles(cairo);  
 	
     cairo_new_path(cairo);
     clipPath.appendToCurrent(cairo);
@@ -817,36 +817,38 @@ namespace
     if (selected) drawSelected(cairo);           
   }
   
-  //void IntOp::resize(const LassoBox& b)
-  //{
-  //  float invZ=1.0/zoomFactor();
-  //  this->moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
-  //  intVar->iWidth(std::abs(b.x1-b.x0)*invZ);
-  //  intVar->iHeight(std::abs(b.y1-b.y0)*invZ);
-  //  bb.update(*this);	  
-  //}
- 
-  ClickType::Type IntOp::clickType(float xx, float yy)
+  void IntOp::resize(const LassoBox& b)
   {
-    double fm=std::fmod(rotation(),360);
-    bool notflipped=(fm>-90 && fm<90) || fm>270 || fm<-270;
-    Rotate r(rotation()+(notflipped? 0: 180),0,0); // rotate into variable's frame of reference
-    double z=zoomFactor();
-    float dx=xx-x(), dy=yy-y(), w=iWidth()*z, h=iHeight()*z;
-    // make sure resize handles can be grabbed at corners of coupled integral variable. for feature 94.
-    if (coupled()) {    
-		  float dl=xx-x(), dr=xx-intVar->x(), wl=w, wr=intVar->iWidth()*z;
-          if (((fabs(fabs(dl)-wl) < portRadiusMult*z) || (fabs(fabs(dr)-wr) < portRadiusMult*z)) &&
-          fabs(fabs(dy)-h) < portRadiusMult*z &&
-          (fabs(hypot(dl,dy)-hypot(wl,h)) < portRadiusMult*z) || (fabs(hypot(dr,dy)-hypot(wr,h)) < portRadiusMult*z))
-              return ClickType::onResize;		  
-	  }
-    else if (fabs(fabs(dx)-w) < portRadius*z &&
-        fabs(fabs(dy)-h) < portRadius*z &&
-        fabs(hypot(dx,dy)-hypot(w,h)) < portRadius*z)
-      return ClickType::onResize;  
-    return Item::clickType(xx,yy);
+    float invZ=1.0/zoomFactor();
+    this->moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
+    iWidth(0.5*std::abs(b.x1-b.x0)*invZ);
+    iHeight(0.5*std::abs(b.y1-b.y0)*invZ);
+    intVar->iWidth(0.5*std::abs(b.x1-b.x0)*invZ);
+    intVar->iHeight(0.5*std::abs(b.y1-b.y0)*invZ);
+    bb.update(*this);	  
   }
+ 
+  //ClickType::Type IntOp::clickType(float xx, float yy)
+  //{
+  //  double fm=std::fmod(rotation(),360);
+  //  bool notflipped=(fm>-90 && fm<90) || fm>270 || fm<-270;
+  //  Rotate r(rotation()+(notflipped? 0: 180),0,0); // rotate into variable's frame of reference
+  //  double z=zoomFactor();
+  //  float dx=xx-x(), dy=yy-y(), w=iWidth()*z, h=iHeight()*z;
+  //  // make sure resize handles can be grabbed at corners of coupled integral variable. for feature 94.
+  //  if (coupled()) {    
+  //   	  float dl=xx-x(), dr=xx-intVar->x(), wl=w, wr=intVar->iWidth()*z;
+  //        if (((fabs(fabs(dl)-wl) < portRadiusMult*z) || (fabs(fabs(dr)-wr) < portRadiusMult*z)) &&
+  //        fabs(fabs(dy)-h) < portRadiusMult*z &&
+  //        (fabs(hypot(dl,dy)-hypot(wl,h)) < portRadiusMult*z) || (fabs(hypot(dr,dy)-hypot(wr,h)) < portRadiusMult*z))
+  //            return ClickType::onResize;		  
+  //   }
+  //  else if (fabs(fabs(dx)-w) < portRadius*z &&
+  //      fabs(fabs(dy)-h) < portRadius*z &&
+  //      fabs(hypot(dx,dy)-hypot(w,h)) < portRadius*z)
+  //    return ClickType::onResize;  
+  //  return Item::clickType(xx,yy);
+  //}
   
   //float IntOp::scaleFactor() const
   //{
@@ -1221,13 +1223,14 @@ namespace
   }
 
   template <> void Operation<OperationType::integrate>::iconDraw(cairo_t* cairo) const
-  {
-    double sf = scaleFactor();  
-    cairo_scale(cairo,sf,sf);		  
-    cairo_move_to(cairo,-7,4.5);
-    cairo_show_text(cairo,"\xE2\x88\xAB");
-    cairo_show_text(cairo,"dt");
-  }
+  {/* moved to IntOp::draw() but needs to be here, and is actually called */}
+  //{
+  //  double sf = scaleFactor();  
+  //  cairo_scale(cairo,sf,sf);		  
+  //  cairo_move_to(cairo,-7,4.5);
+  //  cairo_show_text(cairo,"\xE2\x88\xAB");
+  //  cairo_show_text(cairo,"dt");
+  //}
 
   template <> void Operation<OperationType::differentiate>::iconDraw(cairo_t* cairo) const
   { 

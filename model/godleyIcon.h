@@ -62,7 +62,7 @@ namespace minsky
     }
   public:
     static SVGRenderer svgRenderer;
-
+    
     ~GodleyIcon() {removeControlledItems();}
 
     /// indicate whether icon is in editor mode or icon mode
@@ -118,7 +118,7 @@ namespace minsky
       r->group.reset();
       r->update();
       return r;
-    }        
+    }    
 
     /// returns the variable if point (x,y) is within a
     /// variable icon, null otherwise, indicating that the Godley table
@@ -150,6 +150,20 @@ namespace minsky
     void positionVariables() const;
     Variables m_flowVars, m_stockVars;
   };
+}
+
+#ifdef CLASSDESC
+// omit these, because weak/shared pointers cause problems, and its
+// not needed anyway
+#pragma omit pack minsky::GodleyIcon
+#pragma omit unpack minsky::GodleyIcon
+#endif
+namespace classdesc_access
+{
+  template <> struct access_pack<minsky::GodleyIcon>: 
+    public classdesc::NullDescriptor<classdesc::pack_t> {};
+  template <> struct access_unpack<minsky::GodleyIcon>: 
+    public classdesc::NullDescriptor<classdesc::unpack_t> {};
 }
 
 #include "godleyIcon.cd"

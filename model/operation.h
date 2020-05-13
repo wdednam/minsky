@@ -188,12 +188,9 @@ namespace minsky
     
     void drawResizeHandles(cairo_t* cairo) const override;
     void draw(cairo_t*) const override;
-    //void resize(const LassoBox& b) override;
-    ClickType::Type clickType(float x, float y) override; 
-    //float scaleFactor() const override;     
+    void resize(const LassoBox& b) override;   
 
     void removeControlledItems() const override;
-    //float x() const override;
 
    /// return reference to integration variable
     VariablePtr intVar; 

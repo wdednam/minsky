@@ -99,12 +99,13 @@ proc CSVImportDialog {url} {
     
     if [string length $url] {
 	   set filename [csvDialog.loadWebFile $url]
+	   #set filename [file tail $url]
 	} else {
        set filename [tk_getOpenFile -filetypes {{CSV {.csv}} {All {.*}}} -initialdir $workDir]
     }
     if [string length $filename] {
         set workDir [file dirname $filename]
-        csvDialog.loadFile $filename
+		csvDialog.loadFile $filename
         set csvParms(filename) $filename
         set csvParms(separator) [csvDialog.spec.separator]
         set csvParms(decSeparator) [csvDialog.spec.decSeparator]
@@ -138,7 +139,8 @@ proc csvImportDialogOK {url} {
         cancelWin .wiring.csvImport
         # Delete temporary file created by web import of CSV data
         if [string length $url] {
-	        file delete $filename      
+	        #file delete $filename      
+	        csvDialog.deleteFile $filename
         }
     }
 }

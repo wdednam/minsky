@@ -42,6 +42,8 @@
 #include <string>                                                                
 #include <stdexcept>                                                                                                                         
 #include <sstream>      
+#include <fstream>
+#include <cstdio>
 
 using namespace std;
 using namespace minsky;
@@ -56,6 +58,19 @@ void CSVDialog::reportFromFile(const std::string& input, const std::string& outp
   ifstream is(input);
   ofstream of(output);
   reportFromCSVFile(is,of,spec);
+}
+
+namespace
+{
+   int octal_string_to_int(char *current_char, unsigned int size){
+       unsigned int output = 0;
+       while(size > 0){
+           output = output * 8 + *current_char - '0';
+           current_char++;
+           size--;
+       }
+       return output;
+   }	
 }
 
 // Return file name after downloading a CSV file from the web.
@@ -144,22 +159,72 @@ std::string CSVDialog::loadWebFile(const std::string& url)
   
   // Handle zipped CSV files. Not working... 
   if (res[http::field::content_type]=="application/zip") {
-	   
-	  string responseBody=boost::beast::buffers_to_string(res.body().data());
 	  
+	  
+	  string responseBody = boost::beast::buffers_to_string(res.body().data());
+	  string buf = boost::beast::buffers_to_string(buffer.data()); 
+	  
+    switch(buf[156]){
+       case '0': // intentionally dropping through
+       case '\0':
+           // normal file
+           std::cout<< "normal file" << endl;
+           break;
+       case '1':
+           // hard link
+           std::cout<< "hard link" << endl;
+           break;
+       case '2':
+           // symbolic link
+           std::cout<< "symbolic link" << endl;
+           break;
+       case '3':
+           // device file/special file
+           std::cout<< "device file/special file" << endl;
+           break;
+       case '4':
+           // block device
+           std::cout<< "block device" << endl;
+           break;
+       case '5':
+           // directory
+           std::cout<< "directory" << endl;
+           break;
+       case '6':
+           // named pipe
+           std::cout<< "named pipe" << endl;
+           break;
+       }
 	  //outFile << responseBody;  downloads file correctly as zip file. the problem is definitely in z_stream implementation.
+	  
+	   // in one function
+       //int size = octal_string_to_int(&buf[124], 11);
+       
+       // Get to the next block after the header ends
+       //int location=0;
+       //location += 512;
+       //char *file_contents = new char[size];
+       //memcpy(file_contents, &buf[location], size);
+       // Go to the next block by rounding up to 512
+       // This isn't necessarily the most efficient way to do this,
+       // but it's the most obvious.
+       //location += (int)ceil(size / 512.0);
     
-       vector<unsigned char> zbuf(responseBody.begin(),responseBody.end());
+    
+       //std::cout << buf << " " << endl; 
+       //std::cout << responseBody << endl;
+       //vector<unsigned char> zbuf(responseBody.begin(),responseBody.end());
+       //zbuf.insert(zbuf.end(), file_contents);
        //vector<char> zbuf(responseBody.length()+1,0);                   // None work. See answers https://stackoverflow.com/questions/7378087/how-to-efficiently-copy-a-stdstring-into-a-vector 
        //std::strncpy(&zbuf[0],&responseBody[0],responseBody.length());
 	   	   
-	   InflateFileZStream zs(zbuf);
-	       	   
-       zs.inflate(); 
-       
-       outFile << zs.output;  // Fails with compression failure: invalid stored block lengths, as if all zipped CSV files were corrupt, which I doubt: https://stackoverflow.com/questions/10577045/what-might-explain-an-invalid-stored-block-lengths-error                     
+	   //InflateFileZStream zs(zbuf);
+	   //    	   
+       //zs.inflate(); 
+       //
+       //std::cout << zs.output << endl;  // Fails with compression failure: invalid stored block lengths, as if all zipped CSV files were corrupt, which I doubt: https://stackoverflow.com/questions/10577045/what-might-explain-an-invalid-stored-block-lengths-error                                        
     
-  }  else outFile << boost::beast::buffers_to_string(res.body().data());
+  }  else outFile << boost::beast::buffers_to_string(res.body().data());  
        
   // Gracefully close the socket
   boost::system::error_code ec;
@@ -177,6 +242,12 @@ std::string CSVDialog::loadWebFile(const std::string& url)
       
   // Return the file name for loading the in csvimport.tcl 
   return tempStr;
+}
+
+void CSVDialog::deleteFile(const string& fname)
+{  
+  int status;	
+  status=std::remove(fname.c_str());
 }
 
 void CSVDialog::loadFile(const string& fname)

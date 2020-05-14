@@ -25,6 +25,7 @@
 #include "intrusiveMap.h"
 #include "classdesc_access.h"
 #include "SVGItem.h"
+#include "group.h"
 
 #include <map>
 #include <cairo.h>

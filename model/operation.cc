@@ -1224,13 +1224,6 @@ namespace
 
   template <> void Operation<OperationType::integrate>::iconDraw(cairo_t* cairo) const
   {/* moved to IntOp::draw() but needs to be here, and is actually called */}
-  //{
-  //  double sf = scaleFactor();  
-  //  cairo_scale(cairo,sf,sf);		  
-  //  cairo_move_to(cairo,-7,4.5);
-  //  cairo_show_text(cairo,"\xE2\x88\xAB");
-  //  cairo_show_text(cairo,"dt");
-  //}
 
   template <> void Operation<OperationType::differentiate>::iconDraw(cairo_t* cairo) const
   { 

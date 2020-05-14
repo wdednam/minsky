@@ -252,6 +252,8 @@ namespace minsky
 
     void makeVariablesConsistent();
 
+    void imposeDimensions();
+
     // runs over all ports and variables removing those not in use
     void garbageCollect();
 

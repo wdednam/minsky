@@ -613,8 +613,8 @@ SUITE(Canvas)
         CHECK_EQUAL(0,g->inVariables.size());
 
         // move b into group. 
-        mouseDown(b->x(),b->y());   
-        mouseUp(g->x(),g->y());  // small offset added because resize handles grabbed otherwise, for feature 94. don't understand why?
+        mouseDown(b->x()+5,b->y()+5);   
+        mouseUp(g->x()+5,g->y()+5);  // small offset added because resize handles grabbed otherwise, for feature 94. don't understand why?
         CHECK(b->group.lock()==g);
         CHECK_EQUAL(2,model->numWires());
         CHECK_EQUAL(3,model->numItems());
@@ -623,7 +623,7 @@ SUITE(Canvas)
         // move b out of group
         item=g;
         zoomToDisplay();
-        mouseDown(b->x(),b->y());  
+        mouseDown(b->x()+5,b->y()+5);  
         mouseUp(200,200);
         CHECK(b->group.lock()==model);
         CHECK_EQUAL(1,model->numWires());

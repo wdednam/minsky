@@ -49,7 +49,6 @@ namespace minsky
     //void loadWebFile(const std::string& url);
     //void loadWebFile(int argc, char** argv);
     //void loadWebFile(const char *argv);
-    void deleteFile(const std::string& fname);
     void reportFromFile(const std::string& input, const std::string& output);
     void requestRedraw() {if (surface.get()) surface->requestRedraw();}
     /// return column mouse is over

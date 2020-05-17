@@ -60,18 +60,18 @@ void CSVDialog::reportFromFile(const std::string& input, const std::string& outp
   reportFromCSVFile(is,of,spec);
 }
 
-namespace
-{
-   int octal_string_to_int(char *current_char, unsigned int size){
-       unsigned int output = 0;
-       while(size > 0){
-           output = output * 8 + *current_char - '0';
-           current_char++;
-           size--;
-       }
-       return output;
-   }	
-}
+//namespace
+//{
+//   int octal_string_to_int(char *current_char, unsigned int size){
+//       unsigned int output = 0;
+//       while(size > 0){
+//           output = output * 8 + *current_char - '0';
+//           current_char++;
+//           size--;
+//       }
+//       return output;
+//   }	
+//}
 
 // Return file name after downloading a CSV file from the web.
 std::string CSVDialog::loadWebFile(const std::string& url)
@@ -242,12 +242,6 @@ std::string CSVDialog::loadWebFile(const std::string& url)
       
   // Return the file name for loading the in csvimport.tcl 
   return tempStr;
-}
-
-void CSVDialog::deleteFile(const string& fname)
-{  
-  int status;	
-  status=std::remove(fname.c_str());
 }
 
 void CSVDialog::loadFile(const string& fname)

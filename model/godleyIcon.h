@@ -116,8 +116,7 @@ namespace minsky
     
     GodleyIcon* clone() const override {
       auto r=new GodleyIcon(*this);  
-	  r->update();
-	  if (group.lock()) group.lock().reset();    	  	  
+	  r->update();	  	  
       return r;
     }      
 

@@ -253,7 +253,8 @@ namespace minsky
 #else
       try
         {
-          return (tclcmd()<<"clipboard get -type UTF8_STRING\n").result;
+          //return (tclcmd()<<"clipboard get -type UTF8_STRING\n").result;
+          return (tclcmd()<<"selection get -selection CLIPBOARD -type UTF8_STRING\n").result;
         }
       catch (...)
         {

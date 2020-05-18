@@ -115,15 +115,9 @@ namespace minsky
     void update();
     
     GodleyIcon* clone() const override {
-      auto r=new GodleyIcon(*this);
-      // create a dummy group for the cloned Godley icon to live in while the update takes place. for tickets 1180/1183. 
-      if (auto g=r->group.lock())
-      {	  
-	   auto dummy=make_shared<Group>();
-	   r->update();
-	   dummy.reset(); 
-	  }
-	  else r->update();
+      auto r=new GodleyIcon(*this);  
+	  r->update();
+	  if (group.lock()) group.lock().reset();    	  	  
       return r;
     }      
 

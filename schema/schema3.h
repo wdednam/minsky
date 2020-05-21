@@ -41,6 +41,7 @@ but any renamed attributes require bumping the schema number.
 #include <string>
 
 
+
 namespace schema3
 {
 

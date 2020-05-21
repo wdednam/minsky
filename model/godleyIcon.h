@@ -116,8 +116,9 @@ namespace minsky
     
     GodleyIcon* clone() const override {
       auto r=new GodleyIcon(*this);  
-	  r->update();	  	  
-      return r;
+	  r->update();       
+	  r->group.reset();
+	  return r;
     }      
 
     /// returns the variable if point (x,y) is within a
@@ -169,3 +170,4 @@ namespace classdesc_access
 #include "godleyIcon.cd"
 #include "godleyIcon.xcd"
 #endif
+

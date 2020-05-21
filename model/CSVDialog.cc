@@ -42,8 +42,6 @@
 #include <string>                                                                
 #include <stdexcept>                                                                                                                         
 #include <sstream>      
-#include <fstream>
-#include <cstdio>
 
 using namespace std;
 using namespace minsky;
@@ -157,6 +155,7 @@ std::string CSVDialog::loadWebFile(const std::string& url)
           
   std::ofstream outFile(tempStr, std::ofstream::binary);  
   
+<<<<<<< HEAD
   // Handle zipped CSV files. Not working... 
   if (res[http::field::content_type]=="application/zip") {
 	  
@@ -225,6 +224,9 @@ std::string CSVDialog::loadWebFile(const std::string& url)
        //std::cout << zs.output << endl;  // Fails with compression failure: invalid stored block lengths, as if all zipped CSV files were corrupt, which I doubt: https://stackoverflow.com/questions/10577045/what-might-explain-an-invalid-stored-block-lengths-error                                        
     
   }  else outFile << boost::beast::buffers_to_string(res.body().data());  
+=======
+  outFile << boost::beast::buffers_to_string(res.body().data());
+>>>>>>> fe5f4fd03b04a2fc1227264904e4d0c42dc717ed
        
   // Gracefully close the socket
   boost::system::error_code ec;

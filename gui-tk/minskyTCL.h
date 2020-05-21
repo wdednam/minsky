@@ -367,7 +367,7 @@ namespace minsky
       int status;	      
       status=std::remove(filename.c_str());
       if (status!=0) throw error("delete downloaded file manually from working drectory");      
-    }    
+    }     
     
     /// load from a file
     void load(const std::string& filename) {

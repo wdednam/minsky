@@ -89,6 +89,18 @@ namespace minsky
       return 1;
   }
   
+  float Item::setZoomFactor(const float& zf)
+  {
+	m_zf=zf;  
+    if (auto g=group.lock())
+    {
+	  g->setZoom(m_zf);	
+      return g->zoomFactor()*g->relZoom;
+	}
+    else
+      return m_zf;
+  }  
+  
   float Item::scaleFactor() const
   { 
     return m_sf;
@@ -111,7 +123,6 @@ namespace minsky
     auto g=group.lock();
     return !g || g->displayContents();
   }
-  
 
   void Item::moveTo(float x, float y)
   {

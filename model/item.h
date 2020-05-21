@@ -86,6 +86,7 @@ namespace minsky
     Item(): TCLAccessor<Item,double>("rotation",(Getter)&Item::rotation,(Setter)&Item::rotation) {}
     float m_x=0, m_y=0; ///< position in canvas, or within group
     float m_sf=1; ///< scale factor of item on canvas, or within group
+    float m_zf=1; ///< zoom factor of item on canvas, or within group
     mutable bool onResizeHandles=false; ///< set to true to indicate mouse is over resize handles
     /// owning group of this item.
     classdesc::Exclude<std::weak_ptr<Group>> group; 
@@ -145,6 +146,7 @@ namespace minsky
     virtual float x() const; 
     virtual float y() const;
     virtual float zoomFactor() const;
+    virtual float setZoomFactor(const float& zf);
     float width() const {if (!bb.valid()) bb.update(*this); return bb.width();}
     float height() const {if (!bb.valid()) bb.update(*this); return bb.height();}
     float left() const {return x()-0.5*zoomFactor()*width();}

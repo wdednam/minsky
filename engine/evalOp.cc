@@ -24,12 +24,15 @@
 #include "str.h"
 
 #include "minsky_epilogue.h"
-
+  
 #include <math.h>
+#include <boost/math/special_functions/gamma.hpp>
+#include <boost/math/special_functions/digamma.hpp>
 
 using boost::any;
 using boost::any_cast;
 using namespace boost::posix_time;
+using namespace boost::math; 
 
 namespace minsky
 {
@@ -488,6 +491,26 @@ namespace minsky
   template <>
   double EvalOp<OperationType::frac>::d2(double x1, double x2) const
   {return 0;}
+  
+  template <>
+  double EvalOp<OperationType::percent>::evaluate(double in1, double in2) const
+  {return 100.0*in1;}
+  template <>
+  double EvalOp<OperationType::percent>::d1(double x1, double x2) const
+  {return 100.0;}
+  template <>
+  double EvalOp<OperationType::percent>::d2(double x1, double x2) const
+  {return 0;}
+  
+  template <>
+  double EvalOp<OperationType::fact>::evaluate(double in1, double in2) const
+  {return boost::math::tgamma(in1+1);}
+  template <>
+  double EvalOp<OperationType::fact>::d1(double x1, double x2) const
+  {return boost::math::digamma(x1+1)*boost::math::tgamma(x1+1);}
+  template <>
+  double EvalOp<OperationType::fact>::d2(double x1, double x2) const
+  {return 0;}      
 
   template <>
   double EvalOp<OperationType::add>::evaluate(double in1, double in2) const

@@ -537,9 +537,32 @@ namespace minsky
     switch (classify(type()))
       {
       case function: case reduction: case scan: case tensor:
-        if (check && !ports[1]->units(check).empty())
-          throw_error("function input not dimensionless");
-        return {};
+        switch (type())
+          {
+		  case percent:
+		    {
+             if (check && !ports[1]->units(check).empty())
+               throw_error("function input not dimensionless");
+             //return ports[0]->units(check);  
+              
+             if (!ports[0]->wires().empty() && !ports[1]->wires().empty())  
+               {
+			 	 // set units of item attached to output port to "%".  
+                 if (auto vV=dynamic_cast<VariableValue*>(&ports[0]->wires()[0]->to()->item()))
+                   {
+			         vV->setUnits("%");
+                     return vV->units; 
+		           } 
+		       }  
+		     else return {};
+		    }
+          default:  
+           {
+             if (check && !ports[1]->units(check).empty())
+               throw_error("function input not dimensionless");
+             return {};
+		   }
+	   } 
       case constop:
         return {};        
       case binop:
@@ -1511,6 +1534,16 @@ namespace
     cairo_move_to(cairo,-9,3);
     cairo_show_text(cairo,"frac");
   }
+  template <> void Operation<OperationType::percent>::iconDraw(cairo_t* cairo) const
+  {
+    cairo_move_to(cairo,-6,3);
+    cairo_show_text(cairo,"%");
+  }
+  template <> void Operation<OperationType::fact>::iconDraw(cairo_t* cairo) const
+  {
+    cairo_move_to(cairo,-3,3);
+    cairo_show_text(cairo,"!");
+  }        
   template <> void Operation<OperationType::add>::iconDraw(cairo_t* cairo) const
   {
 	double sf = scaleFactor(); 	     

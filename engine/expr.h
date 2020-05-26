@@ -157,6 +157,18 @@ namespace MathDAG
     return Expr(x.cache,r);
   }
   
+  inline Expr gamma(const Expr& x) {
+    shared_ptr<OperationDAGBase> r(x.newNode(OperationType::gamma));
+    r->arguments[0].push_back(x);
+    return Expr(x.cache,r);
+  }
+  
+  inline Expr digamma(const Expr& x) {
+    shared_ptr<OperationDAGBase> r(x.newNode(OperationType::digamma));
+    r->arguments[0].push_back(x);
+    return Expr(x.cache,r);
+  }      
+  
   inline Expr fact(const Expr& x) {
     shared_ptr<OperationDAGBase> r(x.newNode(OperationType::fact));
     r->arguments[0].push_back(x);

@@ -1539,6 +1539,16 @@ namespace
     cairo_move_to(cairo,-6,3);
     cairo_show_text(cairo,"%");
   }
+  template <> void Operation<OperationType::gamma>::iconDraw(cairo_t* cairo) const
+  {
+    cairo_move_to(cairo,-6,3);
+    cairo_show_text(cairo,"Γ");
+  }      
+  template <> void Operation<OperationType::digamma>::iconDraw(cairo_t* cairo) const
+  {
+    cairo_move_to(cairo,-6,3);
+    cairo_show_text(cairo,"ψ");
+  }    
   template <> void Operation<OperationType::fact>::iconDraw(cairo_t* cairo) const
   {
     cairo_move_to(cairo,-3,3);

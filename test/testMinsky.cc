@@ -678,8 +678,6 @@ SUITE(Minsky)
           case OperationType::eq:
           case OperationType::floor:
           case OperationType::frac:
-          case OperationType::gamma:
-          case OperationType::digamma:
             continue;
           default:
             break;

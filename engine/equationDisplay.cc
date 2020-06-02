@@ -590,12 +590,25 @@ namespace MathDAG
   }
   
   template <>
-  void OperationDAG<OperationType::digamma>::render(Surface& surf) const
+  void OperationDAG<OperationType::polygamma>::render(Surface& surf) const 
   {
-    print(surf.cairo(),"ψ",Anchor::nw);
-    if (!arguments.empty() && !arguments[0].empty() && arguments[0][0])
-      {parenthesise(surf, [&](Surface& surf){arguments[0][0]->render(surf);});}
-  }  
+      print(surf.cairo(),"ψ",Anchor::nw);
+      if (!arguments.empty() && !arguments[0].empty() && arguments[0][0])	  
+      {
+        if (arguments.size()>1 && !arguments[1].empty() && arguments[1][0])
+          {  
+	        RecordingSurface base;
+            arguments[1][0]->render(base);
+            cairo_rel_move_to(surf.cairo(), 0, -0.5*base.height());
+            parenthesise(surf, [&](Surface& surf){arguments[1][0]->render(surf);});   			  
+            arguments[0][0]->render(base);
+            cairo_rel_move_to(surf.cairo(), 0, 0.5*base.height());                        
+            parenthesise(surf, [&](Surface& surf){arguments[0][0]->render(surf);});   			  
+          }
+         else
+            parenthesise(surf, [&](Surface& surf){arguments[0][0]->render(surf);});
+		}
+  }      
   
   template <>
   void OperationDAG<OperationType::fact>::render(Surface& s) const
@@ -619,7 +632,7 @@ namespace MathDAG
       cairo_move_to(s.cairo(),xx,yy-r.height()+oldFs);
       pango.show();
       cairo_move_to(s.cairo(),xx+pango.width(),yy);
-  }   
+  }  
 
   template <>
   void OperationDAG<OperationType::sum>::render(Surface& surf) const

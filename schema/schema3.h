@@ -76,7 +76,7 @@ namespace schema3
       x(it.m_x), y(it.m_y), zoomFactor(it.zoomFactor()), rotation(it.rotation()),
        scaleFactor(it.m_sf), ports(ports) {}
     ItemBase(const schema2::Item& it, const std::string& type="Item"):
-      Note(it), id(it.id), type(type), x(it.x), y(it.y), zoomFactor(it.zoomFactor),
+      Note(it), id(it.id), type(it.type), x(it.x), y(it.y), zoomFactor(it.zoomFactor),
       rotation(it.rotation), ports(it.ports) {}
   };
 

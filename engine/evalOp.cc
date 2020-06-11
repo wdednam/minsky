@@ -26,13 +26,15 @@
 #include "minsky_epilogue.h"
   
 #include <math.h>
+
+#undef Complex 
 #include <boost/math/special_functions/gamma.hpp>
-#include <boost/math/special_functions/digamma.hpp>
-#include <boost/math/special_functions/trigamma.hpp>
+#include <boost/math/special_functions/polygamma.hpp>
 
 using boost::any;
 using boost::any_cast;
 using namespace boost::posix_time;
+using namespace boost::math;
 
 namespace minsky
 {
@@ -247,10 +249,10 @@ namespace minsky
 
   template <> 
   double EvalOp<OperationType::sqrt>::evaluate(double in1, double in2) const
-  {return ::sqrt(in1);}
+  {return ::sqrt(fabs(in1));}
   template <>
   double EvalOp<OperationType::sqrt>::d1(double x1, double x2) const
-  {return 0.5/::sqrt(x1);}
+  {return 0.5/::sqrt(fabs(x1));}
   template <>
   double EvalOp<OperationType::sqrt>::d2(double x1, double x2) const
   {return 0;}

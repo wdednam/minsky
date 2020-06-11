@@ -588,7 +588,7 @@ void VariableBase::resize(const LassoBox& b)
 
 void VariablePtr::makeConsistentWithValue()
 {
-	retype(minsky::cminsky().variableValues[get()->valueId()].type());
+  retype(minsky::cminsky().variableValues[get()->valueId()]->type());
 }
 
 int VarConstant::nextId=0;

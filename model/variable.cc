@@ -88,9 +88,9 @@ ClickType::Type VariableBase::clickType(float xx, float yy)
         return ClickType::onSlider;
       double w=z*rv.width(), h=-hpy;
       if (rv.width()<iWidth()) w=z*iWidth();
-      if (fabs(fabs(dx)-w) < portRadius*z &&
-          fabs(fabs(dy)-h) < portRadius*z &&
-          fabs(hypot(dx,dy)-hypot(w,h)) < portRadius*z)
+      if (fabs(fabs(dx)-w) < 0.5*portRadius*z &&
+          fabs(fabs(dy)-h) < 0.5*portRadius*z &&
+          fabs(hypot(dx,dy)-hypot(w,h)) < 0.5*portRadius*z)
         return ClickType::onResize;
     }
   catch (...) {}
@@ -467,9 +467,9 @@ void VariableBase::draw(cairo_t *cairo) const
   float w, h, hoffs, scaleFactor;
   w=rv.width()*z; 
   h=rv.height()*z;
-  scaleFactor=max(1.0,min(static_cast<double>(iWidth())*z/w,static_cast<double>(iHeight())*z/h));
-  if (rv.width()<iWidth()) w=iWidth()*z;
-  if (rv.height()<iHeight()) h=iHeight()*z;
+  scaleFactor=max(1.0f,min(0.5f*iWidth()*z/w,0.5f*iHeight()*z/h));
+  if (rv.width()<0.5*iWidth()) w=0.5*iWidth()*z;
+  if (rv.height()<0.5*iHeight()) h=0.5*iHeight()*z;
   rv.setFontSize(12*scaleFactor*z);
   hoffs=rv.top()*z;
   

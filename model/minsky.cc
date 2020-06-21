@@ -471,7 +471,7 @@ namespace minsky
              for (size_t i=0; i<p->ports.size(); ++i)
                {
                  auto& pp=p->ports[i];
-                 if (pp->wires().size()>0 && pp->getVariableValue().idx()>=0)
+                 if (pp->wires().size()>0 && pp->getVariableValue()->idx()>=0)
                    p->connectVar(pp->getVariableValue(), i);
                }
            }
@@ -803,7 +803,7 @@ namespace minsky
            }
          else if (auto r=dynamic_cast<Ravel*>(i->get()))
            if (r->ports[1]->numWires()>0)
-             r->populateHypercube(r->ports[1]->getVariableValue().hypercube());
+             r->populateHypercube(r->ports[1]->getVariableValue()->hypercube());
          return false;
        });
 

@@ -141,6 +141,7 @@ void RenderVariable::draw()
   // cairo_scale(cairo,scaleFactor,scaleFactor);
   //}
   var.draw(cairo);
+
 }
 
 void RenderVariable::updatePortLocs() const

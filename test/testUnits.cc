@@ -198,16 +198,7 @@ SUITE(Units)
     CHECK_THROW(opp->checkUnits(),std::exception);
     from2->setUnits(from1->unitsStr());
     CHECK_THROW(opp->checkUnits(),std::exception);
-  }  
-  
-  template <> void TestOp::impl<OperationType::polygamma>()
-  {
-    init(OperationType::polygamma);
-    // polygamma's arguments must be dimensionless
-    CHECK_THROW(opp->checkUnits(),std::exception);
-    from2->setUnits(from1->unitsStr());
-    CHECK_THROW(opp->checkUnits(),std::exception);
-  }    
+  }   
   
   template <> void TestOp::impl<OperationType::copy>()
   {

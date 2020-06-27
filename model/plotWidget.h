@@ -74,11 +74,17 @@ namespace minsky
 
 
     std::string title;
- 
-    int width{150}, height{150};
 
+    /// automatic means choose line or bar depending on the x-vector type.
+    enum PlotType {line, bar, automatic};
+    PlotType plotType=automatic;
+    
     PlotWidget();
 
+    // pick the Item width method, not ecolab::Plot's
+    float width() const {return Item::width();}
+    float height() const {return Item::height();}
+    
     void addPlotPt(double t); ///< add another plot point
     void updateIcon(double t) override {addPlotPt(t);}
     /// add vector/tensor curves to plot

@@ -161,7 +161,8 @@ namespace minsky
     Panopticon panopticon{canvas};
     FontDisplay fontSampler;
     ParameterSheet parameterSheet;
-    VariableSheet variableSheet;    
+    VariableSheet variableSheet;
+    ParVarSheet parVarSheet{parameterSheet};    
         // Allow multiple equity columns.
     bool multipleEquities=false;    
 
@@ -198,6 +199,8 @@ namespace minsky
     /// fills in dimensions table with all loaded ravel axes
     void populateMissingDimensions();
 
+    void populateMissingDimensionsFromVariable(const VariableValue&);
+    
     void setGodleyIconResource(const string& s)
     {GodleyIcon::svgRenderer.setResource(s);}
     void setGroupIconResource(const string& s)

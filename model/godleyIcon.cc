@@ -177,6 +177,7 @@ namespace minsky
     if (bw<=leftMargin() || bh<=bottomMargin()) return;
     iconWidth*=(bw-leftMargin())/(gWidth()-leftMargin());
     iconHeight*=(bh-bottomMargin())/(gHeight()-bottomMargin());
+    scaleIconForHeight(bh);
     update();
     moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
     updateBB(); 
@@ -305,17 +306,14 @@ namespace minsky
     // position of margin in absolute canvas coordinate
     float zoomFactor=iconScale()*this->zoomFactor();
     float vdf=variableDisplay? 1: -1; // variable display factor
-    // fix variable spacing on Godleys. Take into account model and item zoom crossover. for ticket 1202.
-    float globalZoomFactor=minsky().canvas.model->zoomFactor() < this->zoomFactor() ? minsky().canvas.model->zoomFactor() : this->zoomFactor();
     float x= this->x() - 0.5*gWidth()+leftMargin();
     float y= this->y() - 0.5*gHeight()+0.35*(gHeight()-bottomMargin());
     for (auto& v: m_flowVars)
       {
         // right justification if displayed, left otherwisw
-        //RenderVariable rv(*v);
         v->rotation(0);
         v->moveTo(x+v->x() - (variableDisplay? v->right(): v->left()), y);
-        y+=v->height()*v->zoomFactor()*globalZoomFactor;//2*rv.height()*zoomFactor;
+        y+=v->height()*v->zoomFactor();
       }
     x= this->x() - 0.45*gWidth()+leftMargin();
     y= this->y() + 0.5*gHeight()-bottomMargin();
@@ -323,10 +321,9 @@ namespace minsky
     for (auto& v: m_stockVars)
       {
         // top justification at bottom of icon if displayed, bottom justified otherwise
-        //RenderVariable rv(*v);
         v->rotation(90);
         v->moveTo(x, y + v->y() - (variableDisplay? v->top(): v->bottom()));
-        x+=v->width()*v->zoomFactor()*globalZoomFactor;//2*rv.height()*zoomFactor;
+        x+=v->width()*v->zoomFactor();
       }
   }
 

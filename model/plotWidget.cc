@@ -381,8 +381,8 @@ namespace minsky
       }
 
     // TODO - delegate to Item::clickType
-    if ((abs(x-Item::left()) < portRadius*z || abs(x-Item::right()) < portRadius*z) &&
-      (abs(y-top()) < portRadius*z || abs(y-bottom()*z) < portRadius*z))
+    if ((abs(x-Item::left()) < portRadiusMult*z || abs(x-Item::right()) < portRadiusMult*z) &&
+      (abs(y-top()) < portRadiusMult*z || abs(y-bottom()) < portRadiusMult*z))
       return ClickType::onResize;         
 
     double dx=x-this->x(), dy=y-this->y();

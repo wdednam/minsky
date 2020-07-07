@@ -443,7 +443,8 @@ namespace minsky
   {
     double dx=fabs(x-this->x()), dy=fabs(y-this->y());
     auto z=zoomFactor();
-    double w=0.5*Item::width()*z, h=0.5*Item::height()*z;
+    //double w=0.5*Item::width()*z, h=0.5*Item::height()*z;
+    double w=0.5*Item::width(), h=0.5*Item::height();
     // check if (x,y) is within portradius of the 4 corners
     if (fabs(dx-w) < portRadiusMult*z &&
         fabs(dy-h) < portRadiusMult*z &&

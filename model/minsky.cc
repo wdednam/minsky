@@ -257,7 +257,7 @@ namespace minsky
 //    if (!of)
 //      throw runtime_error("cannot save to "+fileName);
   }
-
+  
   void Minsky::paste()
   {
     istringstream is(getClipboard());
@@ -266,12 +266,14 @@ namespace minsky
     GroupPtr g(new Group);
     canvas.model->addGroup(g);
     m.populateGroup(*g);
-    
+    // Default pasting no longer occurs as grouped items or as a group within a group. Fix for tickets 1080/1098    
+    canvas.selection.clear();    
+
     // convert stock variables that aren't defined to flow variables, and other fix up multiply defined vars
     g->recursiveDo(&GroupItems::items,
                    [&](Items&, Items::iterator i) {
                      if (auto v=(*i)->variableCast())
-                       if ((v->defined() || v->isStock()) && !v->group.lock())
+                       if (v->defined() || v->isStock())
                          {
                            // if defined, check no other defining variable exists
                            auto alreadyDefined = canvas.model->findAny
@@ -293,61 +295,120 @@ namespace minsky
                              }
                          }
                      return false;
-                   });               
-    
-    // curved wires not always included in the new group, add them if they aren't. For ticket 1190.
-    if (canvas.selection.numWires()!=g->numWires())
-      {
-        canvas.selection.recursiveDo(&GroupItems::wires,
-                       [&](Wires&, Wires::iterator w) {
-                         auto alreadyAdded = g->findAny
-                           (&GroupItems::wires,
-                            [&w](const WirePtr& u)
-                            {return u.get()==w->get();});
-                                      
-                         if (!alreadyAdded) {  
-                           auto f=w->get()->from(), t=w->get()->to();
-                           g->addWire(new Wire(f,t,w->get()->coords()));
-                         }
-                         return false;
-                       });
-         if (canvas.selection.numWires()!=g->numWires()) throw runtime_error("Some of the wires have not been pasted correctly, please try selecting, copying and pasting again");                           		
-      }
+                   });
 
-//#ifndef NDEBUG	
-//	assert(canvas.selection.numWires()==g->numWires());
-//#endif
-    
-    // Default pasting no longer occurs as grouped items or as a group within a group. Fix for tickets 1080/1098    
-    canvas.selection.clear();                
-    
-    if (!g->groups.empty()) {
-      auto copyOfGroups=g->groups;		
-      for (auto& i: copyOfGroups)
-        {	
-          canvas.model->addGroup(i);
-        }
-      if (!copyOfGroups.empty()) canvas.setItemFocus(copyOfGroups[0]); 
-      else canvas.setItemFocus(nullptr);        
-    }    
-    
     auto copyOfItems=g->items;
-    
     for (auto& i: copyOfItems)
       {		
-         canvas.model->addItem(i);		  
+         canvas.model->addItem(i);			  
          canvas.selection.ensureItemInserted(i);
          assert(!i->ioVar());
       }
     // Attach mouse focus only to first item in selection. For ticket 1098.      
-    
-    if (!copyOfItems.empty()) canvas.setItemFocus(copyOfItems[0]);	      
-    else canvas.setItemFocus(nullptr);	    
-     
+    if (!g->items.empty()) canvas.setItemFocus(g->items[0]);	      
+    auto copyOfGroups=g->groups;
+    for (auto& i: copyOfGroups)
+    {	
+        canvas.model->addGroup(i);	
+    }
+    if (!copyOfGroups.empty()) canvas.setItemFocus(copyOfGroups[0]);    
     g->clear();  
     model->removeGroup(*g);
     canvas.requestRedraw();
-  }
+  }  
+
+//  void Minsky::paste()
+//  {
+//    istringstream is(getClipboard());
+//    xml_unpack_t unpacker(is);
+//    schema3::Minsky m(unpacker);
+//    GroupPtr g(new Group);
+//    canvas.model->addGroup(g);
+//    m.populateGroup(*g);
+//    // Default pasting no longer occurs as grouped items or as a group within a group. Fix for tickets 1080/1098    
+//    //canvas.selection.clear();      
+//    
+//    // convert stock variables that aren't defined to flow variables, and other fix up multiply defined vars
+//    g->recursiveDo(&GroupItems::items,
+//                   [&](Items&, Items::iterator i) {
+//                     if (auto v=(*i)->variableCast())
+//                       if (v->defined() || v->isStock())
+//                         {
+//                           // if defined, check no other defining variable exists
+//                           auto alreadyDefined = canvas.model->findAny
+//                             (&GroupItems::items,
+//                              [&v](const ItemPtr& j)
+//                              {return j.get()!=v && j->variableCast() &&  j->variableCast()->defined();});
+//                           if (v->isStock())
+//                             {
+//                               if (v->defined() && alreadyDefined)
+//                                 message("Integral/Stock variable "+v->name()+" already defined"); 
+//                               else if (!v->defined() && !alreadyDefined)
+//                                 convertVarType(v->valueId(), VariableType::flow);
+//                             }
+//                           else if (alreadyDefined)
+//                             {
+//                               // delete defining wire from this
+//                               assert(v->ports.size()>1 && !v->ports[1]->wires().empty());
+//                               canvas.model->removeWire(*v->ports[1]->wires()[0]);
+//                             }
+//                         }
+//                     return false;
+//                   });               
+//    
+//    // curved wires not always included in the new group, add them if they aren't. For ticket 1190.
+//    if (canvas.selection.numWires()!=g->numWires())
+//      {
+//        canvas.selection.recursiveDo(&GroupItems::wires,
+//                       [&](Wires&, Wires::iterator w) {
+//                         auto alreadyAdded = g->findAny
+//                           (&GroupItems::wires,
+//                            [&w](const WirePtr& u)
+//                            {return u.get()==w->get();});
+//                                      
+//                         if (!alreadyAdded) {  
+//                           auto f=w->get()->from(), t=w->get()->to();
+//                           g->addWire(new Wire(f,t,w->get()->coords()));
+//                         }
+//                         return false;
+//                       });
+//         if (canvas.selection.numWires()!=g->numWires()) throw runtime_error("Some of the wires have not been pasted correctly, please try selecting, copying and pasting again");                           		
+//      }
+//
+////#ifndef NDEBUG	
+////	assert(canvas.selection.numWires()==g->numWires());
+////#endif
+//    
+//    // Default pasting no longer occurs as grouped items or as a group within a group. Fix for tickets 1080/1098    
+//    canvas.selection.clear();                
+//    
+//    if (!g->groups.empty()) {
+//      auto copyOfGroups=g->groups;		
+//      for (auto& i: copyOfGroups)
+//        {	
+//          canvas.model->addGroup(i);
+//        }
+//      if (!copyOfGroups.empty()) canvas.setItemFocus(copyOfGroups[0]); 
+//      //else canvas.setItemFocus(nullptr);        
+//    }    
+//    
+//    auto copyOfItems=g->items;
+//    
+//    for (auto& i: copyOfItems)
+//      {		
+//         canvas.model->addItem(i);		  
+//         canvas.selection.ensureItemInserted(i);
+//         assert(!i->ioVar());
+//      }
+//    // Attach mouse focus only to first item in selection. For ticket 1098.      
+//    
+//    if (!copyOfItems.empty()) canvas.setItemFocus(copyOfItems[0]);	      
+//    //else canvas.setItemFocus(nullptr);	    
+//     
+//    g->clear();  
+//    model->removeGroup(*g);
+//    canvas.requestRedraw();
+//  }
 
   namespace
   {

@@ -89,18 +89,6 @@ namespace minsky
       return 1;
   }
   
-  float Item::setZoomFactor(const float& zf)
-  {
-	m_zf=zf;  
-    if (auto g=group.lock())
-    {
-	  g->setZoom(m_zf);	
-      return g->zoomFactor()*g->relZoom;
-	}
-    else
-      return m_zf;
-  }  
-  
   float Item::scaleFactor() const
   { 
     return m_sf;
@@ -155,9 +143,14 @@ namespace minsky
      
     // then, check whether a resize handle has been selected  
     float z=zoomFactor();
-    if ((abs(x-left()) < portRadius*z || abs(x-right()) < portRadius*z) &&
-      (abs(y-top()) < portRadius*z || abs(y-bottom()*z) < portRadius*z))
-      return ClickType::onResize;         
+    // Ops, vars and switch icon only resize from bottom right corner. for ticket 1203
+    if (!variableCast()) 
+      if (!switchIconCast() && (!operationCast() || operationCast()->type()==OperationType::ravel) &&
+          (abs(x-left()) < portRadius*z || abs(x-right()) < portRadius*z) &&
+          (abs(y-top()) < portRadius*z || abs(y-bottom()) < portRadius*z))
+        return ClickType::onResize;
+      else if (abs(x-right()) < portRadius*z && abs(y-bottom()) < portRadius*z)
+        return ClickType::onResize;        
 
     ecolab::cairo::Surface dummySurf
       (cairo_recording_surface_create(CAIRO_CONTENT_COLOR_ALPHA,nullptr));
@@ -214,21 +207,25 @@ namespace minsky
   // Refactor resize() code for all canvas items here. For feature 25 and 94
   void Item::resize(const LassoBox& b)
   {
-	 // Set initial iWidth() and iHeight() to initial Pango determined values. This resize method is not very reliable. Probably a Pango issue. 
-    float w=iWidth(width()), h=iHeight(height()), invZ=1/zoomFactor();   
+	// Set initial iWidth() and iHeight() to initial Pango determined values. This resize method is not very reliable. Probably a Pango issue. 
+    float w=iWidth(width()), h=iHeight(height());//, invZ=1/zoomFactor();   
     moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));                 
-    iWidth(abs(b.x1-b.x0)*invZ);
-    iHeight(abs(b.y1-b.y0)*invZ);     
+    iWidth(abs(b.x1-b.x0));//*invZ);
+    iHeight(abs(b.y1-b.y0));//*invZ);     
     scaleFactor(std::max(1.0f,std::min(iWidth()/w,iHeight()/h)));
   }
   
   void Item::drawResizeHandles(cairo_t* cairo) const
   {
-    double sf=portRadiusMult*zoomFactor();  
-    drawResizeHandle(cairo,right()-x(),top()-y(),sf,0.5*M_PI);
-    drawResizeHandle(cairo,left()-x(),top()-y(),sf,M_PI);
-    drawResizeHandle(cairo,left()-x(),bottom()-y(),sf,1.5*M_PI);
-    drawResizeHandle(cairo,right()-x(),bottom()-y(),sf,0);
+    double sf=portRadiusMult*zoomFactor();
+    // Ops, vars and switch icon only resize from bottom right corner. for ticket 1203
+    if (!switchIconCast() && !variableCast() && (!operationCast() || operationCast()->type()==OperationType::ravel))  
+      {
+        drawResizeHandle(cairo,right()-x(),top()-y(),sf,0.5*M_PI);
+        drawResizeHandle(cairo,left()-x(),top()-y(),sf,M_PI);
+        drawResizeHandle(cairo,left()-x(),bottom()-y(),sf,1.5*M_PI);
+        drawResizeHandle(cairo,right()-x(),bottom()-y(),sf,0);
+      } else drawResizeHandle(cairo,right()-x(),bottom()-y(),0.5*sf,0);
     cairo_stroke(cairo);
   }
 

@@ -754,10 +754,11 @@ namespace minsky
   {
     double dx=x-this->x(), dy=y-this->y();
     auto z=zoomFactor();
-    double w=0.5*iconWidth*z, h=0.5*iconHeight*z;
+    //double w=0.5*iconWidth*z, h=0.5*iconHeight*z;
+    double w=0.5*Item::width(), h=0.5*Item::height();
     // check if (x,y) is within portradius of the 4 corners
     if ((abs(x-left()) < portRadius*z || abs(x-right()) < portRadius*z) &&
-      (abs(y-top()) < portRadius*z || abs(y-bottom()*z) < portRadius*z))
+      (abs(y-top()) < portRadius*z || abs(y-bottom()) < portRadius*z))
       return ClickType::onResize;         
 //    if (fabs(fabs(dx)-w) < portRadiusMult*z &&
 //        fabs(fabs(dy)-h) < portRadiusMult*z &&

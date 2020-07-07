@@ -60,6 +60,7 @@ namespace minsky
   class VariablePtr;
   class VariableBase;
   class OperationBase;
+  class SwitchIcon;  
 
   class Item;
   /// bounding box information (at zoom=1 scale)
@@ -92,7 +93,6 @@ namespace minsky
     Item(): TCLAccessor<Item,double>("rotation",(Getter)&Item::rotation,(Setter)&Item::rotation) {}
     float m_x=0, m_y=0; ///< position in canvas, or within group
     float m_sf=1; ///< scale factor of item on canvas, or within group
-    float m_zf=1; ///< zoom factor of item on canvas, or within group
     mutable bool onResizeHandles=false; ///< set to true to indicate mouse is over resize handles
     /// owning group of this item.
     classdesc::Exclude<std::weak_ptr<Group>> group; 
@@ -147,14 +147,17 @@ namespace minsky
     virtual const OperationBase* operationCast() const {return nullptr;}
     virtual OperationBase* operationCast() {return nullptr;}
     /// @}
+    /// @{ a more efficient replacement for dynamic_cast<SwitchIcon*>(this)
+    virtual const SwitchIcon* switchIconCast() const {return nullptr;}
+    virtual SwitchIcon* switchIconCast() {return nullptr;}
+    /// @}      
 
     ItemPortVector ports;
     virtual float x() const; 
     virtual float y() const;
     virtual float zoomFactor() const;
-    virtual float setZoomFactor(const float& zf);
-    float width() const {if (!bb.valid()) bb.update(*this); return bb.width();}
-    float height() const {if (!bb.valid()) bb.update(*this); return bb.height();}
+    float width() const {if (!bb.valid()) bb.update(*this); return bb.width()*zoomFactor();}
+    float height() const {if (!bb.valid()) bb.update(*this); return bb.height()*zoomFactor();}
     float left() const {return x()+bb.left()*zoomFactor();}
     float right() const {return x()+bb.right()*zoomFactor();}
     float top() const {return y()+bb.top()*zoomFactor();}

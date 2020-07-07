@@ -81,8 +81,7 @@ namespace minsky
 
     void draw(cairo_t*) const override;
     void resize(const LassoBox& b) override;
-    ClickType::Type clickType(float x, float y) override; 
-    float scaleFactor() const override;       
+    float scaleFactor() const override;  
 
     /// current value of output port
     double value() const override;
@@ -147,13 +146,6 @@ namespace minsky
   public:
     Units units(bool) const override;
   };
-  
-  class Percent: public Operation<OperationType::percent>
-  {
-  public:
-    // set units of item attached to output port to "%"
-    Units units(bool check) const override {return ports[0]->units(check);}
-  };    
 
   class Copy: public Operation<OperationType::copy>
   {
@@ -193,7 +185,6 @@ namespace minsky
     string valueId() const 
     {return intVar->valueId();}
     
-    void drawResizeHandles(cairo_t* cairo) const override;
     void draw(cairo_t*) const override;
     void resize(const LassoBox& b) override;   
 

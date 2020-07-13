@@ -99,12 +99,13 @@ namespace minsky
     std::vector<double> colLeftMargin;          
     
     unsigned insertIdx=0, selectIdx=0;                                       // useful for editable par tab!!                                
-
+    
     void populateItemVector();
-    virtual bool variableSelector(ItemPtr i) {return false;}
-    void draw(cairo_t* cairo);
+    //virtual bool variableSelector(ItemPtr i) {return false;}    
+    virtual bool variableSelector(ItemPtr i) = 0;
+    void draw(cairo_t* cairo); 
     void redraw(int, int, int width, int height) override;
-    void requestRedraw() {if (surface.get()) surface->requestRedraw();}             
+    void requestRedraw() {if (surface.get()) surface->requestRedraw();}      
     
     /// event handling 
     void mouseDown(double x, double y);                                              // useful for editable par tab!!
@@ -158,15 +159,7 @@ namespace minsky
     void checkCell00(); ///<check if cell (0,0) is selected, and deselect if so
     /// handle delete or backspace. Cell assumed selected
     void handleBackspace();                                                                        // useful for editable par tab!!
-    void handleDelete();        
-    
-    void populateItemVector();
-    virtual bool variableSelector(ItemPtr i) = 0;
-    void draw(cairo_t* cairo); 
-    void redraw(int, int, int width, int height) override;
-    void requestRedraw() {if (surface.get()) surface->requestRedraw();}         
-       
-    ~ParVarSheet() {}
+    void handleDelete();               
   };
   
 }

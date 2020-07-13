@@ -160,7 +160,7 @@ namespace minsky
     FontDisplay fontSampler;
     ParameterSheet parameterSheet;
     VariableSheet variableSheet;
-    ParVarSheet parVarSheet;
+    //ParVarSheet parVarSheet;
         // Allow multiple equity columns.
     bool multipleEquities=false;   
 

@@ -72,8 +72,8 @@ namespace schema3
     ItemBase() {}
     ItemBase(int id, const minsky::Item& it, const std::vector<int>& ports): 
       Note(it), id(id), type(it.classType()),
-      x(it.m_x), y(it.m_y), rotation(it.rotation()),
-       scaleFactor(it.m_sf), ports(ports) {}
+      x(it.m_x), y(it.m_y), scaleFactor(it.m_sf),
+      rotation(it.rotation()), ports(ports) {}
     ItemBase(const schema2::Item& it, const std::string& type="Item"):
       Note(it), id(it.id), type(type), x(it.x), y(it.y), 
       rotation(it.rotation), ports(it.ports) {}
@@ -141,7 +141,7 @@ namespace schema3
       axis(o.axis), arg(o.arg) {}
     Item(int id, const minsky::GodleyIcon& g, const std::vector<int>& ports):
       ItemBase(id,static_cast<const minsky::Item&>(g),ports),
-      width(g.gWidth()/g.zoomFactor()), height(g.gHeight()/g.zoomFactor()), name(g.table.title), data(g.table.getData()),
+      width(g.iWidth()/g.zoomFactor()), height(g.iHeight()/g.zoomFactor()), name(g.table.title), data(g.table.getData()),
       assetClasses(g.table._assetClass()) {}
     Item(int id, const minsky::PlotWidget& p, const std::vector<int>& ports):
       ItemBase(id,static_cast<const minsky::Item&>(p),ports),

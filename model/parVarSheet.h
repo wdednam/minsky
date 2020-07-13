@@ -30,7 +30,6 @@ namespace minsky
   class ParVarSheet: public ecolab::CairoSurface
   {
   public:
-    friend struct SchemaHelper; 	   
     typedef std::vector<std::vector<std::string>> Data;  
   private:
     CLASSDESC_ACCESS(ParVarSheet);    
@@ -161,6 +160,13 @@ namespace minsky
     void handleBackspace();                                                                        // useful for editable par tab!!
     void handleDelete();        
     
+    void populateItemVector();
+    virtual bool variableSelector(ItemPtr i) = 0;
+    void draw(cairo_t* cairo); 
+    void redraw(int, int, int width, int height) override;
+    void requestRedraw() {if (surface.get()) surface->requestRedraw();}         
+       
+    ~ParVarSheet() {}
   };
   
 }

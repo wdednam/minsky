@@ -81,7 +81,8 @@ namespace minsky
 
     void draw(cairo_t*) const override;
     void resize(const LassoBox& b) override;
-    float scaleFactor() const override;  
+    ClickType::Type clickType(float x, float y) override;     
+    float scaleFactor() const override;       
 
     /// current value of output port
     double value() const override;
@@ -184,7 +185,7 @@ namespace minsky
 
     string valueId() const 
     {return intVar->valueId();}
-    
+
     void draw(cairo_t*) const override;
     void resize(const LassoBox& b) override;   
 

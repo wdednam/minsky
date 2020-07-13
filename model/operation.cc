@@ -136,6 +136,22 @@ namespace minsky
         (new Port(*this, Port::inputPort | (multiWire()? Port::multiWire: Port::noFlags)));
   }
   
+  ClickType::Type OperationBase::clickType(float xx, float yy)
+  {
+    double fm=std::fmod(rotation(),360);
+    bool notflipped=(fm>-90 && fm<90) || fm>270 || fm<-270;
+    Rotate r(rotation()+(notflipped? 0: 180),0,0); // rotate into variable's frame of reference
+    double z=zoomFactor();
+    float dx=xx-x(), dy=yy-y();
+    // Ops, vars and switch icon only resize from bottom right corner. for ticket 1203 
+    if (fabs(xx-right()) < portRadius*z && fabs(yy-bottom()) < portRadius*z && type()!=ravel)
+      return ClickType::onResize;  
+    else if ((fabs(xx-left()) < portRadius*z || fabs(xx-right()) < portRadius*z) &&
+      (fabs(yy-top()) < portRadius*z || fabs(yy-bottom()) < portRadius*z))
+      return ClickType::onResize;  
+    return Item::clickType(xx,yy);
+  }  
+  
   float OperationBase::scaleFactor() const
   {
     float z=zoomFactor();
@@ -307,10 +323,10 @@ namespace minsky
   
   void OperationBase::resize(const LassoBox& b)
   {
-     float invZ=1/zoomFactor();  
-     moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
-     iWidth(std::abs(b.x1-b.x0)*invZ);
-     iHeight(std::abs(b.y1-b.y0)*invZ);
+    float invZ=1/zoomFactor();  
+    moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
+    iWidth(std::abs(b.x1-b.x0)*invZ);
+    iHeight(std::abs(b.y1-b.y0)*invZ);
   }
   
 
@@ -503,7 +519,7 @@ namespace minsky
     r.normalise();
     return r;
   }
-     
+
   void IntOp::draw(cairo_t* cairo) const
   {
     // if rotation is in 1st or 3rd quadrant, rotate as

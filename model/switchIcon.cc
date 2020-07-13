@@ -32,6 +32,16 @@ namespace minsky
     ports.emplace_back(new Port(*this, Port::inputPort));
     setNumCases(2); ///<default to if/then
   }
+  
+  ClickType::Type SwitchIcon::clickType(float x, float y)
+  {
+    double dx=x-this->x(), dy=y-this->y();
+    auto z=zoomFactor();
+    // Ops, vars and switch icon only resize from bottom right corner. for ticket 1203  
+    if (fabs(x-right()) < portRadius*z && fabs(y-bottom()) < portRadius*z)
+      return ClickType::onResize;
+    return Item::clickType(x,y);
+  }    
 
   void SwitchIcon::setNumCases(unsigned n)
   {
@@ -70,7 +80,7 @@ namespace minsky
             r=w->units(check);
           }
     return r;
-  }
+  } 
 
   void SwitchIcon::draw(cairo_t* cairo) const
   {
@@ -128,9 +138,9 @@ namespace minsky
   
   void SwitchIcon::resize(const LassoBox& b)
   {
-    //float invZ=1/zoomFactor();
+    float invZ=1/zoomFactor();
     moveTo(0.5*(b.x0+b.x1), 0.5*(b.x0+b.x1));    
-    iWidth(0.5*abs(b.x1-b.x0));//*invZ);
+    iWidth(0.5*abs(b.x1-b.x0)*invZ);
     bb.update(*this);
   }  
 

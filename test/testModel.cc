@@ -469,7 +469,9 @@ SUITE(Canvas)
 
     TEST_FIXTURE(TestFixture,onSlider)
     {
-      auto cv=dynamic_cast<VariableBase*>(c.get());
+      auto cc=model->addItem(new Variable<VariableType::flow>("cc"));
+      cc->moveTo(500,300);
+      auto cv=dynamic_cast<VariableBase*>(cc.get());
       cv->value(1000);
       cv->sliderMin=0;
       cv->sliderMax=2000;
@@ -481,11 +483,11 @@ SUITE(Canvas)
       xc+=5;
       canvas.mouseUp(xc,yc);
       // check handle and value changed
-      CHECK_EQUAL(xc, c->x()+rv.handlePos());
+      CHECK_CLOSE(xc, cv->x()+rv.handlePos(), 0.1);
       CHECK(cv->value()>1000);
       // check variable hasn't moved
-      CHECK_EQUAL(300,cv->x());
-      CHECK_EQUAL(100,cv->y());
+      CHECK_EQUAL(500,cv->x());
+      CHECK_EQUAL(300,cv->y());
 
       // now check that value is clamped to max/min
       canvas.mouseDown(xc,yc);
@@ -1000,11 +1002,16 @@ SUITE(GodleyIcon)
 {
   TEST_FIXTURE(GodleyIcon, select)
     {
+      GodleyIcon::svgRenderer.setResource("bank.svg");
+      
       table.resize(3,2);
       table.cell(2,1)="flow1";
       table.cell(0,1)="stock1";
+      update();
       // TODO - shouldn't be needed, but there is some font problem causing bottomMargin to be calculated incorrectly
-      scaleIconForHeight(500);
+      
+      scaleIconForHeight(2.5*bottomMargin());
+      update();
       CHECK_EQUAL(1,flowVars().size());
       CHECK_EQUAL(1,stockVars().size());
       for (auto& i: flowVars())

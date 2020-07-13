@@ -1301,6 +1301,7 @@ proc openNamedFile {ofname} {
 
     # minsky.load resets minsky.multipleEquities, so restore it to preferences
     minsky.multipleEquities $preferences(multipleEquities)
+    canvas.focusFollowsMouse $preferences(focusFollowsMouse)
     pushFlags
     recentreCanvas
 

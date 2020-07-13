@@ -55,8 +55,7 @@ namespace minsky
        }
      markEdited();
    }   
-   	
-	
+
   void ParVarSheet::populateItemVector() {
     itemVector.clear();	
     minsky().canvas.model->recursiveDo(&GroupItems::items,
@@ -85,7 +84,9 @@ namespace minsky
                 x0=0.0;
                 float x=x0, y=y0;
                 double colWidth=0;
+
                 colLeftMargin.clear();
+
                 pango.setMarkup("9999");
                 if (rank==0)
                   { 
@@ -98,6 +99,7 @@ namespace minsky
                     cairo_move_to(cairo,x,y-1.5*rowHeight);
                     pango.setMarkup(value->name+":");
                     pango.show();        					  
+
                     string format=value->hypercube().xvectors[0].timeFormat();
                     for (auto& i: value->hypercube().xvectors[0])
                       {
@@ -110,6 +112,7 @@ namespace minsky
                     insertCol(size_t(rank));  
                     y=y0;
                     //colLeftMargin.push_back(x);                    
+                    y=y0;                
                     x+=colWidth;
                     for (size_t i=0; i<value->size(); ++i)
                       {
@@ -117,7 +120,9 @@ namespace minsky
                           y=y0+value->index()[i]*rowHeight;
                         cairo_move_to(cairo,x,y);
                         auto v=value->value(i);
+
                         insertRow(i+1);
+
                         if (!std::isnan(v))
                           {
                             pango.setMarkup(str(v));
@@ -126,11 +131,13 @@ namespace minsky
                         y+=rowHeight;
                       }
                     resize(value->size(),size_t(rank));  
+
                     h_prev=h;
                     w=0;h=0;      
                     cairo_get_current_point (cairo,&w,&h);   
                     if (h<h_prev) h+=h_prev;                                                                        
                     //cout << " " << w << " " << h << " "<< x0 << " " << y0 << endl;
+
                     // draw grid
                     {
                       cairo::CairoSave cs(cairo);
@@ -148,7 +155,6 @@ namespace minsky
                     else rectHeight=y-y0-rowHeight;                    
                     cairo_rectangle(cairo,0.0,y0,w+colWidth,rectHeight);    
                     cairo_stroke(cairo);                          
-                    cairo_clip(cairo);
                     
                     colLeftMargin.push_back(x);
                     // indicate cell mouse is hovering over
@@ -162,8 +168,8 @@ namespace minsky
                                         colLeftMargin[hoverCol+1]-colLeftMargin[hoverCol],rowHeight);                          
                         cairo_set_line_width(cairo,1);
                         cairo_stroke(cairo);
-                      }                    
-                    
+                      }
+                    cairo_clip(cairo);                      
                     y0=h+3.1*rowHeight;                 
 			      }
 			    else
@@ -171,6 +177,7 @@ namespace minsky
                     cairo_move_to(cairo,x,y-1.5*rowHeight);
                     pango.setMarkup(value->name+":");
                     pango.show();  						    
+
                     for (size_t k=0; k<rank-1; k++)  
                       {   
                         y+=rowHeight; // allow room for header row
@@ -185,6 +192,7 @@ namespace minsky
                           }
                         y=y0;
                         //colLeftMargin.push_back(x);  
+
                         x+=colWidth;
                         format=value->hypercube().xvectors[k+1].timeFormat();
                         for (size_t i=0; i<dims[k+1]; ++i)
@@ -219,6 +227,7 @@ namespace minsky
                                 colWidth=std::max(colWidth, pango.width());
                               }
                             colLeftMargin.push_back(x);    
+
                             x+=colWidth;
                             if (x>2e09) break;
                           }      
@@ -247,7 +256,6 @@ namespace minsky
                         if (rank > 2) rectHeight+=rowHeight;
                         cairo_rectangle(cairo,x0,y0,w+colWidth,rectHeight);    
                         cairo_stroke(cairo);                          
-                        cairo_clip(cairo);
                         
                         colLeftMargin.push_back(x);
                         // indicate cell mouse is hovering over
@@ -262,6 +270,7 @@ namespace minsky
                             cairo_set_line_width(cairo,1);
                             cairo_stroke(cairo);
                           }				        
+                        cairo_clip(cairo);		        
                         
                         x+=0.25*colWidth;
 				        x0=x;         
@@ -343,7 +352,7 @@ namespace minsky
       }
     catch (...) {throw;/* exception most likely invalid variable value */}
   }
-  
+
   namespace
   {    
     struct CroppedPango: public Pango

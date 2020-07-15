@@ -267,25 +267,29 @@ namespace minsky
       if (table.initialConditionRow(r))
         for (size_t c=1; c<table.cols(); ++c)
           {
-            string name=trimWS(table.cell(0,c));
+            string name=trimWS(table.cell(0,c));           
             auto vi=minsky().variableValues.find(VariableValue::valueId(group.lock(),name));
             if (vi==minsky().variableValues.end()) continue;
-            VariableValue& v=*vi->second;
+            VariableValue& v=*vi->second;           
             v.godleyOverridden=false;
             string::size_type start=table.cell(r,c).find_first_not_of(" ");
             if (start!=string::npos)
               {
-                FlowCoef fc(table.cell(r,c).substr(start));
+				// Ensure flows with non-zero lhs and used as initial condtions in Godley table headings. For ticket 1137.  
+				auto vv=minsky().variableValues[VariableValue::valueIdFromScope(group.lock(),v.init)];                  
+                FlowCoef fc((vv->lhs())? str(vv->value()) : table.cell(r,c).substr(start));                      
+                //FlowCoef fc(table.cell(r,c).substr(start));                      
                 v.init=fc.str();
                 v.godleyOverridden=true;
               }
             else
-              {
+              { 
                 // populate cell with current variable's initial value
-                FlowCoef fc(v.init);
-                table.cell(r,c)=fc.str();
+                FlowCoef fc(v.init);   
+				table.cell(r,c)=fc.str();
                 v.godleyOverridden=true;
               }
+
           }
 
 

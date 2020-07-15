@@ -922,6 +922,9 @@ namespace MathDAG
           continue; // ignore empty Godley columns
         // resolve scope
         colName=VariableValue::valueId(gi.group.lock(), colName);
+		auto colVV=minsky.variableValues.find(VariableValue::valueId(gi.group.lock(),colName));
+		if (colVV==minsky.variableValues.end()) continue;
+        auto colInit=minsky.variableValues[VariableValue::valueIdFromScope(gi.group.lock(),colVV->second->init)];                            		
         if (processedColumns.count(colName)) continue; //skip shared columns
         processedColumns.insert(colName);
         GodleyColumnDAG& gd=godleyVariables[colName];
@@ -929,8 +932,11 @@ namespace MathDAG
         vector<WeakNodePtr>& arguments=gd.arguments[0];
         for (size_t r=1; r<godley.rows(); ++r)
           {
+            //if (godley.initialConditionRow(r)) continue;
+            // Ensure flows with non-zero lhs and used as initial condtions in Godley table headings. For ticket 1137.  
+            FlowCoef fc((colInit->lhs() && !godley.initialConditionRow(r))? str(colVV->second->init) : godley.cell(r,c));
             if (godley.initialConditionRow(r)) continue;
-            FlowCoef fc(godley.cell(r,c));
+            //FlowCoef fc(godley.cell(r,c));
             if (fc.name.empty()) continue;
             //            if (godley.signConventionReversed(c)) fc.coef*=-1;
 

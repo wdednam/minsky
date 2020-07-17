@@ -275,11 +275,11 @@ namespace minsky
             string::size_type start=table.cell(r,c).find_first_not_of(" ");
             if (start!=string::npos)
               {
-				// Ensure flows with non-zero lhs and used as initial condtions in Godley table headings. For ticket 1137.  
-				auto vv=minsky().variableValues[VariableValue::valueIdFromScope(group.lock(),v.init)];                  
-                FlowCoef fc((vv->lhs())? str(vv->value()) : table.cell(r,c).substr(start));                      
-                //FlowCoef fc(table.cell(r,c).substr(start));                      
+                FlowCoef fc(table.cell(r,c).substr(start));                      
                 v.init=fc.str();
+                // ensure that flows used as intial conditions, which inherit their values from other vars, correctly initialise corresponding stock var. for ticket 1137.
+                auto vv=minsky().variableValues[VariableValue::valueIdFromScope(group.lock(),v.init)];
+                if (vv->lhs()) vv->init=str(vv->value());                
                 v.godleyOverridden=true;
               }
             else

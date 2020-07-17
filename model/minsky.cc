@@ -186,6 +186,7 @@ namespace minsky
 
     dimensions.clear();
     flags=reset_needed;
+    fileVersion=minskyVersion;
   }
 
 
@@ -1084,6 +1085,7 @@ namespace minsky
       throw;
     }
     flags &= ~is_edited;
+    fileVersion=minskyVersion;
   }
 
   void Minsky::load(const std::string& filename) 

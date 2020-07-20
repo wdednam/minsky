@@ -278,8 +278,8 @@ namespace minsky
                 FlowCoef fc(table.cell(r,c).substr(start));                      
                 v.init=fc.str();
                 // ensure that flows used as intial conditions, which inherit their values from other vars, correctly initialise corresponding stock var. for ticket 1137.
-                auto vv=minsky().variableValues[VariableValue::valueIdFromScope(group.lock(),v.init)];
-                if (vv->lhs()) vv->init=str(vv->value());                
+                //auto vv=minsky().variableValues[VariableValue::valueIdFromScope(group.lock(),v.init)];
+                //if (vv->lhs()) vv->init=str(vv->value());                
                 v.godleyOverridden=true;
               }
             else
@@ -302,8 +302,8 @@ namespace minsky
         accumulateWidthHeight(m_stockVars, stockH, stockMargin);
         accumulateWidthHeight(m_flowVars, flowH, flowMargin);
         float iw=this->iWidth(), ih=this->iHeight();
-        this->iWidth(max(iw, 1.8f*stockH));
-        this->iHeight(max(ih, 1.8f*flowH));
+        this->iWidth(max(iw, stockH));
+        this->iHeight(max(ih, flowH));
       }
     
     positionVariables();
@@ -457,8 +457,8 @@ namespace minsky
     //double w=0.5*Item::width()*z, h=0.5*Item::height()*z;
     double w=iWidth()*z, h=iHeight()*z;
     // check if (x,y) is within portradius of the 4 corners
-    if ((abs(x-Item::left()) < portRadiusMult*z || abs(x-Item::right()) < portRadiusMult*z) &&
-      (abs(y-Item::top()) < portRadiusMult*z || abs(y-Item::bottom()) < portRadiusMult*z))    
+    if ((abs(x-left()) < portRadiusMult*z || abs(x-right()) < portRadiusMult*z) &&
+      (abs(y-top()) < portRadiusMult*z || abs(y-bottom()) < portRadiusMult*z))    
       return ClickType::onResize;
     // Make it possible to pull wires from variables attached to Godley icons. For ticket 940  
     if (auto item=select(x,y))

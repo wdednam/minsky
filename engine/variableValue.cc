@@ -132,7 +132,7 @@ namespace minsky
     
     FlowCoef fc(init);
     if (trimWS(fc.name).empty())
-      return fc.coef;
+      return fc.coef;  
     else
       {
         // special generator functions handled here

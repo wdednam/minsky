@@ -624,10 +624,12 @@ namespace MathDAG
     assert(VariableValue::isValueId(valueId));
     assert(minsky.variableValues.count(valueId));
     auto vv=minsky.variableValues[valueId];
+    
+    //ports[1]->wires()[0]->from()->item().variableCast()->vValue()->init
 
     if (type==VariableType::constant)
       {
-        NodePtr r(new ConstantDAG(vv->lhs()? str(vv->value()) : vv->init)); // Ensure flows with non-zero lhs and used as initial condtions in Godley table headings. For ticket 1137.
+        NodePtr r(new ConstantDAG(vv->init));
         expressionCache.insert(valueId, r);
         return r;
       }
@@ -640,16 +642,15 @@ namespace MathDAG
     
     shared_ptr<VariableDAG> r(new VariableDAG(valueId, nm, type));
     expressionCache.insert(valueId, r);
-    r->init=vv->lhs()? str(vv->value()) :vv->init; // Ensure flows with non-zero lhs and used as initial condtions in Godley table headings. For ticket 1137.
+    r->init=vv->init; 
 	if (auto v=minsky.definingVar(valueId)) {
       if (v->type()!=VariableType::integral && v->numPorts()>1 && !v->ports[1]->wires().empty())
         r->rhs=getNodeFromWire(*v->ports[1]->wires()[0]);
 	  // ensure that flows used as intial conditions, which inherit their values from other vars, correctly initialise corresponding stock var. for ticket 1137.
-	  auto vi=minsky.variableValues[VariableValue::valueId(v->group.lock(),vv->init)];
-	  if (vi->lhs()) {
-		  vv->init=str(vv->value());        
-		  r->init=vv->init;
-	  }
+	  //auto vi=minsky.variableValues[VariableValue::valueId(v->group.lock(),vv->init)];
+	  //if (vi->lhs()) {
+		//  r->init=vv->init;  
+	  //}
 	}
     return r;
   }

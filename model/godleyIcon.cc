@@ -166,14 +166,14 @@ namespace minsky
   double GodleyIcon::schema1ZoomFactor() const
   {
     if (auto g=group.lock())
-      return iconScale()*g->zoomFactor();
+      return this->scaleFactor()*g->zoomFactor();
     else
-      return iconScale();
+      return this->scaleFactor();
   }
 
   void GodleyIcon::resize(const LassoBox& b)
   {
-	float z=zoomFactor(), iw=this->iWidth(svgRenderer.width()), ih=this->iHeight(svgRenderer.height()), is=iconScale();  
+	float z=zoomFactor(), iw=this->iWidth(svgRenderer.width()), ih=this->iHeight(svgRenderer.height()), is=this->scaleFactor();  
 	float minusLeftMargin=iw*z*is, minusBottomMargin=ih*z*is;
     auto bw=abs(b.x0-b.x1), bh=abs(b.y0-b.y1);
     if (bw<=leftMargin() || bh<=bottomMargin()) return;
@@ -302,8 +302,8 @@ namespace minsky
         accumulateWidthHeight(m_stockVars, stockH, stockMargin);
         accumulateWidthHeight(m_flowVars, flowH, flowMargin);
         float iw=this->iWidth(), ih=this->iHeight();
-        this->iWidth(max(iw, stockH));
-        this->iHeight(max(ih, flowH));
+        this->iWidth(max(iw, 1.8f*stockH));
+        this->iHeight(max(ih, 1.8f*flowH));
       }
     
     positionVariables();
@@ -313,7 +313,7 @@ namespace minsky
   void GodleyIcon::positionVariables() const
   {
     // position of margin in absolute canvas coordinate
-    float z=iconScale()*this->zoomFactor();
+    float z=this->scaleFactor()*this->zoomFactor();
     float vdf=variableDisplay? 1: -1; // variable display factor
     float x= this->x() - 0.5*iWidth()*z+0.5*leftMargin();
     float y= this->y() - 0.5*bottomMargin()-0.15*iHeight()*z;
@@ -350,7 +350,7 @@ namespace minsky
   void GodleyIcon::draw(cairo_t* cairo) const
   {
 	  
-    float z=zoomFactor()*iconScale();   
+    float z=zoomFactor()*this->scaleFactor();   
     positionVariables();
     double titley;
     

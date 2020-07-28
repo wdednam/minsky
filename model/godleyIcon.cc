@@ -454,19 +454,19 @@ namespace minsky
   ClickType::Type GodleyIcon::clickType(float x, float y)
   {
     double dx=fabs(x-this->x()), dy=fabs(y-this->y());
-    auto z=zoomFactor();
+    auto z=zoomFactor()*scaleFactor();
     double w=iWidth()*z, h=iHeight()*z;
     // check if (x,y) is within portradius of the 4 corners
     if ((abs(x-left()) < portRadiusMult*z || abs(x-right()) < portRadiusMult*z) &&
         (abs(y-top()) < portRadiusMult*z || abs(y-bottom()) < portRadiusMult*z))    
-      return ClickType::onResize;
-    // Make it possible to pull wires from variables attached to Godley icons. For ticket 940  
-    if (auto item=select(x,y))
-      return item->clickType(x,y);         
+      return ClickType::onResize;        
     if (dx < w && dy < h)
       return ClickType::onItem;
     else
       return ClickType::outside;
+    // Make it possible to pull wires from variables attached to Godley icons. For ticket 940  
+    if (auto item=select(x,y))
+      return item->clickType(x,y);       
   }
 
   

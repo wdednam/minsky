@@ -109,7 +109,7 @@ namespace schema3
     // Godley Icon specific fields
     Optional<std::vector<std::vector<std::string>>> data;
     Optional<std::vector<minsky::GodleyAssetClass::AssetClass>> assetClasses;
-    Optional<float> iconScale; // for handling legacy schemas
+    Optional<bool> editorMode, buttonDisplay, variableDisplay;
     // Plot specific fields
     Optional<bool> logx, logy, ypercent;
     Optional<minsky::PlotWidget::PlotType> plotType;
@@ -141,8 +141,10 @@ namespace schema3
       axis(o.axis), arg(o.arg) {}
     Item(int id, const minsky::GodleyIcon& g, const std::vector<int>& ports):
       ItemBase(id,static_cast<const minsky::Item&>(g),ports),
-      width(g.iWidth()/g.zoomFactor()), height(g.iHeight()/g.zoomFactor()), name(g.table.title), data(g.table.getData()),
-      assetClasses(g.table._assetClass()) {}
+      width(g.iWidth()), height(g.iHeight()), name(g.table.title), data(g.table.getData()),
+      assetClasses(g.table._assetClass()),
+      editorMode(g.editorMode()),
+      buttonDisplay(g.buttonDisplay()), variableDisplay(g.variableDisplay) {}
     Item(int id, const minsky::PlotWidget& p, const std::vector<int>& ports):
       ItemBase(id,static_cast<const minsky::Item&>(p),ports),
       width(p.iWidth()), height(p.iHeight()), name(p.title),
@@ -172,7 +174,7 @@ namespace schema3
       slider(it.slider), intVar(it.intVar), dataOpData(it.dataOpData), filename(it.filename),
       ravelState(it.ravelState), lockGroup(it.lockGroup), dimensions(it.dimensions),
       axis(it.axis), arg(it.arg), data(it.data), assetClasses(it.assetClasses),
-      iconScale(it.iconScale), logx(it.logx), logy(it.logy), ypercent(it.ypercent),
+      logx(it.logx), logy(it.logy), ypercent(it.ypercent),
       plotType(minsky::PlotWidget::PlotType(it.plotType? int(*it.plotType): 0)),
       xlabel(it.xlabel), ylabel(it.ylabel), y1label(it.y1label),
       nxTicks(it.nxTicks), nyTicks(it.nyTicks), xtickAngle(it.xtickAngle),

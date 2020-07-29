@@ -631,7 +631,8 @@ namespace minsky
           if (i->right()>x1) x1=i->right();
           if (i->bottom()<y0) y0=i->bottom();
           if (i->top()>y1) y1=i->top();
-        }  	
+        }  		
+			  
     for (auto& i: groups)
       {
         if (i->left()<x0) x0=i->left();

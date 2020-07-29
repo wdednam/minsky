@@ -339,12 +339,15 @@ namespace minsky
 
   ItemPtr GodleyIcon::select(float x, float y) const
   {
-    for (auto& v: m_flowVars)
-      if (v->contains(x,y)) 
-        return v;
-    for (auto& v: m_stockVars)
-      if (v->contains(x,y)) 
-        return v;
+	if (variableDisplay)           // Disable selection of stock and flow vars when they are hidden. for tickets 1217 and 1220.
+	{   
+       for (auto& v: m_flowVars)
+         if (v->contains(x,y)) 
+           return v;
+       for (auto& v: m_stockVars)
+         if (v->contains(x,y)) 
+           return v; 
+     }
     return ItemPtr();
   }
 
@@ -455,18 +458,18 @@ namespace minsky
   {
     double dx=fabs(x-this->x()), dy=fabs(y-this->y());
     auto z=zoomFactor()*scaleFactor();
-    double w=iWidth()*z, h=iHeight()*z;
+    double w=0.5*iWidth()*z, h=0.5*iHeight()*z;
     // check if (x,y) is within portradius of the 4 corners
     if ((abs(x-left()) < portRadiusMult*z || abs(x-right()) < portRadiusMult*z) &&
-        (abs(y-top()) < portRadiusMult*z || abs(y-bottom()) < portRadiusMult*z))    
+        (abs(y-top()) < portRadiusMult*z || abs(y-bottom()) < portRadiusMult*z))        
       return ClickType::onResize;        
+    // Make it possible to pull wires from variables attached to Godley icons. For ticket 940  
+    if (auto item=select(x,y))
+      return item->clickType(x,y);        
     if (dx < w && dy < h)
       return ClickType::onItem;
     else
-      return ClickType::outside;
-    // Make it possible to pull wires from variables attached to Godley icons. For ticket 940  
-    if (auto item=select(x,y))
-      return item->clickType(x,y);       
+      return ClickType::outside;     
   }
 
   

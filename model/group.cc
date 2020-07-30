@@ -762,7 +762,6 @@ namespace minsky
 
   ClickType::Type Group::clickType(float x, float y)
   {
-    double dx=x-this->x(), dy=y-this->y();
     auto z=zoomFactor();
     //double w=0.5*iconWidth*z, h=0.5*iconHeight*z;
     double w=0.5*Item::width(), h=0.5*Item::height();

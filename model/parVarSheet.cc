@@ -74,7 +74,7 @@ namespace minsky
         if (!itemVector.empty())
           {
             float x0, y0=1.5*rowHeight;//+pango.height();	
-            double w,h,w_prev, h_prev,lh; 
+            double w=0,h=0,w_prev, h_prev,lh; 
             for (auto& it: itemVector)
               {
                 auto value=it->variableCast()->vValue();

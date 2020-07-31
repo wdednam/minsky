@@ -561,13 +561,13 @@ proc doubleButton {x y} {
 bind .wiring.canvas <<contextMenu>> {
 	set item minsky.canvas.item
     if [getWireAt %x %y] {
-		# if not displayContents, disable context menu of wires. for ticket 1226.
+		# if not display the contents of groups, disable context menu of wires. for ticket 1225.
         switch [$item.classType] {
 			Group { 
 				if {![$item.displayContents]} {
 					rightMouseGroup %x %y %X %Y
-				} else {
-					wireContextMenu %X %Y
+				} else {  # needed, otherwise wires inside groups can be very hard to right click on. for ticket 1225
+					wireContextMenu %X %Y  
 				}
 			}
 			default {wireContextMenu %X %Y}

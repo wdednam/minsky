@@ -50,7 +50,7 @@ namespace minsky
 
   GroupPtr Group::copy() const
   {
-    auto r=make_shared<Group>();
+    auto r=make_shared<Group>();   
     r->self=r;
     // make new group a sibling of this if possible
     if (auto g=group.lock())
@@ -408,7 +408,8 @@ namespace minsky
       (y-this->y())*sin(rotation()*M_PI/180);
     float dy=(x-this->x())*sin(rotation()*M_PI/180)+
       (y-this->y())*cos(rotation()*M_PI/180);      
-    float w=0.5*iconWidth*z,h=0.5*iconHeight*z;
+    //float w=0.5*iconWidth*z,h=0.5*iconHeight*z;
+    float w=0.5*iWidth()*z,h=0.5*iHeight()*z;
     if (w-right*edgeScale()<dx)
       return IORegion::output;
     else if (-w+left*edgeScale()>dx)
@@ -451,8 +452,10 @@ namespace minsky
     double dx=xx-x(), dy=yy-y();
     float l,r; margins(l,r);    
     float z=zoomFactor();
-    iconWidth=((x1-x0)+l+r)/z;
-    iconHeight=((y1-y0)+20*z)/z;
+    //iconWidth=((x1-x0)+l+r)/z;
+    //iconHeight=((y1-y0)+20*z)/z;
+    iWidth(((x1-x0)+l+r)/z);
+    iHeight(((y1-y0)+20*z)/z);
 
     // adjust contents by the offset
     for (auto& i: items)
@@ -481,8 +484,10 @@ namespace minsky
   void Group::resize(const LassoBox& b)
   {
     float z=zoomFactor();
-    iconWidth=fabs(b.x0-b.x1)/z;
-    iconHeight=(fabs(b.y0-b.y1)-2*topMargin)/z;
+    //iconWidth=fabs(b.x0-b.x1)/z;
+    //iconHeight=(fabs(b.y0-b.y1)-2*topMargin)/z;
+    iWidth(fabs(b.x0-b.x1)/z);
+    iHeight((fabs(b.y0-b.y1)-2*topMargin)/z);
     // account for margins
     float l, r;
     margins(l,r);    
@@ -676,6 +681,7 @@ namespace minsky
   {
     double x0, x1, y0, y1;
     //float l, r, t, bm;
+    float z=zoomFactor();
     float l, r;    
     float lz=contentBounds(x0,y0,x1,y1);
     x0=min(x0,double(x()));
@@ -683,14 +689,17 @@ namespace minsky
     y0=min(y0,double(y()));
     y1=max(y1,double(y()));
     // first compute the value assuming margins are of zero width
-    displayZoom = 2*max( max(x1-x(), x()-x0)/iconWidth, max(y1-y(), y()-y0)/iconHeight );
+    //displayZoom = 2*max( max(x1-x(), x()-x0)/iconWidth, max(y1-y(), y()-y0)/iconHeight );
+    displayZoom = 2*max( max(x1-x(), x()-x0)/(iWidth()*z), max(y1-y(), y()-y0)/(iHeight()*z) );
 
     // account for shrinking margins
-    float readjust=zoomFactor()/edgeScale() / (displayZoom>1? displayZoom:1);
+    float readjust=z/edgeScale() / (displayZoom>1? displayZoom:1);
     margins(l,r);
     l*=readjust; r*=readjust;    
+    //displayZoom = max(displayZoom, 
+    //              float(max((x1-x())/(0.5f*iconWidth-r), (x()-x0)/(0.5f*iconWidth-l))));
     displayZoom = max(displayZoom, 
-                  float(max((x1-x())/(0.5f*iconWidth-r), (x()-x0)/(0.5f*iconWidth-l))));
+                  float(max((x1-x())/(0.5f*iWidth()*z-r), (x()-x0)/(0.5f*iWidth()*z-l))));
   
     displayZoom*=1.1*rotFactor()/lz;
 
@@ -707,15 +716,19 @@ namespace minsky
     float l, r;
     margins(l,r);    
     double dx=x1-x0, dy=y1-y0;
-    if (iconWidth-l-r>0 && dx>0 && dy>0)
-      relZoom=std::min(1.0, std::min((iconWidth-l-r)/(z*dx), (iconHeight-20*z)/(z*dy)));    
+    //if (iconWidth-l-r>0 && dx>0 && dy>0)
+    //  relZoom=std::min(1.0, std::min((iconWidth-l-r)/(z*dx), (iconHeight-20*z)/(z*dy)));    
+    if (iWidth()*z-l-r>0 && dx>0 && dy>0)
+      relZoom=std::min(1.0, std::min((iWidth()*z-l-r)/(z*dx), (iHeight()*z-20*z)/(z*dy)));    
   }
   
   const Group* Group::minimalEnclosingGroup(float x0, float y0, float x1, float y1, const Item* ignore) const
   {
     float z=zoomFactor();
-    if (x0<x()-0.5*z*iconWidth || x1>x()+0.5*z*iconWidth || 
-        y0<y()-0.5*z*iconHeight || y1>y()+0.5*z*iconHeight)
+    //if (x0<x()-0.5*z*iconWidth || x1>x()+0.5*z*iconWidth || 
+    //    y0<y()-0.5*z*iconHeight || y1>y()+0.5*z*iconHeight)
+    if (x0<x()-0.5*z*iWidth() || x1>x()+0.5*z*iWidth() ||
+        y0<y()-0.5*z*iHeight() || y1>y()+0.5*z*iHeight())
       return nullptr;
     // at this point, this is a candidate. Check if any child groups are also
     for (auto& g: groups)
@@ -764,7 +777,7 @@ namespace minsky
   {
     auto z=zoomFactor();
     //double w=0.5*iconWidth*z, h=0.5*iconHeight*z;
-    double w=0.5*Item::width(), h=0.5*Item::height();
+    double w=0.5*iWidth()*z, h=0.5*iHeight()*z;
     // check if (x,y) is within portradius of the 4 corners
     if ((abs(x-left()) < portRadius*z || abs(x-right()) < portRadius*z) &&
       (abs(y-top()) < portRadius*z || abs(y-bottom()) < portRadius*z))
@@ -776,7 +789,8 @@ namespace minsky
     if (displayContents() && inIORegion(x,y)==IORegion::none)
       return ClickType::outside;
     if (auto item=select(x,y))
-      return item->clickType(x,y);
+      if (displayContents())
+        return item->clickType(x,y);
     if ((abs(x-this->x())<w && abs(y-this->y())<h) || inIORegion(x,y)==IORegion::topBottom) // check also if (x,y) is within top and bottom margins of group. for feature 88
       return ClickType::onItem;
     return ClickType::outside;
@@ -793,7 +807,8 @@ namespace minsky
     float z=zoomFactor();
     leftMargin*=edgeScale(); rightMargin*=edgeScale();
 
-    unsigned width=z*this->iconWidth, height=z*this->iconHeight;
+    //unsigned width=z*this->iconWidth, height=z*this->iconHeight;
+    unsigned width=z*this->iWidth(), height=z*this->iHeight();
 
     {
       // draw default group icon
@@ -924,8 +939,8 @@ namespace minsky
     cairo::CairoSave cs(cairo);
     cairo_rotate(cairo,-M_PI*rotation()/180);
     float z=zoomFactor();
-    draw1edge(inVariables, cairo, -0.5*(z*iconWidth-left));
-    draw1edge(outVariables, cairo, 0.5*(z*iconWidth-right));
+    draw1edge(inVariables, cairo, -0.5*(z*iWidth()-left));
+    draw1edge(outVariables, cairo, 0.5*(z*iWidth()-right));
   }
 
   // draw notches in the I/O region to indicate docking capability
@@ -943,7 +958,8 @@ namespace minsky
         y=max(y, fabs(i->y()-this->y())+varToTextRatio*rv.height()*edgeScale());
       }
     cairo_set_source_rgba(cairo,0,1,1,0.5);
-    float w=0.5*z*iconWidth, h=0.5*z*iconHeight;
+    //float w=0.5*z*iconWidth, h=0.5*z*iconHeight;
+    float w=0.5*z*iWidth(), h=0.5*z*iHeight();
     cairo_rotate(cairo,rotation()*M_PI/180);
     
     cairo_move_to(cairo,-w,-h);

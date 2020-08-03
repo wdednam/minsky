@@ -562,7 +562,7 @@ bind .wiring.canvas <<contextMenu>> {
     if {[getWireAt %x %y] && [minsky.canvas.wire.visible]} {    # prevents wire context menu from being accessed when group contents are not transparent. for ticket 1225.
 		wireContextMenu %X %Y  	  
     } elseif [getItemAt %x %y] {
-        switch [$item.classType] {
+        switch [minsky.canvas.item.classType] {
             GodleyIcon {rightMouseGodley %x %y %X %Y}
             Group {rightMouseGroup %x %y %X %Y}
             default {contextMenu %x %y %X %Y}

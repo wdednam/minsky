@@ -894,13 +894,13 @@ namespace minsky
         v->draw(cairo);
         if (i==0)
           {
-            top=0.5*varToTextRatio*v->height()*edgeScale()/v->zoomFactor(); //??? should be 0.5*varToTextRatio
+            top=0.5*varToTextRatio*v->height(); //??? should be 0.5*varToTextRatio
             bottom=-top;
           }
         else if (i%2)
-          top+=0.5*varToTextRatio*v->height()*edgeScale()/v->zoomFactor();
+          top+=0.5*varToTextRatio*v->height();
         else
-          bottom-=0.5*varToTextRatio*v->height()*edgeScale()/v->zoomFactor();
+          bottom-=0.5*varToTextRatio*v->height();
       }
   }
 
@@ -927,7 +927,7 @@ namespace minsky
     float y=0, dy=topMargin*edgeScale();
     for (auto& i: inVariables)
       {
-        y=max(y, fabs(i->y()-this->y())+varToTextRatio*i->height()*edgeScale()/v->zoomFactor());
+        y=max(y, fabs(i->y()-this->y())+varToTextRatio*i->height());
       }
     cairo_set_source_rgba(cairo,0,1,1,0.5);
     float w=0.5*z*iWidth(), h=0.5*z*iHeight();
@@ -949,7 +949,7 @@ namespace minsky
     y=0;
     for (auto& i: outVariables)
       {
-        y=max(y, fabs(i->y()-this->y())+varToTextRatio*i->height()*edgeScale()/v->zoomFactor());
+        y=max(y, fabs(i->y()-this->y())+varToTextRatio*i->height());
       }
     cairo_move_to(cairo,w,-h);
     // create notch in output region

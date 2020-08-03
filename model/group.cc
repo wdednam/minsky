@@ -408,7 +408,6 @@ namespace minsky
       (y-this->y())*sin(rotation()*M_PI/180);
     float dy=(x-this->x())*sin(rotation()*M_PI/180)+
       (y-this->y())*cos(rotation()*M_PI/180);      
-    //float w=0.5*iconWidth*z,h=0.5*iconHeight*z;
     float w=0.5*iWidth()*z,h=0.5*iHeight()*z;
     if (w-right*edgeScale()<dx)
       return IORegion::output;
@@ -452,8 +451,6 @@ namespace minsky
     double dx=xx-x(), dy=yy-y();
     float l,r; margins(l,r);    
     float z=zoomFactor();
-    //iconWidth=((x1-x0)+l+r)/z;
-    //iconHeight=((y1-y0)+20*z)/z;
     iWidth(((x1-x0)+l+r)/z);
     iHeight(((y1-y0)+20*z)/z);
 
@@ -484,8 +481,6 @@ namespace minsky
   void Group::resize(const LassoBox& b)
   {
     float z=zoomFactor();
-    //iconWidth=fabs(b.x0-b.x1)/z;
-    //iconHeight=(fabs(b.y0-b.y1)-2*topMargin)/z;
     iWidth(fabs(b.x0-b.x1)/z);
     iHeight((fabs(b.y0-b.y1)-2*topMargin)/z);
     // account for margins
@@ -622,28 +617,20 @@ namespace minsky
     y1=-numeric_limits<float>::max();
 
     for (auto& i: items)
-      if (auto g=dynamic_cast<GodleyIcon*>(i.get())) // Godley icon bounding box behaves unpredictably. For ticket 1219.
-        { 
-          float z=g->zoomFactor()*g->scaleFactor();	
-          if (g->x()-0.5*z*g->iWidth()<x0) x0=g->x()-0.5*z*g->iWidth();
-          if (g->x()+0.5*z*g->iWidth()>x1) x1=g->x()+0.5*z*g->iWidth();
-          if (g->y()-0.5*z*g->iHeight()<y0) y0=g->y()-0.5*z*g->iHeight();
-          if (g->y()+0.5*z*g->iHeight()>y1) y1=g->y()+0.5*z*g->iHeight();
-        }
-      else if (!i->ioVar())
+      if (!i->ioVar())
         {
           if (i->left()<x0) x0=i->left();
           if (i->right()>x1) x1=i->right();
-          if (i->bottom()<y0) y0=i->bottom();
-          if (i->top()>y1) y1=i->top();
+          if (i->top()<y0) y0=i->top();
+          if (i->bottom()>y1) y1=i->bottom();
         }  		
 			  
     for (auto& i: groups)
       {
         if (i->left()<x0) x0=i->left();
         if (i->right()>x1) x1=i->right();
-        if (i->bottom()<y0) y0=i->bottom();
-        if (i->top()>y1) y1=i->top();
+        if (i->top()<y0) y0=i->top();
+        if (i->bottom()>y1) y1=i->bottom();
       }
    
     // if there are no contents, result is not finite. In this case,
@@ -681,7 +668,7 @@ namespace minsky
   {
     double x0, x1, y0, y1;
     //float l, r, t, bm;
-    float z=zoomFactor();
+    float z=zoomFactor();    
     float l, r;    
     float lz=contentBounds(x0,y0,x1,y1);
     x0=min(x0,double(x()));
@@ -689,8 +676,7 @@ namespace minsky
     y0=min(y0,double(y()));
     y1=max(y1,double(y()));
     // first compute the value assuming margins are of zero width
-    //displayZoom = 2*max( max(x1-x(), x()-x0)/iconWidth, max(y1-y(), y()-y0)/iconHeight );
-    displayZoom = 2*max( max(x1-x(), x()-x0)/(iWidth()*z), max(y1-y(), y()-y0)/(iHeight()*z) );
+    displayZoom = 2*max( max(x1-x(), x()-x0)/(iWidth()*z), max(y1-y(), y()-y0)/(iHeight()*z));
 
     // account for shrinking margins
     float readjust=z/edgeScale() / (displayZoom>1? displayZoom:1);
@@ -716,17 +702,13 @@ namespace minsky
     float l, r;
     margins(l,r);    
     double dx=x1-x0, dy=y1-y0;
-    //if (iconWidth-l-r>0 && dx>0 && dy>0)
-    //  relZoom=std::min(1.0, std::min((iconWidth-l-r)/(z*dx), (iconHeight-20*z)/(z*dy)));    
     if (iWidth()*z-l-r>0 && dx>0 && dy>0)
-      relZoom=std::min(1.0, std::min((iWidth()*z-l-r)/(z*dx), (iHeight()*z-20*z)/(z*dy)));    
+      relZoom=std::min(1.0, std::min((iWidth()*z-l-r)/(z*dx), (iHeight()*z-20*z)/(z*dy))); 
   }
   
   const Group* Group::minimalEnclosingGroup(float x0, float y0, float x1, float y1, const Item* ignore) const
   {
     float z=zoomFactor();
-    //if (x0<x()-0.5*z*iconWidth || x1>x()+0.5*z*iconWidth || 
-    //    y0<y()-0.5*z*iconHeight || y1>y()+0.5*z*iconHeight)
     if (x0<x()-0.5*z*iWidth() || x1>x()+0.5*z*iWidth() ||
         y0<y()-0.5*z*iHeight() || y1>y()+0.5*z*iHeight())
       return nullptr;
@@ -776,16 +758,8 @@ namespace minsky
   ClickType::Type Group::clickType(float x, float y)
   {
     auto z=zoomFactor();
-    //double w=0.5*iconWidth*z, h=0.5*iconHeight*z;
     double w=0.5*iWidth()*z, h=0.5*iHeight()*z;
-    // check if (x,y) is within portradius of the 4 corners
-    if ((abs(x-left()) < portRadius*z || abs(x-right()) < portRadius*z) &&
-      (abs(y-top()) < portRadius*z || abs(y-bottom()) < portRadius*z))
-      return ClickType::onResize;         
-//    if (fabs(fabs(dx)-w) < portRadiusMult*z &&
-//        fabs(fabs(dy)-h) < portRadiusMult*z &&
-//        fabs(hypot(dx,dy)-hypot(w,h)) < portRadiusMult*z)
-//      return ClickType::onResize;
+    if (onResizeHandle(x,y)) return ClickType::onResize;         
     if (displayContents() && inIORegion(x,y)==IORegion::none)
       return ClickType::outside;
     if (auto item=select(x,y))
@@ -807,7 +781,6 @@ namespace minsky
     float z=zoomFactor();
     leftMargin*=edgeScale(); rightMargin*=edgeScale();
 
-    //unsigned width=z*this->iconWidth, height=z*this->iconHeight;
     unsigned width=z*this->iWidth(), height=z*this->iHeight();
 
     {
@@ -907,7 +880,7 @@ namespace minsky
   void Group::draw1edge(const vector<VariablePtr>& vars, cairo_t* cairo, 
                         float x) const
   {
-    float top=0, bottom=0, z=zoomFactor();
+    float top=0, bottom=0;
     for (size_t i=0; i<vars.size(); ++i)
       {
         float y=i%2? top:bottom;
@@ -921,13 +894,13 @@ namespace minsky
         v->draw(cairo);
         if (i==0)
           {
-            top=0.5*varToTextRatio*v->height()*z; //??? should be 0.5*varToTextRatio
+            top=0.5*varToTextRatio*v->height()*edgeScale()/v->zoomFactor(); //??? should be 0.5*varToTextRatio
             bottom=-top;
           }
         else if (i%2)
-          top+=0.5*varToTextRatio*v->height()*z;
+          top+=0.5*varToTextRatio*v->height()*edgeScale()/v->zoomFactor();
         else
-          bottom-=0.5*varToTextRatio*v->height()*z;
+          bottom-=0.5*varToTextRatio*v->height()*edgeScale()/v->zoomFactor();
       }
   }
 
@@ -939,8 +912,8 @@ namespace minsky
     cairo::CairoSave cs(cairo);
     cairo_rotate(cairo,-M_PI*rotation()/180);
     float z=zoomFactor();
-    draw1edge(inVariables, cairo, -0.5*(z*iWidth()-left));
-    draw1edge(outVariables, cairo, 0.5*(z*iWidth()-right));
+    draw1edge(inVariables, cairo, -0.5*(iWidth()*z-left));
+    draw1edge(outVariables, cairo, 0.5*(iWidth()*z-right));
   }
 
   // draw notches in the I/O region to indicate docking capability
@@ -954,11 +927,9 @@ namespace minsky
     float y=0, dy=topMargin*edgeScale();
     for (auto& i: inVariables)
       {
-        RenderVariable rv(*i);
-        y=max(y, fabs(i->y()-this->y())+varToTextRatio*rv.height()*edgeScale());
+        y=max(y, fabs(i->y()-this->y())+varToTextRatio*i->height()*edgeScale()/v->zoomFactor());
       }
     cairo_set_source_rgba(cairo,0,1,1,0.5);
-    //float w=0.5*z*iconWidth, h=0.5*z*iconHeight;
     float w=0.5*z*iWidth(), h=0.5*z*iHeight();
     cairo_rotate(cairo,rotation()*M_PI/180);
     
@@ -978,8 +949,7 @@ namespace minsky
     y=0;
     for (auto& i: outVariables)
       {
-        RenderVariable rv(*i);
-        y=max(y, fabs(i->y()-this->y())+varToTextRatio*rv.height()*edgeScale());
+        y=max(y, fabs(i->y()-this->y())+varToTextRatio*i->height()*edgeScale()/v->zoomFactor());
       }
     cairo_move_to(cairo,w,-h);
     // create notch in output region

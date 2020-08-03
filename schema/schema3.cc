@@ -391,10 +391,6 @@ namespace schema3
       {
         if (y.name)
           x1->name(*y.name);
-        if (y.init)
-          x1->init(*y.init);
-        if (y.units)
-          x1->setUnits(*y.units);
         if (y.slider)
           {
             x1->sliderBoundsSet=true;
@@ -404,23 +400,7 @@ namespace schema3
             x1->sliderMax=y.slider->max;
             x1->sliderStep=y.slider->step;
           }
-        if (y.tensorData)
-          if (auto val=x1->vValue())
-            {
-              auto buf=minsky::decode(*y.tensorData);
-              try
-                {
-                  unpack(buf, val->tensorInit);
-                  val->hypercube(val->tensorInit.hypercube());
-                }
-              catch (const std::exception& ex) {
-                val->tensorInit.hypercube({});
-                cout<<ex.what()<<endl;
-              }
-              catch (...) {
-                val->tensorInit.hypercube({});
-              } // absorb for now - maybe log later
-            }
+        // variableValue attributes populated later once variable is homed in its group
       }
     if (auto x1=dynamic_cast<minsky::OperationBase*>(&x))
       {
@@ -445,8 +425,8 @@ namespace schema3
         if (y.buttonDisplay && *y.buttonDisplay!=x1->buttonDisplay())
           x1->toggleButtons();
         if (y.variableDisplay) x1->variableDisplay=*y.variableDisplay;
-        if (y.width) x1->iWidth(*y.width);
-        if (y.height) x1->iHeight(*y.height);
+        if (y.width && *y.width>0) x1->iWidth(*y.width);
+        if (y.height && *y.height>0) x1->iHeight(*y.height);
       }
     if (auto x1=dynamic_cast<minsky::PlotWidget*>(&x))
       {
@@ -486,11 +466,9 @@ namespace schema3
       }
     if (auto x1=dynamic_cast<minsky::Group*>(&x))
       {
-        //if (y.width) x1->iconWidth=*y.width;
-        //if (y.height) x1->iconHeight=*y.height;
         if (y.width) x1->iWidth(*y.width);
-        if (y.height) x1->iHeight(*y.height);        
-        //x1->bb.update(*x1);
+        if (y.height) x1->iHeight(*y.height);       
+        x1->bb.update(*x1);
         if (y.name) x1->title=*y.name;
         if (y.bookmarks) x1->bookmarks=*y.bookmarks;
       }
@@ -521,7 +499,7 @@ namespace schema3
           populateItem(*newItem,i);
           for (size_t j=0; j<min(newItem->ports.size(), i.ports.size()); ++j)
             portMap[i.ports[j]]=newItem->ports[j];
-          if (matchesStart(i.type,"Variable:"))
+          if (newItem->variableCast())
             schema3VarMap[i.id]=i;
         }
     // second loop over items to wire up integrals, and populate Godley table variables
@@ -610,7 +588,9 @@ namespace schema3
               {
                 auto it=itemMap.find(j);
                 if (it!=itemMap.end())
-                  newG->addItem(it->second, true/*inSchema*/);
+                  {
+                    newG->addItem(it->second, true/*inSchema*/);
+                  }
               }
             if (i.inVariables)
               for (auto j: *i.inVariables)
@@ -635,6 +615,35 @@ namespace schema3
                         newG->outVariables.push_back(v);
                         v->controller=newG;
                       }
+                }
+          }
+      }
+    // now that variables have been homed in their groups, set the variableValue stuff
+    for (auto& i: schema3VarMap)
+      {
+        auto it=itemMap.find(i.first);
+        if (auto v=it->second->variableCast())
+          {
+            if (i.second.init)
+              v->init(*i.second.init);
+            if (i.second.units)
+              v->setUnits(*i.second.units);
+            if (i.second.tensorData)
+              if (auto val=v->vValue())
+                {
+                  auto buf=minsky::decode(*i.second.tensorData);
+                  try
+                    {
+                      unpack(buf, val->tensorInit);
+                      val->hypercube(val->tensorInit.hypercube());
+                    }
+                  catch (const std::exception& ex) {
+                    val->tensorInit.hypercube({});
+                    cout<<ex.what()<<endl;
+                  }
+                  catch (...) {
+                    val->tensorInit.hypercube({});
+                  } // absorb for now - maybe log later
                 }
           }
       }

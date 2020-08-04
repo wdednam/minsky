@@ -396,7 +396,7 @@ namespace minsky
     createdIOvariables.push_back(v);
     v->rotation(rotation());
     v->controller=self;
-    bb.update(*this);
+    bb.update(*this);  
     return v;
   }
   
@@ -703,7 +703,7 @@ namespace minsky
     margins(l,r);    
     double dx=x1-x0, dy=y1-y0;
     if (iWidth()*z-l-r>0 && dx>0 && dy>0)
-      relZoom=std::min(1.0, std::min((iWidth()*z-l-r)/(z*dx), (iHeight()*z-20*z)/(z*dy))); 
+      relZoom=std::min(1.0, (iWidth()*z-l-r)/(z*dx));
   }
   
   const Group* Group::minimalEnclosingGroup(float x0, float y0, float x1, float y1, const Item* ignore) const
@@ -931,7 +931,15 @@ namespace minsky
       }
     cairo_set_source_rgba(cairo,0,1,1,0.5);
     float w=0.5*z*iWidth(), h=0.5*z*iHeight();
+    double fm=std::fmod(rotation(),360);
+    bool notflipped=(fm>-90 && fm<90) || fm>270 || fm<-270;    
+    
     cairo_rotate(cairo,rotation()*M_PI/180);
+    if (!notflipped) {
+		float dummy=left;
+		left=right;
+		right=dummy;
+	}
     
     cairo_move_to(cairo,-w,-h);
     // create notch in input region
@@ -954,9 +962,9 @@ namespace minsky
     cairo_move_to(cairo,w,-h);
     // create notch in output region
     cairo_line_to(cairo,w,y-dy);
-    cairo_line_to(cairo,w-right-2*z,y-dy);
-    cairo_line_to(cairo,w-right+2*z,y);
-    cairo_line_to(cairo,w-right-2*z,y+dy);
+    cairo_line_to(cairo,w-right+4*z,y-dy);
+    cairo_line_to(cairo,w-right,y);
+    cairo_line_to(cairo,w-right+4*z,y+dy);
     cairo_line_to(cairo,w,y+dy);
     cairo_line_to(cairo,w,h);
     cairo_line_to(cairo,w-right,h);

@@ -46,7 +46,7 @@ namespace minsky
     x.onResizeHandles=false;
     try
       {
-        cairo_rotate(surf.cairo(),-x.rotation()*M_PI/180);
+        //cairo_rotate(surf.cairo(),-x.rotation()*M_PI/180);
         x.draw(surf.cairo());
       }
     catch (const std::exception& e) 
@@ -132,7 +132,10 @@ namespace minsky
 
    bool BottomRightResizerItem::onResizeHandle(float x, float y) const
   {
-    return near(x,y,right(),bottom(),resizeHandleSize(),Rotate(rotation(),this->x(),this->y()));
+    //double angle=rotation() * M_PI / 180.0;	  
+    double angle=0;
+	double sa=sin(angle), ca=cos(angle); 
+    return near(x,y,right()*ca+bottom()*sa,bottom()*ca-right()*sa,resizeHandleSize(),Rotate(0,this->x(),this->y()));
   }
 
  

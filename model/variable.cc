@@ -26,6 +26,8 @@
 #include "minsky_epilogue.h"
 
 #include <boost/regex.hpp>
+#include <boost/locale.hpp>
+using namespace boost::locale::conv;
 
 using namespace classdesc;
 using namespace ecolab;
@@ -164,11 +166,11 @@ string VariableBase::name()  const
       if (!g || g==cminsky().model)
         return m_name.substr(1);
     }
-  return m_name;
+  return utf_to_utf<char>(m_name);
 }
 
 string VariableBase::name(const std::string& name) 
-{	
+{
   // cowardly refuse to set a blank name
   if (name.empty() || name==":") return name;
   // Ensure value of variable is preserved after rename. For ticket 1106.	
@@ -185,7 +187,7 @@ bool VariableBase::ioVar() const
 
 
 void VariableBase::ensureValueExists(VariableValue* vv, const std::string& nm) const
-{
+{	
   string valueId=this->valueId();
   // disallow blank names
   if (valueId.length()>1 && valueId.substr(valueId.length()-2)!=":_" && 

@@ -23,11 +23,14 @@
 #include "minsky.h"
 #include <pango.h>
 #include "minsky_epilogue.h"
+#include <string>
+#include <boost/locale.hpp>
 
 using namespace std;
 using namespace minsky;
 using ecolab::Pango;
 using namespace ecolab::cairo;
+using namespace boost::locale::conv;
 
 #include <cairo/cairo-ps.h>
 #include <cairo/cairo-pdf.h>
@@ -227,7 +230,9 @@ namespace minsky
             CairoSave cs(cairo);
             if (row!=0 || col!=0)               
               {
-                string text=godleyIcon->table.cell(row,col);
+				// Make sure non-utf8 chars converted to utf8 as far as possible. for ticket 1166.  
+                string text=utf_to_utf<char>(godleyIcon->table.cell(row,col));
+                
                 if (!text.empty())
                   {
                     string value;
@@ -237,7 +242,7 @@ namespace minsky
                         {
                           auto vv=cminsky().variableValues
                             [VariableValue::valueIdFromScope
-                             (godleyIcon->group.lock(),fc.name)];
+                             (godleyIcon->group.lock(),utf_to_utf<char>(fc.name))];
                           if (vv->idx()>=0)
                             {
                               double val=fc.coef*vv->value();
@@ -446,7 +451,9 @@ namespace minsky
     ZoomablePango pango(surf.cairo());
     if (selectedCellInTable() && (selectedRow!=1 || selectedCol!=0)) // No text index needed for a cell that is immutable. For ticket 1064
       {
+		// Make sure non-utf8 chars converted to utf8 as far as possible. for ticket 1166.  
         auto& str=godleyIcon->table.cell(selectedRow,selectedCol);
+        str=utf_to_utf<char>(str);                
         pango.setMarkup(defang(str));
         int j=0;
         if (selectedCol>=int(scrollColStart)) j=selectedCol-scrollColStart+1;
@@ -500,7 +507,8 @@ namespace minsky
         if (selectedCellInTable() && (selectedRow!=1 || selectedCol!=0)) // Cannot save text in cell(1,0). For ticket 1064
            {
              selectIdx=insertIdx = textIdx(x);
-             godleyIcon->table.savedText=godleyIcon->table.cell(selectedRow, selectedCol);
+             // Make sure non-utf8 chars converted to utf8 as far as possible. for ticket 1166.
+             godleyIcon->table.savedText=utf_to_utf<char>(godleyIcon->table.cell(selectedRow, selectedCol));
            }
         else
           selectIdx=insertIdx=0;
@@ -589,8 +597,10 @@ namespace minsky
     
     auto& table=godleyIcon->table;
     if (selectedCellInTable() && (selectedCol!=0 || selectedRow!=1)) // Cell (1,0) is off-limits. For ticket 1064
-          {			  	  
-            auto& str=table.cell(selectedRow,selectedCol);
+          {	
+			auto& str=table.cell(selectedRow,selectedCol);
+			str=utf_to_utf<char>(str);	  	  
+            
             if (utf8.length() && (keySym<0x7f || (0xffaa <= keySym && keySym <= 0xffbf)))  // Enable numeric keypad key presses. For ticket 1136
               // all printing and control characters have keysym
               // <0x80. But some keys (eg tab, backspace and escape
@@ -789,7 +799,7 @@ namespace minsky
   {
     int c=colX(x);
     if (c>0)
-      godleyIcon->table.insertCol(c+1);
+      godleyIcon->table.insertCol(c+1);   
   }
   void GodleyTableEditor::importStockVar(const string& name, double x)
   {
@@ -995,7 +1005,7 @@ namespace {
                 {
                   auto savedItem=minsky().canvas.item;
                   minsky().canvas.item=sv;
-                  minsky().canvas.renameAllInstances(godleyIcon->table.cell(selectedRow,selectedCol));
+                  minsky().canvas.renameAllInstances(utf_to_utf<char>(godleyIcon->table.cell(selectedRow,selectedCol)));
                   savedItem.swap(minsky().canvas.item);
                 }
             minsky().importDuplicateColumn(godleyIcon->table, selectedCol);

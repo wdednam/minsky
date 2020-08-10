@@ -902,7 +902,7 @@ namespace minsky
     auto godleyItems=model->findAll<GodleyIcon*>
       (toGodleyIcon, &GroupItems::items, toGodleyIcon);
     evalGodley.initialiseGodleys(GodleyIt(godleyItems.begin()), 
-                                 GodleyIt(godleyItems.end()), variableValues);
+                                 GodleyIt(godleyItems.end()), variableValues);                         
   }
 
   void Minsky::reset()
@@ -1191,9 +1191,10 @@ namespace minsky
       {
         model->recursiveDo(&Group::items, 
                            [&](Items&,Items::iterator i) {
-                             if (auto g=dynamic_cast<GodleyIcon*>(i->get()))
+                             if (auto g=dynamic_cast<GodleyIcon*>(i->get())) {
                                for (unsigned i=1; i<g->table.cols(); ++i)
                                  balanceDuplicateColumns(*g,i);
+							 }
                              return false;
                            });
     

@@ -76,7 +76,8 @@ namespace minsky
     Units units;
     bool unitsCached=false; // optimisation to prevent evaluating this units value more than once
     void setUnits(const std::string& x) {units=Units(x);}
-    
+
+    bool sliderVisible=false; // determined at reset time
     bool godleyOverridden;
     std::string name; // name of this variable
     classdesc::Exclude<std::weak_ptr<Group>> m_scope;
@@ -243,7 +244,7 @@ namespace minsky
   struct EngNotation {int sciExp, engExp;};
   /// return formatted mantissa and exponent in engineering format
   EngNotation engExp(double value);
-  std::string mantissa(double value, const EngNotation&);
+  std::string mantissa(double value, const EngNotation&,int digits=3);
   std::string expMultiplier(int exp);
 
 

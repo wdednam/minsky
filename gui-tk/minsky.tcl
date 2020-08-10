@@ -19,6 +19,7 @@
 
 set fname ""
 set workDir [pwd]
+encoding system utf-8
 
 # On mac-build versions, fontconfig needs to find its config file,
 # which is packaged up in the Minsky.app directory
@@ -714,6 +715,7 @@ proc logVarsOK {} {
 .menubar.edit add command -label "Paste" -command "minsky.paste" -accelerator $meta_menu-V
 .menubar.edit add command -label "Group selection" -command "minsky.createGroup" -accelerator $meta_menu-G
 .menubar.edit add command -label "Dimensions" -command dimensionsDialog
+.menubar.edit add command -label "Remove units" -command minsky.deleteAllUnits
 
 proc togglePaste {} {
     if {[getClipboard]==""} {
@@ -1632,7 +1634,7 @@ proc exit {} {
     if {[edited]||[file exists [autoBackupName]]} {
         switch [tk_messageBox -message "Save before exiting?" -type yesnocancel] {
             yes save
-            no {}
+            no {file delete [autoBackupName]}
             cancel {return -level [info level]}
         }
     }

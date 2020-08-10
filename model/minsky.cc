@@ -553,7 +553,15 @@ namespace minsky
     equations.clear();
     integrals.clear();
 
-    dimensionalAnalysis();
+    try
+      {
+        dimensionalAnalysis();
+      }
+    catch (const std::exception& ex)
+      {
+        // do not block reset() on dimensional analysis failure
+        message(ex.what());
+      }
     
     EvalOpBase::timeUnit=timeUnit;
 
@@ -610,6 +618,12 @@ namespace minsky
              i->checkUnits();
          return false;
        });
+  }
+
+  void Minsky::deleteAllUnits()
+  {
+    for (auto& i: variableValues)
+      i.second->units.clear();
   }
   
   void Minsky::populateMissingDimensions() {
@@ -933,11 +947,18 @@ namespace minsky
                p->updateIcon(t);
              else
                p->addConstantCurves();
-             p->redraw();
+             p->requestRedraw();
            }
          else if (auto r=dynamic_cast<Ravel*>(i->get()))
-           if (r->ports[1]->numWires()>0)
-             r->populateHypercube(r->ports[1]->getVariableValue()->hypercube());
+           {
+             if (r->ports[1]->numWires()>0)
+               r->populateHypercube(r->ports[1]->getVariableValue()->hypercube());
+           }
+         else if (auto v=(*i)->variableCast())
+           { //determine whether a slider should be shown
+             if (auto vv=v->vValue())
+               vv->sliderVisible = v->type()==VariableType::parameter || (v->type()==VariableType::flow && !inputWired(v->valueId()));
+           }
          return false;
        });
 

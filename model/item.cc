@@ -149,48 +149,6 @@ namespace minsky
       near(x,y,left(),bottom(),rhSize,r) ||
       near(x,y,right(),bottom(),rhSize,r); 
   }
-  
-   std::pair<double,std::pair<float,float>> Item::rotatedPoints() const
-   {
-     // ensure resize handle is always active on the same corner of variable/items for 90 and 180 degree rotations. for ticket 1232   
-     double fm=std::fmod(rotation(),360), angle;	
-     float x1=right(),y1=bottom();  
-     if (fm==-90 || fm==270) {
-       angle=-rotation();
-       Rotate r1(angle,this->x(),this->y());
-       x1=r1.x(right(),bottom());
-       y1=r1.y(right(),bottom());						  
-     }
-     else if (abs(fm)==180) {
-       angle=rotation();
-       x1=right();
-       y1=top();					
-     }
-     else angle=0;	
-     if (auto i=intOpCast())
-       {
-         if (i->coupled()) {
-           angle=i->intVar->rotation();  
-           Rotate r2(angle,i->intVar->x(),i->intVar->y());		
-           if (fm==-90 || fm==270) {
-             x1=r2.x(i->intVar->right(),i->intVar->bottom());
-             y1=r2.y(i->intVar->right(),i->intVar->bottom());
-           } else if (fm==90 || fm==-270) {
-             x1=r2.x(i->intVar->left(),i->intVar->top());
-             y1=r2.y(i->intVar->left(),i->intVar->top());			       
-           } else if (abs(fm)==180) {
-             angle=-i->intVar->rotation();
-             x1=i->intVar->right();  			  
-             y1=i->intVar->top();  				       		  
-           } else if (fm==0 || fm==360) {
-             angle=-i->intVar->rotation();
-             x1=i->intVar->right(); 			
-             y1=i->intVar->bottom(); 				  
-           } else angle=0;
-         }
-       }	
-     return make_pair(angle,make_pair(x1,y1));  
-  }  
 
    bool BottomRightResizerItem::onResizeHandle(float x, float y) const
   {

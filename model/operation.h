@@ -61,9 +61,6 @@ namespace minsky
     ///from a schema
     static OperationBase* create(Type type); 
     virtual Type type() const=0;
-
-    const OperationBase* operationCast() const override {return this;}
-    OperationBase* operationCast() override {return this;}
     
     virtual ~OperationBase() {}
 
@@ -175,10 +172,7 @@ namespace minsky
       OperationBase(x), Super(x) {intVar.reset(); description(x.description());}
     ~IntOp() {removeControlledItems();}
     
-    const IntOp& operator=(const IntOp& x);
-    
-    const IntOp* intOpCast() const override {return this;}
-    IntOp* intOpCast() override {return this;}         
+    const IntOp& operator=(const IntOp& x);     
 
     /// @{ name of the associated integral variable
     std::string description(const std::string& desc);

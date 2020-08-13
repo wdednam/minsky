@@ -75,8 +75,7 @@ namespace minsky
       }
     return this->coords();
   }
-
-
+  
   Wire::Wire(const shared_ptr<Port>& from, const shared_ptr<Port>& to, 
          const vector<float>& a_coords): 
       m_from(from), m_to(to) 
@@ -158,7 +157,7 @@ namespace
 		}						
 		
    return points;
- } 	  
+ }  
  	
  // For ticket 991/1092. Returns coordinate pairs for moving handles on a curved wire	
  vector<pair<float,float>> toCoordPair(vector<float> coords) {    
@@ -171,7 +170,7 @@ namespace
      }
    return points;
  } 	
-
+ 
 // For ticket 991. Construct tridoagonal matrix A which relates control points c and knots k (curved wire handles): Ac = k.
  vector<vector<float>> constructTriDiag(int length) {
 
@@ -386,6 +385,33 @@ namespace
         for (int i = 0; i < n; i++) {      
           cairo_curve_to(cairo, controlPoints[i].first,controlPoints[i].second,controlPoints[n+i].first,controlPoints[n+i].second,points[i+1].first,points[i+1].second);
         }     
+        
+        cairo_path_t *path;
+        cairo_path_data_t *data;
+        if (m_cairoCoords.size() > coords.size()+5) m_cairoCoords.clear();
+         
+        path = cairo_copy_path (cairo);
+         
+        for (int j=0; j < path->num_data; j += path->data[j].header.length) {
+            data = &path->data[j];
+            switch (data->header.type) {
+            case CAIRO_PATH_MOVE_TO:
+                //do_move_to_things (data[1].point.x, data[1].point.y);
+                break;
+            case CAIRO_PATH_LINE_TO:
+                //do_line_to_things (data[1].point.x, data[1].point.y);
+                break;
+            case CAIRO_PATH_CURVE_TO:
+                m_cairoCoords.push_back(data[j].point.x);
+                m_cairoCoords.push_back(data[j].point.y);             
+                break;
+            case CAIRO_PATH_CLOSE_PATH:
+                //do_close_path_things ();
+                break;
+            }
+        }          
+        cout << " " << path->num_data << " " << coords.size() << endl;
+        cairo_path_destroy (path);        
                
         cairo_stroke(cairo); 
         angle=atan2(coords[coords.size()-1]-coords[coords.size()-3], 
@@ -491,14 +517,15 @@ namespace
       return segNear(c[0],c[1],c[2],c[3],x,y);
     else {
 	  // fixes for tickets 991/1095
-      vector<pair<float,float>> p=allHandleCoords(c);
+      //vector<pair<float,float>> p=allHandleCoords(c);
+      vector<pair<float,float>> p=toCoordPair(m_cairoCoords);
          
       unsigned k=0; // nearest index
       
       float closestD1=d2(p[0].first,p[0].second,x,y);
       float closestD2=d2(p[p.size()/2].first,p[p.size()/2].second,x,y);
       float closestD3=d2(p[p.size()-1].first,p[p.size()-1].second,x,y);
-      float closestD=min(closestD3,min(closestD1,closestD2));
+      float closestD=closestD3; //=min(closestD3,min(closestD1,closestD2));
       
      for (size_t i=0; i<p.size()-1; i++)
        {

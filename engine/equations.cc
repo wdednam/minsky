@@ -645,11 +645,6 @@ namespace MathDAG
 	if (auto v=minsky.definingVar(valueId))
       if (v->type()!=VariableType::integral && v->numPorts()>1 && !v->ports[1]->wires().empty())
         r->rhs=getNodeFromWire(*v->ports[1]->wires()[0]);
-	  // ensure that flows used as intial conditions, which inherit their values from other vars, correctly initialise corresponding stock var. for ticket 1137.
-	  //auto vi=minsky.variableValues[VariableValue::valueId(v->group.lock(),vv->init)];
-	  //if (vi->lhs()) {
-		//  r->init=vv->init;  
-	  //}
     return r;
   }
 

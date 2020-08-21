@@ -209,9 +209,22 @@ void VariableBase::ensureValueExists(VariableValue* vv, const std::string& nm) c
 string VariableBase::init() const
 {
   auto value=minsky().variableValues.find(valueId());
-  if (value!=minsky().variableValues.end())
+  if (value!=minsky().variableValues.end()) {
+    if (auto i=dynamic_cast<IntOp*>(controller.lock().get()))
+      if (i->ports.size()>1 && !i->ports[1]->wires().empty())
+         i->intVar->init(ports[1]->wires()[0]->from()->item().variableCast()->init());
+    else if (auto g=dynamic_cast<GodleyIcon*>(controller.lock().get()))
+      for (auto v: g->stockVars())
+         if (v->ports.size()>1 && !v->ports[1]->wires().empty())
+            v->init(ports[1]->wires()[0]->from()->item().variableCast()->init());        	  
+	//if (inputWired()) {  
+    //  if (ports.size()>1 && !ports[1]->wires().empty())
+    //    value->second->init=ports[1]->wires()[0]->from()->item().variableCast()->init();
+      //else if (auto v=cminsky().definingVar(valueId()))
+      //  return vv->init=v->init();
     return value->second->init;
-  else
+  }
+  else 
     return "0";
 }
 

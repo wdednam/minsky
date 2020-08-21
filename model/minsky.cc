@@ -346,9 +346,9 @@ namespace minsky
         }
         
     auto copyOfGroups=g->groups;
-    for (auto& j: copyOfGroups)
+    for (auto& i: copyOfGroups)
     {	
-        canvas.model->addGroup(j);
+        canvas.model->addGroup(i);
     }
 
     if (!copyOfGroups.empty()) canvas.setItemFocus(copyOfGroups[0]);
@@ -1094,10 +1094,9 @@ namespace minsky
       {
         model->recursiveDo(&Group::items, 
                            [&](Items&,Items::iterator i) {
-                             if (auto g=dynamic_cast<GodleyIcon*>(i->get())) {
+                             if (auto g=dynamic_cast<GodleyIcon*>(i->get()))
                                for (unsigned i=1; i<g->table.cols(); ++i)
                                  balanceDuplicateColumns(*g,i);
-							 }
                              return false;
                            });
     

@@ -25,9 +25,6 @@
 #include "minsky_epilogue.h"
 #include <boost/regex.hpp>
 
-#include <boost/math/special_functions/gamma.hpp>
-#include <boost/math/special_functions/digamma.hpp>
-
 using boost::regex;
 using boost::smatch;
 using namespace minsky;

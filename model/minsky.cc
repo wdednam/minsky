@@ -298,10 +298,10 @@ namespace minsky
                        if (v->defined() || v->isStock())
                          {
                            // if defined, check no other defining variable exists
-                           auto alreadyDefined = model->findAny
+                           auto alreadyDefined = canvas.model->findAny
                              (&GroupItems::items,
                               [&v](const ItemPtr& j)
-                              {return j->variableCast() && j->variableCast()!=v && j->variableCast()->defined();});
+                              {return j.get()!=v && j->variableCast() &&  j->variableCast()->defined();});
                            if (v->isStock())
                              {
                                if (v->defined() && alreadyDefined)
@@ -321,7 +321,7 @@ namespace minsky
                              {
                                // delete defining wire from this
                                assert(v->ports.size()>1 && !v->ports[1]->wires().empty()); 
-                               model->removeWire(*v->ports[1]->wires()[0]);
+                               canvas.model->removeWire(*v->ports[1]->wires()[0]);
                              }
                          } 
                      return false;
@@ -332,7 +332,7 @@ namespace minsky
     ItemPtr selectedItem;
     for (auto& i: copyOfItems)
       {		
-         model->addItem(i);			  
+         canvas.model->addItem(i);			  
          canvas.selection.ensureItemInserted(i);
          assert(!i->ioVar());
       }
@@ -348,7 +348,7 @@ namespace minsky
     auto copyOfGroups=g->groups;
     for (auto& j: copyOfGroups)
     {	
-        model->addGroup(j);
+        canvas.model->addGroup(j);
     }
 
     if (!copyOfGroups.empty()) canvas.setItemFocus(copyOfGroups[0]);

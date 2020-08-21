@@ -519,7 +519,7 @@ namespace
     {
       float d=sqrt(sqr(x1-x0)+sqr(y1-y0));
       float d1=sqrt(sqr(x-x0)+sqr(y-y0)), d2=sqrt(sqr(x-x1)+sqr(y-y1));
-      return d1+d2<=d+0.05*d;
+      return d1+d2<=d+5;
     }
     
     inline float d2(float x0, float y0, float x1, float y1)

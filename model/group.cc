@@ -763,7 +763,7 @@ namespace minsky
     margins(l,r);    
     double dx=x1-x0, dy=y1-y0;
     if (iWidth()*z-l-r>0 && dx>0 && dy>0)
-      relZoom=std::min(1.0, (iWidth()*z-l-r)/(z*dx));
+     relZoom=std::min(1.0, std::min((iWidth()*z-l-r)/(z*dx), (iHeight()*z-20*z)/(z*dy))); 
   }
   
   const Group* Group::minimalEnclosingGroup(float x0, float y0, float x1, float y1, const Item* ignore) const
@@ -823,8 +823,7 @@ namespace minsky
     if (displayContents() && inIORegion(x,y)==IORegion::none)
       return ClickType::outside;
     if (auto item=select(x,y))
-      if (displayContents())
-        return item->clickType(x,y);
+      return item->clickType(x,y);
     if ((abs(x-this->x())<w && abs(y-this->y())<h) || inIORegion(x,y)==IORegion::topBottom) // check also if (x,y) is within top and bottom margins of group. for feature 88
       return ClickType::onItem;
     return ClickType::outside;
@@ -1030,9 +1029,9 @@ namespace minsky
     cairo_move_to(cairo,w,-h);
     // create notch in output region
     cairo_line_to(cairo,w,y-dy);
-    cairo_line_to(cairo,w-right+4*z,y-dy);
-    cairo_line_to(cairo,w-right,y);
-    cairo_line_to(cairo,w-right+4*z,y+dy);
+    cairo_line_to(cairo,w-right-2*z,y-dy);
+    cairo_line_to(cairo,w-right+2*z,y);
+    cairo_line_to(cairo,w-right-2*z,y+dy);
     cairo_line_to(cairo,w,y+dy);
     cairo_line_to(cairo,w,h);
     cairo_line_to(cairo,w-right,h);

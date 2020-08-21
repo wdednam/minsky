@@ -153,7 +153,7 @@ proc doPlotOptions {plot} {
 
     .pltWindowOptions.buttonBar.ok configure -command "setPlotOptions $plot"
     set plotWindowOptions(legend) [$plot.legend]
-    canvas.requestRedraw
+
     grab .pltWindowOptions
 }
 

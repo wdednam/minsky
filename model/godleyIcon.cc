@@ -441,7 +441,7 @@ namespace minsky
                 {
                   auto flowUnits=v->units(check);
                   if (check && foundFlow && units!=flowUnits)
-                    throw_error("incompatible units: "+flowUnits.str()+"≠"+units.str()+" on stock "+stockame);
+                    throw_error("incompatible units: "+flowUnits.str()+"≠"+units.str()+" on stock "+stockName);
                   foundFlow=true;
                   units=flowUnits;
                 }

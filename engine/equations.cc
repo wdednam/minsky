@@ -642,7 +642,7 @@ namespace MathDAG
     shared_ptr<VariableDAG> r(new VariableDAG(valueId, nm, type));
     expressionCache.insert(valueId, r);
     r->init=vv->init; 
-	if (auto v=minsky.definingVar(valueId)) {
+	if (auto v=minsky.definingVar(valueId))
       if (v->type()!=VariableType::integral && v->numPorts()>1 && !v->ports[1]->wires().empty())
         r->rhs=getNodeFromWire(*v->ports[1]->wires()[0]);
 	  // ensure that flows used as intial conditions, which inherit their values from other vars, correctly initialise corresponding stock var. for ticket 1137.
@@ -650,7 +650,6 @@ namespace MathDAG
 	  //if (vi->lhs()) {
 		//  r->init=vv->init;  
 	  //}
-	}
     return r;
   }
 

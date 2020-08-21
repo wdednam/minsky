@@ -62,7 +62,6 @@ namespace minsky
   class VariableBase;
   class OperationBase;
   class SwitchIcon;  
-  class IntOp;  
 
   class Item;
   /// bounding box information (at zoom=1 scale)

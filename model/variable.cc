@@ -71,6 +71,14 @@ bool VariableBase::inputWired() const
   return ports.size()>1 && !ports[1]->wires().empty();
 }
 
+std::vector<std::string> VariableBase::accessibleVars() const
+{
+  if (auto g=group.lock())
+    return g->accessibleVars();
+  return {};
+}
+
+
 ClickType::Type VariableBase::clickType(float xx, float yy)
 {
   double fm=std::fmod(rotation(),360);
@@ -205,17 +213,16 @@ void VariableBase::ensureValueExists(VariableValue* vv, const std::string& nm) c
     }
 }
 
-
 string VariableBase::init() const
 {
   auto value=minsky().variableValues.find(valueId());
   if (value!=minsky().variableValues.end()) {   	
-        // set initial value of int var to init value of input to second port. for ticket 1137
-        if (!ports[0]->wires().empty())
-          if (auto i=dynamic_cast<IntOp*>(&ports[0]->wires()[0]->to()->item()))
-            if (i->ports.size()>2 && !i->ports[2]->wires().empty())
-              if (auto lhsVar=i->ports[2]->wires()[0]->from()->item().variableCast())
-                 value->second->init=lhsVar->vValue()->init;  	
+    // set initial value of int var to init value of input to second port. for ticket 1137
+    if (!ports[0]->wires().empty())
+      if (auto i=dynamic_cast<IntOp*>(&ports[0]->wires()[0]->to()->item()))
+        if (i->ports.size()>2 && !i->ports[2]->wires().empty())
+          if (auto lhsVar=i->ports[2]->wires()[0]->from()->item().variableCast())
+            value->second->init=lhsVar->vValue()->init;
     return value->second->init;
   }
   else 
@@ -228,7 +235,7 @@ string VariableBase::init(const string& x)
   if (VariableValue::isValueId(valueId()))
     {
       VariableValue& val=*minsky().variableValues[valueId()];
-      val.init=x;
+      val.init=x;     
       // for constant types, we may as well set the current value. See ticket #433. Also ignore errors (for now), as they will reappear at reset time.
       try
         {
@@ -343,30 +350,6 @@ void VariableBase::setUnits(const string& x)
 }
 
 
-
-vector<string> VariableBase::accessibleVars() const
-{
-  set<string> r;
-  if (auto g=group.lock())
-    {
-      // first add local variables
-      for (auto& i: g->items)
-        if (auto v=i->variableCast())
-          r.insert(v->name());
-      // now add variables in outer scopes, ensuring they qualified
-      for (g=g->group.lock(); g;  g=g->group.lock())
-        for (auto& i: g->items)
-          if (auto v=i->variableCast())
-            {
-              auto n=v->name();
-              if (n[0]==':')
-                r.insert(n);
-              else
-                r.insert(':'+n);
-            }
-    }
-  return vector<string>(r.begin(),r.end());
-}
 
 void VariableBase::exportAsCSV(const std::string& filename) const
 {

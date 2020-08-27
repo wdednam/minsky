@@ -132,22 +132,22 @@ SUITE(CSVParser)
    
   TEST_FIXTURE(CSVDialog,loadWebFile)
     {
-      //spec=DataSpec();	
       string url="https://sourceforge.net/p/minsky/ravel/20/attachment/BIS_GDP.csv";
       CHECK(url.find("://")!=string::npos);
       CHECK(loadWebFile(url)!="");      
-      //string fname = url.find("://")==string::npos? url: loadWebFile(url);
-      //spec.guessFromFile(fname);
-      //ifstream is(fname);
-      //spec.duplicateKeyAction=DataSpec::DuplicateKeyAction::sum;            
-      //
-      //VariableValue v;
-      //loadValueFromCSVFile(v,is,spec);
-	  //
-      //CHECK_EQUAL(3, v.rank());
-      //CHECK_ARRAY_EQUAL(vector<unsigned>({82,188,220}),v.hypercube().dims(),3);
-      //CHECK(v.hypercube().dims()==v.tensorInit.hypercube().dims());
-      //CHECK_EQUAL(58520, v.tensorInit.size());
+      spec=DataSpec();	      
+      string fname = url.find("://")==string::npos? url: loadWebFile(url);
+      spec.guessFromFile(fname);
+      ifstream is(fname);
+      spec.duplicateKeyAction=DataSpec::DuplicateKeyAction::sum;            
+      
+      VariableValue v;
+      loadValueFromCSVFile(v,is,spec);
+	  
+      CHECK_EQUAL(2, v.rank());
+      CHECK_ARRAY_EQUAL(vector<unsigned>({44,269}),v.hypercube().dims(),2);
+      CHECK(v.hypercube().dims()==v.tensorInit.hypercube().dims());
+      CHECK_EQUAL(11836, v.tensorInit.size());
     }           
   
   TEST_FIXTURE(DataSpec,loadVar)

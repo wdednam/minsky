@@ -129,26 +129,34 @@ SUITE(CSVParser)
       
       CHECK(osn.str().find("missing numerical data") != std::string::npos);
     }
-   
+    
+   TEST_FIXTURE(CSVDialog,guessSpaceFile)
+    {
+      spec=DataSpec();
+      string fname="testEqGodley.csv";
+      spec.guessFromFile(fname);                                  
+      ifstream is(fname);
+
+      spec.separator=',';
+      spec.headerRow=1;
+      spec.setDataArea(3,2);     
+      spec.dimensionNames={"asset","liability","equity"};          
+      spec.dimensionCols={1,2,3};      
+          
+      VariableValue v;
+      loadValueFromCSVFile(v,is,spec);
+
+      CHECK_EQUAL(1, v.rank()); 
+      spec.toggleDimension(2);
+      CHECK_EQUAL(2,spec.dimensionCols.size());  // equity column is empty
+         
+    }      
+
   TEST_FIXTURE(CSVDialog,loadWebFile)
     {
       string url="https://sourceforge.net/p/minsky/ravel/20/attachment/BIS_GDP.csv";
-      CHECK(url.find("://")!=string::npos);
       CHECK(loadWebFile(url)!="");      
-      spec=DataSpec();	      
-      string fname = url.find("://")==string::npos? url: loadWebFile(url);
-      spec.guessFromFile(fname);
-      ifstream is(fname);
-      spec.duplicateKeyAction=DataSpec::DuplicateKeyAction::sum;            
-      
-      VariableValue v;
-      loadValueFromCSVFile(v,is,spec);
-	  
-      CHECK_EQUAL(2, v.rank());
-      CHECK_ARRAY_EQUAL(vector<unsigned>({44,269}),v.hypercube().dims(),2);
-      CHECK(v.hypercube().dims()==v.tensorInit.hypercube().dims());
-      CHECK_EQUAL(11836, v.tensorInit.size());
-    }           
+    }     
   
   TEST_FIXTURE(DataSpec,loadVar)
     {

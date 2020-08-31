@@ -393,10 +393,10 @@ namespace minsky
   static const size_t maxNumTensorElementsToPlot=10;
   
   void PlotWidget::addPlotPt(double t)
-  {
+  {  
     size_t extraPen=2*numLines+1;
     for (size_t pen=0; pen<2*numLines; ++pen)
-      if (pen<yvars.size() && yvars[pen])
+      if (pen<yvars.size() && yvars[pen] && xvars[pen]) // xvars also vector of shared pointers and null derefencing error can likewise cause crash if the variable Value does not exist. for ticket 1248
         for (size_t i=0; i<min(maxNumTensorElementsToPlot,yvars[pen]->size()); ++i)
           {
             double x,y;
@@ -566,14 +566,14 @@ namespace minsky
         case 5: y1maxVar=*var; return;
         }
     unsigned pen=port-nBoundsPorts;
-    if (pen<2*numLines)
+    if (pen<2*numLines && var->idx()>=0)
       {
         yvars.resize(2*numLines);
         yvars[pen]=var;
         if (pen>=numLines)
           assignSide(pen,Side::right);
       }
-    else if (pen<4*numLines)
+    else if (pen<4*numLines && var->idx()>=0)
       {
         xvars.resize(2*numLines);
         xvars[pen-2*numLines]=var;

@@ -32,15 +32,17 @@ cat >input.tcl <<EOF
 source $here/test/assert.tcl
 proc afterMinskyStarted {} {
   minsky.addVariable par parameter
-  minsky.findObject Variable::parameter
-  CSVImportDialog
-  getValue :par
-  minsky.value.csvDialog.url https://sourceforge.net/p/minsky/ravel/20/attachment/BIS_GDP.csv
-  minsky.value.csvDialog.loadFile
-  destroy .wiring.editVar
-  assert {![winfo ismapped .wiring.context]}
-  
-  after 100 {tcl_exit}
+  assert {[findObject Variable:parameter]}  
+  editItem
+  assert {[winfo ismapped .wiring.editVar]}
+  .wiring.editVar.buttonBar.import invoke
+  assert {[winfo ismapped .wiring.csvImport]}      
+  minsky.value.csvDialog.url $here/test/testEqGodley.csv
+  minsky.value.csvDialog.loadFile  
+  minsky.value.csvDialog.requestRedraw        
+  minsky.value.csvDialog.spec.guessFromFile minsky.value.csvDialog.url      
+  .wiring.csvImport.buttonBar.ok invoke 
+  tcl_exit
 }
 EOF
 

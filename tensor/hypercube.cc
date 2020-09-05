@@ -95,24 +95,6 @@ namespace civita
       throw ecolab::error("tensors nonconformant");
   }
 
-  void Hypercube::computeStrideAndSize(const string& dim, size_t& stride, size_t& size) const
-  {
-    stride=1;
-    if (dim.empty())
-      // default to first axis if empty
-      size=xvectors.empty()? 1:xvectors[0].size();
-    else
-      {
-        for (auto& i: xvectors)
-          {
-            size=i.size();
-            if (i.name==dim) return;
-            stride*=i.size();
-          }
-        throw runtime_error("axis "+dim+" not found");
-      }
-  }
-
     /// split lineal index into components along each dimension
     vector<size_t> Hypercube::splitIndex(size_t i) const
     {
@@ -125,20 +107,5 @@ namespace civita
         }
       return splitIndex;
     }
-  
-    /// combine a split index into a lineal hypercube index
-  size_t Hypercube::linealIndex(const std::vector<size_t>& splitIndex) const
-    {
-      assert(dims().size()==splitIndex.size());
-      size_t index=0, stride=1;
-      auto dd=dims();
-      for (size_t i=0; i<dd.size(); ++i)
-        {
-          index+=splitIndex[i]*stride;
-          stride*=dd[i];
-        }
-      return index;
-    }
-
 }
 

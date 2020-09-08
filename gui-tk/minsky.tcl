@@ -1188,7 +1188,7 @@ proc runstop {} {
 }
 
 proc step {} {
-    global recordingReplay eventRecordR simTMax simTStart
+    global recordingReplay eventRecordR rkVars
     if {$recordingReplay} {
         if {[gets $eventRecordR cmd]>=0} {
             eval $cmd

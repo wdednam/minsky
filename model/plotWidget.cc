@@ -566,14 +566,14 @@ namespace minsky
         case 5: y1maxVar=*var; return;
         }
     unsigned pen=port-nBoundsPorts;
-    if (pen<2*numLines && var->idx()>=0)
+    if (pen<2*numLines)
       {
         yvars.resize(pen+1);
         yvars[pen]=var;
         if (pen>=numLines)
           assignSide(pen,Side::right);
       }
-    else if (pen<4*numLines && var->idx()>=0)
+    else if (pen<4*numLines)
       {
         xvars.resize(pen-2*numLines+1);
         xvars[pen-2*numLines]=var;

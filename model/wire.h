@@ -46,7 +46,6 @@ namespace minsky
 
     // intermediate control point coords, relative to ports
     std::vector<float> m_coords;
-    mutable std::vector<float> m_cairoCoords;
     /// ports this wire connects
     std::weak_ptr<Port> m_from, m_to;
 

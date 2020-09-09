@@ -333,7 +333,7 @@ namespace minsky
 
     canvas.model->addGroup(g); // needed to ensure wires are correctly handled
     auto copyOfItems=g->items;
-    ItemPtr selectedItem;
+
     for (auto& i: copyOfItems)
       {		
          canvas.model->addItem(i);			  

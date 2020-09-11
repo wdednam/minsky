@@ -1583,7 +1583,6 @@ proc aboutMinsky {} {
   tk_messageBox -message "
    Minsky [minskyVersion]\n
    Version used to save file [fileVersion]\n
-   EcoLab [ecolabVersion]\n
    Tcl/Tk [info tclversion]\n
    Ravel [ravelVersion]
 " -detail "

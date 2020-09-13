@@ -289,7 +289,9 @@ namespace minsky
     g->self=g;
     m.populateGroup(*g);
     // Default pasting no longer occurs as grouped items or as a group within a group. Fix for tickets 1080/1098    
-    canvas.selection.clear();    
+    canvas.selection.clear();
+    // The following is only necessary if one pastes into an existing model. For ticket 1258   
+	if (!history.empty() || !canvas.model.get()->empty()) {     
     bool alreadyDefinedMessageDisplayed=false;
     
     // convert stock variables that aren't defined to flow variables, and other fix up multiply defined vars
@@ -329,7 +331,8 @@ namespace minsky
                              }
                          } 
                      return false;
-                   });                              
+                   });
+	}                              
 
     canvas.model->addGroup(g); // needed to ensure wires are correctly handled
     auto copyOfItems=g->items;

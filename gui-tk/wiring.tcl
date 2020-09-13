@@ -211,12 +211,13 @@ proc wrapHoverMouse {op x y} {
 }
   
 bind .wiring.canvas <ButtonPress-1> {wrapHoverMouse mouseDown %x %y}
+bind .wiring.canvas <Control-Button-1> {wrapHoverMouse controlMouseDown %x %y}
 bind .wiring.canvas <ButtonRelease-1> {wrapHoverMouse mouseUp %x %y}
 bind .wiring.canvas <Motion> {wrapHoverMouse mouseMove %x %y}
 bind .wiring.canvas <Leave> {after cancel hoverMouse}
-set meta Control
-bindtags .wiring.canvas [list all . controlButtonTag .wiring.canvas]
-bind controlButtonTag <$meta-Button-1> {wrapHoverMouse controlMouseDown %x %y}
+#set meta Control
+#bindtags .wiring.canvas [list all . controlButtonTag .wiring.canvas]
+#bind controlButtonTag <$meta-Button-1> {wrapHoverMouse controlMouseDown %x %y}
 
 proc get_pointer_x {c} {
     return [expr {[winfo pointerx $c] - [winfo rootx $c]}]
@@ -427,6 +428,7 @@ proc textOK {} {
             
             getItemAtFocus
             editVar
+            refreshEqTab
         }
     }
     canvas.mouseUp [get_pointer_x .wiring.canvas] [get_pointer_y .wiring.canvas]

@@ -23,7 +23,11 @@
 #include "ravelWrap.h"
 #include "minsky_epilogue.h"
 
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+
 using namespace civita;
+
 namespace classdesc
 {
   // postpone factory definition to TensorOpFactory()
@@ -276,9 +280,59 @@ namespace minsky
   {
     std::shared_ptr<ITensor> arg1, arg2;
     void computeTensor() const override {//TODO
-      throw runtime_error("inner product not yet implemented");
+		
+	 if (arg1->rank()>2 || arg2->rank()>2)
+        throw runtime_error("inner product of rank>2 tensors not yet implemented");
+     
+     boost::numeric::ublas::matrix<double> m1 (arg1->hypercube().dims()[0],arg1->hypercube().dims()[1]);
+     if (arg1->rank()<2) boost::numeric::ublas::vector<double> m1 (arg1->hypercube().dims()[0]);
+     
+     for (size_t i=0; i<m1.size1(); ++i)
+         for (size_t j=0; j<m1.size2(); ++j)
+           if (arg1->rank()>1) m1(i,j)=arg1->atHCIndex(j+i*arg1->hypercube().dims()[arg1->rank()-1]);
+
+      if (arg1->rank()<2) {
+		  boost::numeric::ublas::vector<double> m1 (arg1->hypercube().dims()[0]);
+		  for (size_t i=0; i<m1.size(); ++i)
+             m1(i)=(*arg1)[i];   
+		 }
+              
+     boost::numeric::ublas::matrix<double> m2 (arg2->hypercube().dims()[0],arg2->hypercube().dims()[1]);
+     if (arg2->rank()<2) boost::numeric::ublas::vector<double> m2 (arg2->hypercube().dims()[0]);     
+     
+      for (size_t i=0; i<m2.size1(); ++i)
+          for (size_t j=0; j<m2.size2(); ++j)
+             if (arg2->rank()>1) m2(i,j)=arg2->atHCIndex(j+i*arg2->hypercube().dims()[0]);
+              
+      if (arg2->rank()<2) {
+		  boost::numeric::ublas::vector<double> m2 (arg2->hypercube().dims()[0]);
+		  for (size_t i=0; i<m2.size(); ++i)
+             m2(i)=(*arg2)[i];   
+		 }
+          
+     boost::numeric::ublas::matrix<double> dotProd=prec_prod(m1,m2);          
+	
+     size_t counter=0; 
+     for (size_t i=0; i<dotProd.size1(); ++i)
+         for (size_t j=0; j<dotProd.size2(); ++j, counter++)
+               cachedResult[counter]=dotProd(i,j);
+     
+     if (cachedResult.size()==0) 
+        for (size_t i=0; i<arg1->size(); i++) 
+           cachedResult[i]=nan("");
     }
     Timestamp timestamp() const override {return max(arg1->timestamp(), arg2->timestamp());}
+    void setArguments(const TensorPtr& a1, const TensorPtr& a2) override {
+      arg1=a1; arg2=a2;
+      if (arg1 && arg1->rank()!=0 && arg2 && arg2->rank()!=0) {
+        if (arg1->hypercube().dims()[arg1->rank()-1]!=arg2->hypercube().dims()[0])
+          throw std::runtime_error("arguments not conformal");
+        
+        // ensure size of final tensor is the same as the second argument, which can be rank 1 or 2  
+ 		cachedResult.hypercube(arg2->hypercube());
+		cachedResult.index(arg2->index());
+	  }
+    }    
   };
 
   template <>
@@ -378,7 +432,7 @@ namespace minsky
   class SwitchTensor: public ITensor
   {
     size_t m_size=1;
-    vector<TensorPtr> args;
+    std::vector<TensorPtr> args;
   public:
     void setArguments(const std::vector<TensorPtr>& a,const std::string& axis={},double argv=0) override {
       args=a;
@@ -442,7 +496,7 @@ namespace minsky
   class RavelTensor: public civita::ITensor
   {
     const Ravel& ravel;
-    vector<TensorPtr> chain;
+    std::vector<TensorPtr> chain;
     
     CLASSDESC_ACCESS(Ravel);
   public:
@@ -505,10 +559,10 @@ namespace minsky
     return {};
   }
 
-  vector<TensorPtr> TensorsFromPort::tensorsFromPort(const Port& p) const
+  std::vector<TensorPtr> TensorsFromPort::tensorsFromPort(const Port& p) const
   {
     if (!p.input()) return {};
-    vector<TensorPtr> r;
+    std::vector<TensorPtr> r;
     for (auto w: p.wires())
       {
         Item& item=w->from()->item();
@@ -534,9 +588,9 @@ namespace minsky
   }
 
 
-  vector<TensorPtr> TensorsFromPort::tensorsFromPorts(const vector<shared_ptr<Port>>& ports) const
+  std::vector<TensorPtr> TensorsFromPort::tensorsFromPorts(const std::vector<shared_ptr<Port>>& ports) const
   {
-    vector<TensorPtr> r;
+    std::vector<TensorPtr> r;
     for (auto& p: ports)
       if (p->input())
         {

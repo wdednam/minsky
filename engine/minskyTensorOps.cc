@@ -24,6 +24,7 @@
 #include "minsky_epilogue.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 using namespace civita;

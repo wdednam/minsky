@@ -286,21 +286,21 @@ namespace minsky
 
      SparseMatrix<double> m1(arg1->rank()>1?  arg1->hypercube().dims()[0] : 1, arg1->hypercube().dims()[1]), m2(arg2->hypercube().dims()[0], arg2->rank()>1? arg2->hypercube().dims()[1] : 1);
      
-     for (size_t i=0; i<m1.getRowCount(); ++i)
-         for (size_t j=0; j<m1.getColumnCount(); ++j)
+     for (size_t i=0; i<size_t(m1.getRowCount()); ++i)
+         for (size_t j=0; j<size_t(m1.getColumnCount()); ++j)
            if (arg1->rank()>1) m1.set(arg1->atHCIndex(j+i*arg1->hypercube().dims()[arg1->rank()-1]),i+1,j+1);
            else m1.set((*arg1)[j],i+1,j+1);
            
-     for (size_t i=0; i<m2.getRowCount(); ++i)
-         for (size_t j=0; j<m2.getColumnCount(); ++j)
+     for (size_t i=0; i<size_t(m2.getRowCount()); ++i)
+         for (size_t j=0; j<size_t(m2.getColumnCount()); ++j)
            if (arg2->rank()>1) m2.set(arg2->atHCIndex(j+i*arg2->hypercube().dims()[0]),i+1,j+1); 
            else m2.set((*arg2)[i],i+1,j+1);         
            
 	SparseMatrix<double> product=m1*m2;   
 	
 	size_t counter=0;
-     for (size_t i=0; i<product.getRowCount(); ++i)
-         for (size_t j=0; j<product.getColumnCount(); ++j) {         
+     for (size_t i=0; i<size_t(product.getRowCount()); ++i)
+         for (size_t j=0; size_t(j<product.getColumnCount()); ++j) {         
              cachedResult[counter]=product.get(i+1,j+1);
              counter++;	             
 		 }

@@ -22,8 +22,8 @@
 #include "minsky.h"
 #include "minsky_epilogue.h"
 #include <error.h>
-
 #include <regex>
+
 using namespace ecolab;
 using namespace std;
 namespace minsky

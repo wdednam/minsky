@@ -9,10 +9,9 @@
 #include <fstream>
 #include <regex> 
 
-//#include <boost/regex.hpp>
-//#include <boost/filesystem.hpp>
+#include <boost/filesystem.hpp>
 using std::regex;
-using boost::smatch;
+using std::smatch;
 using boost::filesystem::current_path;
 
 using namespace minsky;

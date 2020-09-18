@@ -27,7 +27,6 @@
 #include "str.h"
 #include "CSVDialog.h"
 #include "latexMarkup.h"
-//#include <boost/regex.hpp>
 #include <regex> 
 #include <utility>
 #include <boost/locale.hpp>

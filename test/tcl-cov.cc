@@ -7,10 +7,11 @@
 #include "minsky_epilogue.h"
 #include <vector>
 #include <fstream>
+#include <regex> 
 
-#include <boost/regex.hpp>
-#include <boost/filesystem.hpp>
-using boost::regex;
+//#include <boost/regex.hpp>
+//#include <boost/filesystem.hpp>
+using std::regex;
 using boost::smatch;
 using boost::filesystem::current_path;
 

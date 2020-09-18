@@ -231,9 +231,10 @@ namespace minsky
 
   int VariableValue::scope(const std::string& name) 
   {
-    boost::smatch m;
+    //boost::smatch m;
+    smatch m;
     auto nm=utf_to_utf<char>(name);
-    if (boost::regex_search(nm, m, boost::regex(R"((\d*)]?:.*)")))
+    if (std::regex_search(nm, m, std::regex(R"((\d*)]?:.*)")))
       if (m.size()>1 && m[1].matched && !m[1].str().empty())
         {
           int r;

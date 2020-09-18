@@ -31,7 +31,7 @@
 #include <boost/beast/http.hpp>                                                  
 #include <boost/beast/version.hpp>  
                                       
-#include <boost/regex.hpp>                                                       
+//#include <boost/regex.hpp>                                                       
 #include <boost/filesystem.hpp>                                                  
                                                                                  
 #include "certify/include/boost/certify/extensions.hpp"                          
@@ -43,7 +43,8 @@
 #include <string>                                                                
 #include <stdexcept>                                                                                                                         
 #include <sstream>      
-
+#include <regex> 
+		
 using namespace std;
 using namespace minsky;
 using ecolab::Pango;
@@ -127,8 +128,8 @@ std::string CSVDialog::loadWebFile(const std::string& url)
     }
   
   // Parse input URL. Also handles URLs of the type username:password@example.com/pathname#section. See https://stackoverflow.com/questions/2616011/easy-way-to-parse-a-url-in-c-cross-platform
-  boost::regex ex(R"((http|https)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\??([^ #]*)#?([^ ]*)|^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)");
-  boost::cmatch what;
+  std::regex ex(R"((http|https)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\??([^ #]*)#?([^ ]*)|^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)");
+  cmatch what;
   if (regex_match(url.c_str(), what, ex)) {
    // what[0] contains the whole string 	 
    // what[1] is the protocol

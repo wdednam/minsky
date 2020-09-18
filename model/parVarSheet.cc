@@ -74,7 +74,7 @@ namespace minsky
         if (!itemVector.empty())
           {
             float x0, y0=1.5*rowHeight;//+pango.height();	
-            double w=0,h=0,w_prev, h_prev,lh; 
+            double w=0,h=0,w_prev, h_prev,lh, lw; 
             for (auto& it: itemVector)
               {
                 auto value=it->variableCast()->vValue();
@@ -98,21 +98,30 @@ namespace minsky
                   {
                     cairo_move_to(cairo,x,y-1.5*rowHeight);
                     pango.setMarkup(value->name+":");
-                    pango.show();        					  
+                    pango.show();                            					  
 
-                    string format=value->hypercube().xvectors[0].timeFormat();
+                    string format=value->hypercube().xvectors[0].timeFormat();                                
                     for (auto& i: value->hypercube().xvectors[0])
                       {
                         cairo_move_to(cairo,x,y);
                         pango.setText(trimWS(str(i,format)));
                         pango.show();
-                        y+=rowHeight;
+                        y+=rowHeight;                      
                         colWidth=std::max(colWidth,5+pango.width());
-                      }
+                      }                      
                     insertCol(size_t(rank));  
-                    y=y0;
-                    //colLeftMargin.push_back(x);                    
                     y=y0;                
+                    //colLeftMargin.push_back(x);                    
+                    lh=0;                
+                    for (size_t j=0; j<dims[0]; ++j)
+                      lh+=rowHeight;                    
+                    { // draw vertical grid line
+                      cairo::CairoSave cs(cairo);
+                      cairo_set_source_rgba(cairo,0,0,0,0.5);
+                      cairo_move_to(cairo,colWidth-2.5,y0);
+                      cairo_line_to(cairo,colWidth-2.5,y0+lh);
+                      cairo_stroke(cairo);
+                    }                        
                     x+=colWidth;
                     for (size_t i=0; i<value->size(); ++i)
                       {
@@ -176,11 +185,12 @@ namespace minsky
 			      {
                     cairo_move_to(cairo,x,y-1.5*rowHeight);
                     pango.setMarkup(value->name+":");
-                    pango.show();  						    
-
+                    pango.show();
+                                        					    
                     for (size_t k=0; k<rank-1; k++)  
                       {   
                         y+=rowHeight; // allow room for header row
+                        lw=0;                        
                         string format=value->hypercube().xvectors[k].timeFormat();
                         for (auto& i: value->hypercube().xvectors[k])
                           {
@@ -189,11 +199,19 @@ namespace minsky
                             pango.show();
                             y+=rowHeight;
                             colWidth=std::max(colWidth,5+pango.width());
+                            if (it==itemVector[0]) lw+=colWidth;
                           }
-                        y=y0;
-                        //colLeftMargin.push_back(x);  
-
-                        x+=colWidth;
+                        y=y0;                           
+                        //colLeftMargin.push_back(x);                        
+                        x+=colWidth;                       
+                        { // draw horizontal grid line
+                          cairo::CairoSave cs(cairo);
+                          cairo_set_source_rgba(cairo,0,0,0,0.5);
+                          cairo_move_to(cairo,x0,y+1.1*rowHeight);
+                          if (it==itemVector[0]) cairo_line_to(cairo,x+lw,y+1.1*rowHeight);
+                          else cairo_line_to(cairo,w+colWidth,y+1.1*rowHeight);
+                          cairo_stroke(cairo);
+                        }                          
                         format=value->hypercube().xvectors[k+1].timeFormat();
                         for (size_t i=0; i<dims[k+1]; ++i)
                           {

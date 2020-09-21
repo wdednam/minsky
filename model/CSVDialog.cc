@@ -30,7 +30,6 @@
 #include <boost/beast/core.hpp>                                                  
 #include <boost/beast/http.hpp>                                                  
 #include <boost/beast/version.hpp>  
-                                                                                      
 #include <boost/filesystem.hpp>                                                  
                                                                                  
 #include "certify/include/boost/certify/extensions.hpp"                          
@@ -42,8 +41,8 @@
 #include <string>                                                                
 #include <stdexcept>                                                                                                                         
 #include <sstream>      
-#include <regex> 
-		
+#include <regex>    
+
 using namespace std;
 using namespace minsky;
 using ecolab::Pango;

@@ -74,7 +74,7 @@ namespace minsky
         if (!itemVector.empty())
           {
             float x0, y0=1.5*rowHeight;//+pango.height();	
-            double w=0,h=0,w_prev, h_prev,lh, lw; 
+            double w=0,h=0,w_prev, h_prev,lh,lw; 
             for (auto& it: itemVector)
               {
                 auto value=it->variableCast()->vValue();
@@ -110,8 +110,7 @@ namespace minsky
                         colWidth=std::max(colWidth,5+pango.width());
                       }                      
                     insertCol(size_t(rank));  
-                    y=y0;                
-                    //colLeftMargin.push_back(x);                    
+                    y=y0;                                
                     lh=0;                
                     for (size_t j=0; j<dims[0]; ++j)
                       lh+=rowHeight;                    
@@ -121,7 +120,7 @@ namespace minsky
                       cairo_move_to(cairo,colWidth-2.5,y0);
                       cairo_line_to(cairo,colWidth-2.5,y0+lh);
                       cairo_stroke(cairo);
-                    }                        
+                    }                                       
                     x+=colWidth;
                     for (size_t i=0; i<value->size(); ++i)
                       {
@@ -201,9 +200,8 @@ namespace minsky
                             colWidth=std::max(colWidth,5+pango.width());
                             if (it==itemVector[0]) lw+=colWidth;
                           }
-                        y=y0;                           
-                        //colLeftMargin.push_back(x);                        
-                        x+=colWidth;                       
+                        y=y0;  
+                        x+=colWidth;
                         { // draw horizontal grid line
                           cairo::CairoSave cs(cairo);
                           cairo_set_source_rgba(cairo,0,0,0,0.5);
@@ -211,7 +209,7 @@ namespace minsky
                           if (it==itemVector[0]) cairo_line_to(cairo,x+lw,y+1.1*rowHeight);
                           else cairo_line_to(cairo,w+colWidth,y+1.1*rowHeight);
                           cairo_stroke(cairo);
-                        }                          
+                        }                           
                         format=value->hypercube().xvectors[k+1].timeFormat();
                         for (size_t i=0; i<dims[k+1]; ++i)
                           {

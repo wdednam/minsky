@@ -9,7 +9,6 @@
 #include <fstream>
 #include <regex> 
 
-#include <boost/filesystem.hpp>
 using std::regex;
 using std::smatch;
 using boost::filesystem::current_path;

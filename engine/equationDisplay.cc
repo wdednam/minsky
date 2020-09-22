@@ -168,8 +168,9 @@ namespace MathDAG
       {
         if (eqnNo++ < baseEqn) continue;
         // initial conditions
+        cairo_move_to(dest.cairo(), x, y);        
         y+=print(dest.cairo(), latexToPango(mathrm(i->name))+"(0) = "+
-                 latexToPango(latexInit(i->init)),Anchor::nw);
+                 latexToPango(latexInit(i->init)),Anchor::nw);   
         
         // differential equation
         Pango num(dest.cairo());

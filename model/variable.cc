@@ -206,7 +206,7 @@ void VariableBase::ensureValueExists(VariableValue* vv, const std::string& nm) c
       if (vv==nullptr)
         minsky().variableValues.emplace(valueId,VariableValuePtr(type(), name(),"",group.lock()));
       // Ensure variable names are updated correctly everywhere they appear. For tickets 1109/1138.  
-      else
+      else 
         minsky().variableValues.emplace
           (valueId,VariableValuePtr(type(),nm,vv->init,group.lock())).first->
           second->tensorInit=vv->tensorInit;
@@ -221,8 +221,12 @@ string VariableBase::init() const
     if (!ports[0]->wires().empty())
       if (auto i=dynamic_cast<IntOp*>(&ports[0]->wires()[0]->to()->item()))
         if (i->ports.size()>2 && !i->ports[2]->wires().empty())
-          if (auto lhsVar=i->ports[2]->wires()[0]->from()->item().variableCast())
+          if (auto lhsVar=i->ports[2]->wires()[0]->from()->item().variableCast()) 
+          {
             value->second->init=lhsVar->vValue()->init;
+            // Since integral takes initial value from second port, the intVar should have the same intial value. for ticket 1257
+            if (i->intVar->vValue()->init!=lhsVar->vValue()->init) i->intVar->vValue()->init=lhsVar->vValue()->init;  
+		   }
     return value->second->init;
   }
   else 
@@ -234,8 +238,8 @@ string VariableBase::init(const string& x)
   ensureValueExists(nullptr,""); 
   if (VariableValue::isValueId(valueId()))
     {
-      VariableValue& val=*minsky().variableValues[valueId()];
-      val.init=x;     
+      VariableValue& val=*minsky().variableValues[valueId()];        
+      val.init=x; 
       // for constant types, we may as well set the current value. See ticket #433. Also ignore errors (for now), as they will reappear at reset time.
       try
         {

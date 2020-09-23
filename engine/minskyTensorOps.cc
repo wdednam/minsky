@@ -277,38 +277,37 @@ namespace minsky
   struct GeneralTensorOp<OperationType::innerProduct>: public civita::CachedTensorOp
   {
     std::shared_ptr<ITensor> arg1, arg2;
-    void computeTensor() const override {//TODO
-		
-     
+    void computeTensor() const override {//TODO: tensors of arbitrary rank
+		   
       size_t m=1, n=1;   
       if (arg1->rank()>1)
         for (size_t i=0; i<arg1->rank()-1; i++)
           m*=arg1->hypercube().dims()[i];
           
-	  if (arg2->rank()>1)
+      if (arg2->rank()>1)
         for (size_t i=1; i<arg2->rank(); i++)
           n*=arg2->hypercube().dims()[i];     
   	
-   	  size_t stride=arg2->hypercube().dims()[0];	 	 
+      size_t stride=arg2->hypercube().dims()[0];	 	 
       double tmpSum;
       for (size_t i=0; i< m; i++) {
-        if (arg1->rank()>1 && arg2->rank()>1)		
+        if (m>1 && n>1)		
           for (size_t j=0; j< n; j++)
             {
               tmpSum=0;
               for (size_t k=0; k<stride; k++)  {
-				auto v1=arg1->atHCIndex(k*m+i);  
-				auto v2=arg2->atHCIndex(j*stride + k);  
+                auto v1=arg1->atHCIndex(k*m+i);  
+                auto v2=arg2->atHCIndex(j*stride + k);  
                 if (!isnan(v1) && !isnan(v2)) tmpSum+=v1*v2;
-			   }
+              }
               cachedResult[i+m*j]=tmpSum;
             }
         else {
           for (size_t k=0; k<stride; k++)  {
-			auto v1=(arg1->rank()>1? arg1->atHCIndex(k*m+i):(*arg1)[i]);   
-			auto v2=(*arg2)[k];
+            auto v1=(arg1->rank()>1? arg1->atHCIndex(k*m+i):(*arg1)[i]);   
+            auto v2=(*arg2)[k];
             if (!isnan(v1) && !isnan(v2)) cachedResult[i]+= v1*v2;
-		  }
+          }
         }
       }	 
     		            
@@ -323,11 +322,11 @@ namespace minsky
         if (arg1->hypercube().dims()[arg1->rank()-1]!=arg2->hypercube().dims()[0] && (arg1->rank()<arg2->rank()))  // do not allow products of the type nx1 dot nxm
           throw std::runtime_error("inner dimensions of tensors do not match");
         
-       auto xv1=arg1->hypercube().xvectors, xv2=arg2->hypercube().xvectors;
-       Hypercube hc;
-       hc.xvectors.insert(hc.xvectors.begin(), xv1.begin(), xv1.end()-1);
-       hc.xvectors.insert(hc.xvectors.begin(), xv2.begin()+1, xv2.end());
-       cachedResult.hypercube(move(hc));
+        auto xv1=arg1->hypercube().xvectors, xv2=arg2->hypercube().xvectors;
+        Hypercube hc;
+        hc.xvectors.insert(hc.xvectors.begin(), xv1.begin(), xv1.end()-1);
+        hc.xvectors.insert(hc.xvectors.begin(), xv2.begin()+1, xv2.end());
+        cachedResult.hypercube(move(hc));
       }
     }    
   };

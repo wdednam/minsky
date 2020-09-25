@@ -324,9 +324,25 @@ namespace minsky
         
         auto xv1=arg1->hypercube().xvectors, xv2=arg2->hypercube().xvectors;
         Hypercube hc;
+        hc.xvectors.insert(hc.xvectors.begin(), xv2.begin()+1, xv2.end());   // order of insertion reversed here so that matrix appears as m x n if inner product was mxp dot pxn        
         hc.xvectors.insert(hc.xvectors.begin(), xv1.begin(), xv1.end()-1);
-        hc.xvectors.insert(hc.xvectors.begin(), xv2.begin()+1, xv2.end());
         cachedResult.hypercube(move(hc));
+
+        auto idx1=arg1->index(), idx2=arg2->index();
+        set<size_t> newIdx;        
+        for (auto& i: idx1)
+          for (auto& j: idx2)
+          {
+            // strip of any indices outside the output range
+            auto t=ssize_t(j)-ssize_t(i);
+            if (t>=0 && t<ssize_t(size()))  newIdx.insert(t);
+            //if (j>i)
+            //  newIdx.insert(i);
+            //else   
+            //  newIdx.insert(j);
+          }
+        cachedResult.index(Index(newIdx));        
+        
       }
     }    
   };

@@ -222,11 +222,11 @@ string VariableBase::init() const
       if (auto i=dynamic_cast<IntOp*>(&ports[0]->wires()[0]->to()->item()))
         if (i->ports.size()>2 && !i->ports[2]->wires().empty())
           if (auto lhsVar=i->ports[2]->wires()[0]->from()->item().variableCast()) 
-          {
-            value->second->init=lhsVar->vValue()->init;
-            // Since integral takes initial value from second port, the intVar should have the same intial value. for ticket 1257
-            if (i->intVar->vValue()->init!=lhsVar->vValue()->init) i->intVar->vValue()->init=lhsVar->vValue()->init;  
-		   }
+            {
+              value->second->init=lhsVar->vValue()->init;
+              // Since integral takes initial value from second port, the intVar should have the same intial value. for ticket 1257
+              if (i->intVar->vValue()->init!=lhsVar->vValue()->init) i->intVar->vValue()->init=lhsVar->vValue()->init;  
+            }
     return value->second->init;
   }
   else 

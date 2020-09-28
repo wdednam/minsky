@@ -416,7 +416,7 @@ proc textOK {} {
     canvas.moveOffsY 0
     if {[lsearch [availableOperations] $textBuffer]>-1} {
 		addOperationKey $textBuffer
-	} elseif {[llength $textBuffer]==1 && [regexp "(\-)?" $textBuffer]} {
+	} elseif {[llength $textBuffer]==1 && [string match "-" $textBuffer]} { # minus sign only creates subtract op. for ticket 145
 		addOperationKey subtract		
     } elseif [string match "\[%#\]*" $textBuffer] {
         addNote [string range $textBuffer 1 end]
@@ -425,7 +425,7 @@ proc textOK {} {
 			minsky.addVariable $name flow
 			minsky.canvas.itemFocus.init $init
             minsky.variableValues.reset
-        } else {  
+        } else {  # signed numbers create constant on the canvas. for ticket 145
 			if [regexp "(?:^|\s)(\[+-\]?\[\[:digit:\]\]*\.?\[\[:digit:\]\]+)(?=\$|\s)" $textBuffer] { #https://stackoverflow.com/questions/33520934/regex-with-only-numbers-in-a-string-c          
 			    minsky.addVariable $textBuffer constant
 			    minsky.canvas.itemFocus.init $textBuffer

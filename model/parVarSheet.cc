@@ -98,9 +98,8 @@ namespace minsky
                   {
                     cairo_move_to(cairo,x,y-1.5*rowHeight);
                     pango.setMarkup(latexToPango(value->name)+":");
-                    pango.show();                            					  
-
-                    string format=value->hypercube().xvectors[0].timeFormat();                                
+                    pango.show();              
+                    string format=value->hypercube().xvectors[0].timeFormat();
                     for (auto& i: value->hypercube().xvectors[0])
                       {
                         cairo_move_to(cairo,x,y);
@@ -184,12 +183,11 @@ namespace minsky
 			      {
                     cairo_move_to(cairo,x,y-1.5*rowHeight);
                     pango.setMarkup(latexToPango(value->name)+":");
-                    pango.show();
-                                        					    
+                    pango.show();  					    
                     for (size_t k=0; k<rank-1; k++)  
                       {   
                         if ((k&1)==0) y+=rowHeight; // allow room for header row
-                        lw=0;                        
+                        lw=0;
                         string format=value->hypercube().xvectors[k].timeFormat();
                         for (auto& i: value->hypercube().xvectors[k])
                           {
@@ -252,8 +250,7 @@ namespace minsky
                         w=0;h=0;      
                         cairo_get_current_point (cairo,&w,&h);   
                         if (h<h_prev) h+=h_prev; 
-                        if (h<h_prev) w+=w_prev;                                                                         
-                        //cout << " " << w << " " << h << " "<< x0 << " " << y0 << endl;
+                        if (w<w_prev) w=w_prev;                                                                         
                         // draw grid
                         {
                           cairo::CairoSave cs(cairo);

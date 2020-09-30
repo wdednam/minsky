@@ -101,14 +101,7 @@ namespace minsky
       gsl_set_error_handler(errHandler);
       sys.function=RKfunction;
       sys.jacobian=jacobian;
-      auto intVar=dynamic_pointer_cast<VariableBase>
-             (minsky->model->findAny(&Group::items, [&](const ItemPtr& x) {
-                   auto v=x->variableCast();
-                   return v && v->type()==VariableType::integral;
-                 }));      
-      
-      
-      sys.dimension=ValueVector::stockVars.size()*(intVar? intVar->vValue().get()->size(): 1);
+      sys.dimension=ValueVector::stockVars.size();
       sys.params=minsky;
       const gsl_odeiv2_step_type* stepper;
       switch (minsky->order)

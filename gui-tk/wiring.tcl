@@ -211,7 +211,7 @@ proc wrapHoverMouse {op x y} {
 }
   
 bind .wiring.canvas <ButtonPress-1> {wrapHoverMouse mouseDown %x %y}
-bind .wiring.canvas <Control-Button-1> {wrapHoverMouse controlMouseDown %x %y}
+bind .wiring.canvas <$meta-ButtonPress-1> {wrapHoverMouse controlMouseDown %x %y}
 bind .wiring.canvas <ButtonRelease-1> {wrapHoverMouse mouseUp %x %y}
 bind .wiring.canvas <Motion> {wrapHoverMouse mouseMove %x %y}
 bind .wiring.canvas <Leave> {after cancel hoverMouse}
@@ -237,11 +237,7 @@ bind .wiring.canvas <Button-5> {zoomAt  %x %y [expr 1.0/1.1]}
 # mouse wheel bindings for pc and aqua
 bind .wiring.canvas <MouseWheel> { if {%D>=0} {zoomAt %x %y 1.1} {zoomAt  %x %y [expr 1.0/(1.1)]} }
 
-if {[tk windowingsystem]=="aqua"} {
-    bind .wiring.canvas <Command-Button-1> {
-        tk_messageBox -message "Mouse coordinates %x %y"
-    }
-} else {
+if {[tk windowingsystem]!="aqua"} {
      bind .wiring.canvas <Alt-Button-1> {
         tk_messageBox -message "Mouse coordinates %x %y"
     }
@@ -551,7 +547,9 @@ proc canvasContext {x y X Y} {
 
 proc saveSelection {} {
     global workDir
-    set f [tk_getSaveFile -defaultextension .mky -initialdir $workDir]
+    set ext [canvas.selection.defaultExtension]
+    set f [tk_getSaveFile -defaultextension $ext  -initialdir $workDir \
+                  -filetypes [fileTypes $ext]]            
     if [string length $f] {
         set workDir [file dirname $f]
         eval minsky.saveSelectionAsFile {$f}

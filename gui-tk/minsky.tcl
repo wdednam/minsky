@@ -303,6 +303,10 @@ if {[tk windowingsystem] == "aqua"} {
     }
     proc ::tk::mac::ShowPreferences {} {showPreferences}
     proc ::tk::mac::ShowHelp {} {help Introduction}
+} else {
+    # keyboard accelerator introducer, which is different on macs
+    set meta Control
+    set meta_menu Ctrl
 }
 
 menu .menubar.file
@@ -559,10 +563,6 @@ proc setSimulationDelay {delay} {
 label .controls.slowSpeed -text "slow"
 label .controls.fastSpeed -text "fast"
 scale .controls.simSpeed -variable delay -command setSimulationDelay -to 0 -from 12 -length 150 -label "Simulation Speed" -orient horizontal -showvalue 0
-
-# keyboard accelerator introducer, which is different on macs
-set meta Control
-set meta_menu Ctrl
 
 
 
@@ -1276,7 +1276,7 @@ populateRecentFiles
 proc openFile {} {
     global fname workDir preferences
     set ofname [tk_getOpenFile -multiple 1 -filetypes {
-	    {Minsky {.mky}} {XML {.xml}} {All {.*}}} -initialdir $workDir]
+        {Minsky {.mky}} {Ravel {.rvl}} {XML {.xml}} {All {.*}}} -initialdir $workDir]
     if [string length $ofname] {eval openNamedFile $ofname}
 }
 
@@ -1321,7 +1321,7 @@ proc openNamedFile {ofname} {
 proc insertFile {} {
     global workDir
     set fname [tk_getOpenFile -multiple 1 -filetypes {
-	    {Minsky {.mky}} {XML {.xml}} {All {.*}}} -initialdir $workDir]
+        {Minsky {.mky}} {Ravel {.rvl}} {XML {.xml}} {All {.*}}} -initialdir $workDir]
     eval insertGroupFromFile $fname
 }
 
@@ -1347,11 +1347,20 @@ proc recentreCanvas {} {
     }
 }
 
+proc fileTypes {defaultExtension} {
+    if {$defaultExtension==".rvl"} {
+        return {{"Ravel" .rvl TEXT} {"Minsky" .mky TEXT} {"All Files" * TEXT}}
+    } else {
+        return {{"Minsky" .mky TEXT} {"Ravel" .rvl TEXT} {"All Files" * TEXT}}
+    }
+}
+
 proc save {} {
     global fname workDir
+    set ext [minsky.model.defaultExtension]
     if {![string length $fname]} {
-        setFname [tk_getSaveFile -defaultextension .mky  -initialdir $workDir \
-                  -filetypes {{"Minsky" .mky TEXT} {"All Files" * TEXT}}]}            
+        setFname [tk_getSaveFile -defaultextension $ext  -initialdir $workDir \
+                      -filetypes [fileTypes $ext]]}            
     if [string length $fname] {
         set workDir [file dirname $fname]
         eval minsky.save {$fname}
@@ -1361,8 +1370,9 @@ proc save {} {
 
 proc saveAs {} {
     global fname workDir
-    setFname [tk_getSaveFile -defaultextension .mky -initialdir $workDir \
-              -filetypes {{"Minsky" .mky TEXT} {"All Files" * TEXT}}]
+    set ext [minsky.model.defaultExtension]
+    setFname [tk_getSaveFile -defaultextension $ext  -initialdir $workDir \
+                  -filetypes [fileTypes $ext]]            
     if [string length $fname] save
 }
 

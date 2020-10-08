@@ -149,6 +149,7 @@ namespace minsky
     /// initialise slider bounds when slider first opened
     void initSliderBounds() const;
     void adjustSliderBounds() const;
+    double maxSliderSteps() const;
 
     /// sets/gets the units associated with this type
     Units units(bool check=false) const override;

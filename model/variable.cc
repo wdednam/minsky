@@ -465,7 +465,8 @@ void VariableBase::adjustSliderBounds() const
 
 double VariableBase::maxSliderSteps() const
 {
-	if ((sliderMax-sliderMin)/sliderStep > 1.0e04) sliderStep=(sliderMax-sliderMin)/1.0e04;   // ensure there are at most 10000 steps between sliderMin and Max. for ticket 1255.  
+    // ensure there are at most 10000 steps between sliderMin and Max. for ticket 1255. 	
+	if ((sliderMax-sliderMin)/sliderStep > 1.0e04) sliderStep=(sliderMax-sliderMin)/1.0e04;    
 	return sliderStep;
 }
 

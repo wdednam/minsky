@@ -740,15 +740,14 @@ proc cut {} {
 
 proc dimensionsDialog {} {
     populateMissingDimensions
-    if {![winfo exists .dimensions]} {
-        toplevel .dimensions
-        grid [button .dimensions.cancel -text Cancel -command "wm withdraw .dimensions"] \
-            [button .dimensions.ok -text OK -command {
-                    set colRows [grid size .dimensions]
-                    for {set i 2} {$i<[lindex $colRows 1]} {incr i} {
-                        set dim [.dimensions.g${i}_dim get]
-                        if {$dim!=""} {
-                            set d [dimensions.@elem $dim]
+    toplevel .dimensions
+    grid [button .dimensions.cancel -text Cancel -command "destroy .dimensions"] \
+        [button .dimensions.ok -text OK -command {
+            set colRows [grid size .dimensions]
+            for {set i 2} {$i<[lindex $colRows 1]} {incr i} {
+                set dim [.dimensions.g${i}_dim get]
+                if {$dim!=""} {
+                    set d [dimensions.@elem $dim]
                             $d.type [.dimensions.g${i}_type get]
                             if [info exists timeFormatStrings([.dimensions.g${i}_units get])] {
                                 $d.units $timeFormatStrings([.dimensions.g${i}_units get])
@@ -757,24 +756,23 @@ proc dimensionsDialog {} {
                             }
                         }
                     }
-                imposeDimensions
-                wm withdraw .dimensions
-                reset
-            }]
-        grid [label .dimensions.g1_dim -text Dimension] \
-            [label .dimensions.g1_type -text Type]\
-            [label .dimensions.g1_units -text "Units/Format"]
-        tooltip .dimensions.g1_units "Value type: enter a unit string, eg m/s; time type: enter a strftime format string, eg %Y-%m-%d %H:%M:%S, or %Y-Q%Q"
-    } else {
-        wm deiconify .dimensions
-    }
+            imposeDimensions
+            destroy .dimensions
+            reset
+        }]
+    grid [label .dimensions.g1_dim -text Dimension] \
+        [label .dimensions.g1_type -text Type]\
+        [label .dimensions.g1_units -text "Units/Format"]
+    tooltip .dimensions.g1_units "Value type: enter a unit string, eg m/s; time type: enter a strftime format string, eg %Y-%m-%d %H:%M:%S, or %Y-Q%Q"
+
     set colRows [grid size .dimensions]
     for {set i [lindex $colRows 1]} {$i<[dimensions.size]+3} {incr i} {
         grid [entry .dimensions.g${i}_dim] \
             [ttk::combobox .dimensions.g${i}_type -state readonly \
-             -values {string value time}] \
+                 -values {string value time}] \
             [ttk::combobox .dimensions.g${i}_units \
-                 -postcommand "dimFormatPopdown .dimensions.g${i}_units \[.dimensions.g${i}_type get\]"]
+                 -postcommand "dimFormatPopdown .dimensions.g${i}_units \[.dimensions.g${i}_type get\] {}"
+            ]
     }
     set i 2
     foreach dim [dimensions.#keys] {
@@ -784,7 +782,7 @@ proc dimensionsDialog {} {
         .dimensions.g${i}_type set [$d.type]
         .dimensions.g${i}_units delete 0 end
         .dimensions.g${i}_units insert 0 [$d.units]
-        dimFormatPopdown .dimensions.g${i}_units [$d.type]
+        dimFormatPopdown .dimensions.g${i}_units [$d.type] {}
         incr i
     }
 }
@@ -828,21 +826,22 @@ proc rewriteTimeComboBox {comboBox} {
     }
 }
 
-proc dimFormatPopdown {comboBox type} {
+# If comboBox is a format combo box for a field of \a type, then set up rewrite strings, then execute \a onSelect
+proc dimFormatPopdown {comboBox type onSelect} {
     global timeFormatStrings
     switch $type {
         string {
             $comboBox configure -values {}
             $comboBox set {}
-            bind $comboBox <<ComboboxSelected>> {}
+            bind $comboBox <<ComboboxSelected>> $onSelect
         }
         value {
             $comboBox configure -values {}
-            bind $comboBox <<ComboboxSelected>> {}
+            bind $comboBox <<ComboboxSelected>> $onSelect
         }
         time {
             $comboBox configure -values [lsort [array names timeFormatStrings]]
-            bind $comboBox <<ComboboxSelected>> "rewriteTimeComboBox $comboBox"
+            bind $comboBox <<ComboboxSelected>> "rewriteTimeComboBox $comboBox; $onSelect"
         }
     }
 }

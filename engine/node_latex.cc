@@ -44,6 +44,11 @@ namespace MathDAG
     string::size_type ss;
     if ((ss=nm.find_first_of("_^"))!=string::npos)
       return mathrm(nm.substr(0, ss)) + nm[ss] + "{"+mathrm(nm.substr(ss+1))+"}";
+      
+    // process % chars
+    string::size_type pc;
+    if ((pc=nm.find_first_of("%"))!=string::npos)
+      return mathrm(nm.substr(0, pc)) + "\\" + nm[pc] + mathrm(nm.substr(pc+1));      
     
     // if its a single letter variable, or contains LaTeX codes, process as is
     if (nm.length()==1 || nm.find('\\')!=string::npos)

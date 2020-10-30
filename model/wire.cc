@@ -105,7 +105,7 @@ namespace minsky
       (f->item().group.lock()->displayContents() ||
        t->item().group.lock()->displayContents());
   }
-
+  
   void Wire::moveToPorts(const shared_ptr<Port>& from, const shared_ptr<Port>& to)
   {
     if (auto f=this->from())
@@ -362,9 +362,33 @@ namespace
     }
     cairo_path_destroy (path);              
   }
+  
+  bool Wire::attachedToDefiningVar() const
+  {
+    auto f=from(), t=to();
+    //assert(f->item().group.lock() && t->item().group.lock());
+    bool attachedToFrom=false, attachedToTo=false;
+    //if (any_of(f->item().group.lock()->items.begin(),f->item().group.lock()->items.end(), [&](ItemPtr i){if (auto v=i->variableCast()) return v->varTabDisplay; else return false;})) attachedToFrom=true;
+    //else attachedToFrom=true; 
+    //if (any_of(t->item().group.lock()->items.begin(),t->item().group.lock()->items.end(), [&](ItemPtr i){if (auto v=i->variableCast()) return v->varTabDisplay; else return false;})) attachedToTo=true;    
+    //else attachedToTo=true;
+    //for (auto i: f->item().group.lock()->items) 
+    //       if (i->variableCast() && i->variableCast()->defined() && i->variableCast()->varTabDisplay) attachedToFrom=true; 
+    //for (auto i: t->item().group.lock()->items) 
+    //       if (i->variableCast() && i->variableCast()->defined() && i->variableCast()->varTabDisplay) attachedToTo=true;                   
+    assert(f && t);
+    if (auto vf=f->item().variableCast()) attachedToFrom=vf->varTabDisplay;
+    //else return f->item().attachedToDefiningVar();                                // attempt at recursion...
+    if (auto vt=t->item().variableCast()) attachedToTo=vt->varTabDisplay;
+    //else return t->item().attachedToDefiningVar();                              // attempt at recursion...
+    if (attachedToFrom || attachedToTo) return true;
+    return false;       
+  }  
+  
    
   void Wire::draw(cairo_t* cairo) const
   {
+	if (!attachedToDefiningVar()) {    
     auto coords=this->coords();
     if (coords.size()<4 || !visible()) return;
 
@@ -465,6 +489,7 @@ namespace
           }
         cairo_restore(cairo);
       }
+    }
   }
 
   void Wire::split()

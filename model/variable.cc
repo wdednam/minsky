@@ -480,6 +480,7 @@ bool VariableBase::handleArrows(int dir,bool reset)
 
 void VariableBase::draw(cairo_t *cairo) const
 {
+  if (!varTabDisplay) {	
   double angle=rotation() * M_PI / 180.0;
   double fm=std::fmod(rotation(),360);
   float z=zoomFactor();
@@ -510,7 +511,7 @@ void VariableBase::draw(cairo_t *cairo) const
     vv=*minsky::cminsky().variableValues[valueId()];
   
   // For feature 47
-  if (type()!=constant && !ioVar() && (vv.size()==1) )
+  if (type()!=constant && !ioVar() && (vv.size()==1))
     try
       {
         auto val=engExp();    
@@ -613,6 +614,7 @@ void VariableBase::draw(cairo_t *cairo) const
   // Rescale size of variable attached to intop. For ticket 94
   cairo_clip(cairo);
   if (selected) drawSelected(cairo);
+  }
 }
 
 void VariableBase::resize(const LassoBox& b)

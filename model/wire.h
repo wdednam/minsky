@@ -65,7 +65,9 @@ namespace minsky
     /// switch ports this wire links to
     void moveToPorts(const std::shared_ptr<Port>& from, const std::shared_ptr<Port>& to);
     /// stash all the internal cairo coordinates along a wire 
-    void storeCairoCoords(cairo_t* cairo) const;   
+    void storeCairoCoords(cairo_t* cairo) const;
+    
+    bool attachedToDefiningVar() const;       
     /// draw this item into a cairo context
     void draw(cairo_t* cairo) const;  
     
@@ -87,7 +89,7 @@ namespace minsky
     void straighten() {m_coords.clear();}
 
     /// whether this wire is visible or not
-    bool visible() const;
+    bool visible() const;  
     /// move this from its group into dest
     void moveIntoGroup(Group& dest);
     /// splits wires crossing group boundaries

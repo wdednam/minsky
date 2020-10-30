@@ -536,7 +536,9 @@ proc canvasContext {x y X Y} {
     .wiring.context add command -label "Paste selection" -command pasteAt
     if {[getClipboard]==""} {
         .wiring.context entryconfigure end -state disabled
-    } 
+    }
+    .wiring.context add command -label "Hide defining variables on tab" -command "minsky.canvas.pushDefiningVarsToTab"
+    .wiring.context add command -label "Show defining variables on canvas" -command "minsky.canvas.showDefiningVarsOnCanvas" 
     .wiring.context add command -label "Bookmark here" -command "bookmarkAt $x $y $X $Y"
     .wiring.context add command -label "Group" -command "minsky.createGroup"
     .wiring.context add command -label "Lock selected Ravels" -command "minsky.canvas.lockRavelsInSelection"
@@ -705,6 +707,11 @@ proc contextMenu {x y X Y} {
                 .wiring.context add command -label "Add integral" -command "addIntegral"
             }
             .wiring.context add command -label "Flip" -command "$item.flip; flip_default"
+            if {[$item.defined]} {
+                 global varTabDisplay
+                 set varTabDisplay [$item.varTabDisplay]            
+                .wiring.context add checkbutton -label "Display variable on tab" -command "$item.toggleVarTabDisplay" -variable varTabDisplay
+            }                        
             if {[$item.type]=="parameter"} {
                 .wiring.context add command -label "Import CSV" -command {CSVImportDialog}
             }

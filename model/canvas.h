@@ -176,9 +176,10 @@ namespace minsky
     void lockRavelsInSelection();
     void unlockRavelsInSelection();
     
+    Items itemVector;
     void pushDefiningVarsToTab();
-    void showDefiningVarsOnCanvas();
-    
+    void showDefiningVarsOnCanvas();    
+
     /// delete item referenced by item
     void deleteItem();
     /// delete wire referenced by wire

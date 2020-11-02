@@ -468,26 +468,29 @@ namespace minsky
       if (auto r=dynamic_cast<Ravel*>(i.get()))
         r->leaveLockGroup();
   }
-  
+    
   void Canvas::pushDefiningVarsToTab()
   {
     for (auto& i: selection.items)
-    {
-      auto v=i->variableCast();
-      if (v && v->defined() && !v->varTabDisplay)
-        v->varTabDisplay=!v->varTabDisplay;	  
-	  }
+      {
+        auto v=i->variableCast();
+        if (v && v->defined() && !v->varTabDisplay) {
+          itemVector.push_back(i);
+          v->toggleVarTabDisplay();	  
+	    }
+      }
   }
   
   void Canvas::showDefiningVarsOnCanvas()
   {
-    for (auto& i: selection.items)
-    {
-      auto v=i->variableCast();
-      if (v && v->defined() && v->varTabDisplay)
-        v->varTabDisplay=!v->varTabDisplay;	  
-	  }	  
-  }
+    for (auto& i: itemVector)
+      {
+        auto v=(*i).variableCast();
+        if (v && v->defined() && v->varTabDisplay)
+          v->toggleVarTabDisplay();	  
+      }
+    itemVector.clear();  	  
+  }  
   
   void Canvas::deleteItem()
   {

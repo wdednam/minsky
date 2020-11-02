@@ -46,7 +46,7 @@ namespace minsky
     try
       {
         x.draw(surf.cairo());
-		cairo_rotate(surf.cairo(),-x.rotation()*M_PI/180);  // perform transformation after drawing, otherwise ink extents not calculated correctly below. For ticket 1232    
+		cairo_rotate(surf.cairo(),-x.rotation()*M_PI/180);  // perform transformation after drawing, otherwise ink extents not calculated correctly below. For ticket 1232      
       }
     catch (const std::exception& e) 
       {cerr<<"illegal exception caught in draw(): "<<e.what()<<endl;}
@@ -161,9 +161,14 @@ namespace minsky
  
   bool Item::visible() const 
   {
+	if (auto o=operationCast()) 
+	  if (o->attachedToDefiningVar()) return false;
+	if (auto v=variableCast()) 
+	  if (v->attachedToDefiningVar()) return false;	  
     auto g=group.lock();
-    return !g || g->displayContents();
+    return (!g || g->displayContents());
   }
+  
 
   void Item::moveTo(float x, float y)
   {
@@ -254,8 +259,8 @@ namespace minsky
     // Set initial iWidth() and iHeight() to initial Pango determined values. This resize method is not very reliable. Probably a Pango issue. 
     float w=iWidth(width()), h=iHeight(height()), invZ=1/zoomFactor();   
     moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));                 
-    iWidth(abs(b.x1-b.x0));//*invZ);
-    iHeight(abs(b.y1-b.y0));//*invZ);     
+    iWidth(abs(b.x1-b.x0)*invZ);
+    iHeight(abs(b.y1-b.y0)*invZ);     
     scaleFactor(std::max(1.0f,std::min(iWidth()/w,iHeight()/h)));
   }
   
@@ -276,23 +281,15 @@ namespace minsky
     Rotate r(angle,this->x(),this->y());
     drawResizeHandle(cairo,r.x(p.x(),p.y())-x(),r.y(p.x(),p.y())-y(),0.5*resizeHandleSize(),abs(rotation())==180? 0.5*M_PI : 0);
     cairo_stroke(cairo);
-  }    
+  }
   
   bool Item::attachedToDefiningVar() const
   {
-    //if (auto g=group.lock())
-    //  if (any_of(g->items.begin(),g->items.end(), [&](ItemPtr i){if (auto v=i->variableCast()) return v->varTabDisplay; else return false;})) return true;
-      //else return true;
-      //  for (auto& i: g->items) {
-		//   auto v=i->variableCast();	 
-      //     if (v && v->defined() && v->varTabDisplay) return true; 
-	  // }
-	if (ports.size()>1)
-	  for (size_t i=0; i<ports.size(); i++)
-        for (auto w: ports[i]->wires())
-          if (w->attachedToDefiningVar()) return true;
+	if (variableCast() || operationCast())  
+      for (auto w: ports[0]->wires())
+        if (w->attachedToDefiningVar()) return true;
     return false;
-  }  
+  }    
   
   // default is just to display the detailed text (ie a "note")
   void Item::draw(cairo_t* cairo) const

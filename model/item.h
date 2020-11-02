@@ -183,7 +183,7 @@ namespace minsky
     /// whether this item is visible on the canvas. 
     virtual bool visible() const;
     
-    virtual bool attachedToDefiningVar() const;
+    virtual bool attachedToDefiningVar() const;    
 
     void moveTo(float x, float y);
 

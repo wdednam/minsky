@@ -22,6 +22,7 @@
 #include "port.h"
 #include "group.h"
 #include "selection.h"
+#include "operation.h"
 #include "minsky_epilogue.h"
 #include  <random>
 #include  <iterator>
@@ -77,7 +78,8 @@ namespace minsky
       }
     return this->coords();
   }
-  
+
+
   Wire::Wire(const shared_ptr<Port>& from, const shared_ptr<Port>& to, 
          const vector<float>& a_coords): 
       m_from(from), m_to(to) 
@@ -100,12 +102,13 @@ namespace minsky
   bool Wire::visible() const
   {
     auto f=from(), t=to();
+    if (attachedToDefiningVar()) return false;
     assert(f->item().group.lock() && t->item().group.lock());
-    return f && t &&
+    return f && t && 
       (f->item().group.lock()->displayContents() ||
        t->item().group.lock()->displayContents());
   }
-  
+
   void Wire::moveToPorts(const shared_ptr<Port>& from, const shared_ptr<Port>& to)
   {
     if (auto f=this->from())
@@ -159,7 +162,7 @@ namespace
 		}						
 		
    return points;
- }  
+ } 	  
  	
  // For ticket 991/1092. Returns coordinate pairs for moving handles on a curved wire	
  vector<pair<float,float>> toCoordPair(vector<float> coords) {    
@@ -172,7 +175,7 @@ namespace
      }
    return points;
  } 	
- 
+
 // For ticket 991. Construct tridoagonal matrix A which relates control points c and knots k (curved wire handles): Ac = k.
  vector<vector<float>> constructTriDiag(int length) {
 
@@ -365,30 +368,15 @@ namespace
   
   bool Wire::attachedToDefiningVar() const
   {
-    auto f=from(), t=to();
-    //assert(f->item().group.lock() && t->item().group.lock());
-    bool attachedToFrom=false, attachedToTo=false;
-    //if (any_of(f->item().group.lock()->items.begin(),f->item().group.lock()->items.end(), [&](ItemPtr i){if (auto v=i->variableCast()) return v->varTabDisplay; else return false;})) attachedToFrom=true;
-    //else attachedToFrom=true; 
-    //if (any_of(t->item().group.lock()->items.begin(),t->item().group.lock()->items.end(), [&](ItemPtr i){if (auto v=i->variableCast()) return v->varTabDisplay; else return false;})) attachedToTo=true;    
-    //else attachedToTo=true;
-    //for (auto i: f->item().group.lock()->items) 
-    //       if (i->variableCast() && i->variableCast()->defined() && i->variableCast()->varTabDisplay) attachedToFrom=true; 
-    //for (auto i: t->item().group.lock()->items) 
-    //       if (i->variableCast() && i->variableCast()->defined() && i->variableCast()->varTabDisplay) attachedToTo=true;                   
-    assert(f && t);
-    if (auto vf=f->item().variableCast()) attachedToFrom=vf->varTabDisplay;
-    //else return f->item().attachedToDefiningVar();                                // attempt at recursion...
-    if (auto vt=t->item().variableCast()) attachedToTo=vt->varTabDisplay;
-    //else return t->item().attachedToDefiningVar();                              // attempt at recursion...
-    if (attachedToFrom || attachedToTo) return true;
+    auto t=to();
+    assert(t);             
+    if (auto i=dynamic_cast<IntOp*>(t->item().operationCast())) return i->intVar->varTabDisplay;
+    if (t->item().attachedToDefiningVar()) return true;
     return false;       
-  }  
-  
+  }    
    
   void Wire::draw(cairo_t* cairo) const
   {
-	if (!attachedToDefiningVar()) {    
     auto coords=this->coords();
     if (coords.size()<4 || !visible()) return;
 
@@ -489,7 +477,6 @@ namespace
           }
         cairo_restore(cairo);
       }
-    }
   }
 
   void Wire::split()

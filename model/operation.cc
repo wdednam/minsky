@@ -508,7 +508,7 @@ namespace minsky
   {
 	if (coupled()) return intVar->attachedToDefiningVar();
     return Item::attachedToDefiningVar();
-  }     
+  }    
  
   void IntOp::draw(cairo_t* cairo) const
   { 	  

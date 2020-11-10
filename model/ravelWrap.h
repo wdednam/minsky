@@ -67,16 +67,14 @@ namespace minsky
     void leaveLockGroup();
     void broadcastStateToLockGroup() const;
     
-    /// true to indicate mouse hovering over border
-    bool onBorder=false; 
-    
     void draw(cairo_t* cairo) const override;
     void resize(const LassoBox&) override;
-    ClickType::Type clickType(float x, float y) override;
-    void onMouseDown(float x, float y);
-    void onMouseUp(float x, float y);
-    bool onMouseMotion(float x, float y);
-    bool onMouseOver(float x, float y);
+    bool inItem(float x, float y) const override;
+    void onMouseDown(float x, float y) override;
+    void onMouseUp(float x, float y) override;
+    bool onMouseMotion(float x, float y) override;
+    bool onMouseOver(float x, float y) override;
+    void onMouseLeave() override {ravel::Ravel::onMouseLeave();}
     /// return hypercube corresponding to the current Ravel state
     Hypercube hypercube() const;
     void populateHypercube(const Hypercube&);
@@ -85,7 +83,7 @@ namespace minsky
     /// adjust output dimensions to first \a r handles
     void setRank(unsigned r);
     void adjustSlicer(int); ///< adjust currently selected handle's slicer
-    bool handleArrows(int dir, bool modifier) override;
+    bool onKeyPress(int, const std::string&, int) override; 
 
     /// enable/disable calipers on currently selected handle
     bool displayFilterCaliper() const;

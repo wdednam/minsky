@@ -25,11 +25,21 @@
 
 using namespace minsky;
 using namespace ecolab;
+using namespace std;
+
+// width of draggable border 
+const float border=10;
 
 Sheet::Sheet()
 {
   ports.emplace_back(new Port(*this, Port::inputPort));
 }
+
+bool Sheet::inItem(float xx, float yy) const
+{
+  return abs(xx-x())<0.5*width()-border && abs(yy-y())<0.5*height()-border;
+}
+
 
 void Sheet::draw(cairo_t* cairo) const
 {
@@ -45,9 +55,22 @@ void Sheet::draw(cairo_t* cairo) const
 
   cairo_scale(cairo,z,z);
     
+  cairo_rectangle(cairo,-0.5*m_width+border,-0.5*m_height+border,m_width-2*border,m_height-2*border);
+  cairo_stroke_preserve(cairo);
   cairo_rectangle(cairo,-0.5*m_width,-0.5*m_height,m_width,m_height);
   cairo_stroke_preserve(cairo);
+  // draw border
+  if (onBorder)
+    { // shadow the border when mouse is over it
+      cairo::CairoSave cs(cairo);
+      cairo_set_source_rgba(cairo,0.5,0.5,0.5,0.5);
+      cairo_set_fill_rule(cairo,CAIRO_FILL_RULE_EVEN_ODD);
+      cairo_fill(cairo);
+    }
+  cairo_new_path(cairo);
+  cairo_rectangle(cairo,-0.5*m_width+border,-0.5*m_height+border,m_width-2*border,m_height-2*border);
   cairo_clip(cairo);
+  
   if (selected) drawSelected(cairo);
 
   try
@@ -63,7 +86,7 @@ void Sheet::draw(cairo_t* cairo) const
         }
       else
         {
-          float x0=-0.5*m_width, y0=-0.5*m_height;//+pango.height();
+          float x0=-0.5*m_width+border, y0=-0.5*m_height+border;
           if (value->hypercube().rank()==0)
             {
               cairo_move_to(cairo,x0,y0);
@@ -100,7 +123,7 @@ void Sheet::draw(cairo_t* cairo) const
               for (auto& i: value->hypercube().xvectors[0])
                 {
                   pango.setText(trimWS(str(i,format)));
-                  colWidth=std::max(colWidth,5+pango.width()/z);
+                  colWidth=std::max(colWidth,5+pango.width());
                 }                
 
               if (value->hypercube().rank()==2)
@@ -174,7 +197,7 @@ void Sheet::draw(cairo_t* cairo) const
                         cairo_line_to(cairo,x-2.5,0.5*m_height);
                         cairo_stroke(cairo);
                       }
-                      colWidth=std::max(colWidth, 5+pango.width()/z);
+                      colWidth=std::max(colWidth, 5+pango.width());
                       for (size_t j=0; j<dims[0]; ++j)
                         {
                           y+=rowHeight;
@@ -207,13 +230,8 @@ void Sheet::draw(cairo_t* cairo) const
         }
     }
   catch (...) {/* exception most likely invalid variable value */}
+  cairo_reset_clip(cairo);
+  cairo_rectangle(cairo,-0.5*m_width,-0.5*m_height,m_width,m_height);
+  cairo_clip(cairo);
 }
 
-void Sheet::resize(const LassoBox& b)
-{
-  auto invZ=1/zoomFactor();
-  m_width=abs(b.x1-b.x0)*invZ;
-  m_height=abs(b.y1-b.y0)*invZ;
-  moveTo(0.5*(b.x0+b.x1), 0.5*(b.y0+b.y1));
-  bb.update(*this);
-}

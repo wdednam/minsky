@@ -197,7 +197,8 @@ namespace minsky
       }          
 
     if (onResizeHandle(x,y)) return ClickType::onResize;         
-
+    if (inItem(x,y)) return ClickType::inItem;
+    
     ecolab::cairo::Surface dummySurf
                                 (cairo_recording_surface_create(CAIRO_CONTENT_COLOR_ALPHA,nullptr));
     draw(dummySurf.cairo());
@@ -366,9 +367,6 @@ namespace minsky
         r=ports[i];
     return r;
   }
-
-  ItemPtr Item::select(float x, float y) const
-  {return ItemPtr();}
 
   void Item::removeControlledItems() const
   {

@@ -181,8 +181,8 @@ namespace minsky
 
     std::string valueId() const 
     {return intVar->valueId();}
-
-    bool attachedToDefiningVar() const override;       
+    
+    bool attachedToDefiningVar() const override;        
     void draw(cairo_t*) const override;
     void resize(const LassoBox& b) override;  
     std::pair<double,Point> rotatedPoints() const override;        
@@ -191,7 +191,10 @@ namespace minsky
    /// return reference to integration variable
     VariablePtr intVar; 
 
-    bool handleArrows(int dir,bool) override {return intVar->handleArrows(dir,false);}
+    bool onKeyPress(int keySym, const std::string& utf8, int state) override {
+      if (intVar) return intVar->onKeyPress(keySym, utf8, state);
+      return false;
+    }
 
     /// toggles coupled state of integration variable. Only valid for integrate
     /// @return coupled state

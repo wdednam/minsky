@@ -142,24 +142,12 @@ namespace
     bb.update(*this);
   }
 
-  ClickType::Type Ravel::clickType(float xx, float yy)
+  bool Ravel::inItem(float xx, float yy) const
   {
-    double z=zoomFactor();
-    for (auto& p: ports)
-      if (hypot(xx-p->x(), yy-p->y()) < portRadius*z)
-        return ClickType::onPort;
-    double r=1.1*z*radius();
-    double R=1.1*r;
-    double dx=xx-x(), dy=yy-y();
-    if (onResizeHandle(xx,yy))
-      return ClickType::onResize;         
-    if (std::abs(xx-x())>R || std::abs(yy-y())>R)
-      return ClickType::outside;    
-    if (std::abs(dx)<=r && std::abs(dy)<=r)
-      return ClickType::onRavel;
-    return ClickType::onItem;
+    float r=1.1*zoomFactor()*radius();
+    return std::abs(xx-x())<=r && std::abs(yy-y())<=r;
   }
-
+  
   void Ravel::onMouseDown(float xx, float yy)
   {
     double invZ=1/zoomFactor();
@@ -170,6 +158,7 @@ namespace
   {
     double invZ=1/zoomFactor();
     ravel::Ravel::onMouseUp((xx-x())*invZ,(yy-y())*invZ);
+    broadcastStateToLockGroup();
   }
   bool Ravel::onMouseMotion(float xx, float yy)
   {
@@ -256,11 +245,20 @@ namespace
     broadcastStateToLockGroup();
   }
 
-  bool Ravel::handleArrows(int dir, bool modifier)
+  bool Ravel::onKeyPress(int keySym, const std::string& utf8, int state)
   {
-    adjustSlicer(dir);
-    if (modifier)
-      minsky().reset();
+    switch (keySym)
+      {
+      case 0xff52: case 0xff53: //Right, Up
+        adjustSlicer(1);
+        break;
+      case 0xff51: case 0xff54: //Left, Down
+        adjustSlicer(-1);
+        break;
+      default:
+        return false;
+      }
+    if (state&1) minsky().reset();
     return true;
   }
 

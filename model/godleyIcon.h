@@ -75,7 +75,10 @@ namespace minsky
 
     bool variableDisplay=true;
     void toggleVariableDisplay() {variableDisplay=!variableDisplay; updateBoundingBox();}
-    
+
+    /// sets editor's display values attributes to current global preferences
+    void setEditorDisplayValues();
+
     /// scale icon until it's height or width matches \a h or \a w depending on which is minimum             
     void scaleIcon(float w, float h);         
     
@@ -132,6 +135,15 @@ namespace minsky
     {for (auto& i: m_stockVars) i->setUnits(currency);}
       
     void insertControlled(Selection& selection) override;
+
+    void onMouseDown(float, float) override;
+    void onMouseUp(float, float) override;
+    bool onMouseMotion(float, float) override;
+    bool onMouseOver(float, float) override;
+    void onMouseLeave() override;
+    bool onKeyPress(int, const std::string&, int) override;
+    bool inItem(float, float) const override;
+
   private:
     void updateVars(Variables& vars, 
                     const vector<string>& varNames, 
@@ -139,6 +151,10 @@ namespace minsky
     /// move contained variables to correct locations within icon
     void positionVariables() const;
     Variables m_flowVars, m_stockVars;
+
+    /// @{ convert mouse coordinates into editor coords
+    float toEditorX(float) const;
+    float toEditorY(float) const;
   };
 }
 

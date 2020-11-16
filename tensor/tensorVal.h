@@ -81,13 +81,12 @@ namespace civita
     TensorVal(const Hypercube& hc): ITensorVal(hc) {allocVal();}
     TensorVal(Hypercube&& hc): ITensorVal(std::move(hc)) {allocVal();}
     TensorVal(const std::vector<unsigned>& dims): ITensorVal(dims) {allocVal();}
-
+    TensorVal(const ITensor& t) {*this=t;}
+    
     using ITensorVal::index;
     const Index& index(Index&& idx) override {
       m_index=std::move(idx);
-      if (!m_index.empty()) {
-        data.resize(m_index.size());
-      }
+      allocVal();
       return m_index;
     }
     const Hypercube& hypercube(const Hypercube& hc) override
@@ -96,7 +95,7 @@ namespace civita
     {m_hypercube=std::move(hc);allocVal();return m_hypercube;}
     using ITensor::hypercube;
 
-    void allocVal() {if (m_index.empty()) data.resize(hypercube().numElements());}
+    void allocVal() {data.resize(size());}
 
     // assign a sparse data set
     TensorVal& operator=(const std::map<size_t,double>& x) {
@@ -108,11 +107,10 @@ namespace civita
     
     double operator[](size_t i) const override {return data.empty()? 0: data[i];}
     double& operator[](size_t i) override {return data[i];}
-    size_t size() const override {return std::max(data.size(),size_t(1));}
     const TensorVal& operator=(const ITensor& x) override {
+      index(x.index());
       hypercube(x.hypercube());
-      m_index=index();
-      data.resize(x.size());
+      assert(data.size()==x.size());
       for (size_t i=0; i<x.size(); ++i) data[i]=x[i];
       updateTimestamp();
       return *this;

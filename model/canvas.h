@@ -186,11 +186,7 @@ namespace minsky
     /// hide or reveal the defining variables and attached items within a selection on the canvas
     Items itemVector;
     void pushDefiningVarsToTab();
-<<<<<<< HEAD
-    void showDefiningVarsOnCanvas(); 
-=======
     void showDefiningVarsOnCanvas();    
->>>>>>> 7dc204115f1d1996216976dfdd1808e221a302f9
 
     /// delete item referenced by item
     void deleteItem();

@@ -446,17 +446,17 @@ proc canvasKeyPress {N A s} {
 
 
 # operation add shortcuts
-bind . <Key-plus> {if {![canvasKeyPress %N %A]} {addOperationKey add}}
-bind . <Key-minus> {if {![canvasKeyPress %N %A]} {textInput "-"; .wiring.canvas configure -cursor {}}}
-bind . <Key-asterisk> {if {![canvasKeyPress %N %A]} {addOperationKey multiply}}
-bind . <Key-KP_Multiply> {if {![canvasKeyPress %N %A]} {addOperationKey multiply}}
-bind . <Key-slash> {if {![canvasKeyPress %N %A]} {addOperationKey divide}}
-bind . <Key-KP_Divide> {if {![canvasKeyPress %N %A]} {addOperationKey divide}}
-bind . <Key-asciicircum> {if {![canvasKeyPress %N %A]} {addOperationKey pow}}
+bind . <Key-plus> {if {![canvasKeyPress %N %A %s]} {addOperationKey add}}
+bind . <Key-minus> {if {![canvasKeyPress %N %A %s]} {textInput "-"; .wiring.canvas configure -cursor {}}}
+bind . <Key-asterisk> {if {![canvasKeyPress %N %A %s]} {addOperationKey multiply}}
+bind . <Key-KP_Multiply> {if {![canvasKeyPress %N %A %s]} {addOperationKey multiply}}
+bind . <Key-slash> {if {![canvasKeyPress %N %A %s]} {addOperationKey divide}}
+bind . <Key-KP_Divide> {if {![canvasKeyPress %N %A %s]} {addOperationKey divide}}
+bind . <Key-asciicircum> {if {![canvasKeyPress %N %A %s]} {addOperationKey pow}}
 #bind . <Key-backslash> {if {![canvasKeyPress %N %A]} {addOperationKey sqrt}}
-bind . <Key-ampersand> {if {![canvasKeyPress %N %A]} {addOperationKey integrate}}
-bind . <Key-equal> {if {![canvasKeyPress %N %A]} {addNewGodleyItemKey}}
-bind . <Key-at> {if {![canvasKeyPress %N %A]} {addPlotKey}}
+bind . <Key-ampersand> {if {![canvasKeyPress %N %A %s]} {addOperationKey integrate}}
+bind . <Key-equal> {if {![canvasKeyPress %N %A %s]} {addNewGodleyItemKey}}
+bind . <Key-at> {if {![canvasKeyPress %N %A %s]} {addPlotKey}}
 
 #Clear canvas pan mode in case shift key is pressed to create a capitalized variable via textInput. for ticket 1112.
 bind . <Key> {
@@ -466,8 +466,8 @@ bind . <Key> {
     }
 }  
 
-bind . <Key-Delete> {if {![canvasKeyPress %N %A]} {deleteKey [get_pointer_x .wiring.canvas] [get_pointer_y .wiring.canvas]}}
-bind . <Key-BackSpace> {if {![canvasKeyPress %N %A]} {deleteKey  [get_pointer_x .wiring.canvas] [get_pointer_y .wiring.canvas]}}
+bind . <Key-Delete> {if {![canvasKeyPress %N %A %s]} {deleteKey [get_pointer_x .wiring.canvas] [get_pointer_y .wiring.canvas]}}
+bind . <Key-BackSpace> {if {![canvasKeyPress %N %A %s]} {deleteKey  [get_pointer_x .wiring.canvas] [get_pointer_y .wiring.canvas]}}
 
 bind . <KeyPress-Shift_L> {.wiring.canvas configure -cursor $panIcon}
 bind . <KeyRelease-Shift_L> {.wiring.canvas configure -cursor {}}
@@ -705,24 +705,16 @@ proc contextMenu {x y X Y} {
             if {![inputWired [$item.valueId]]} {
                 .wiring.context add command -label "Add integral" -command "addIntegral"
             }
-<<<<<<< HEAD
-            .wiring.context add command -label "Flip" -command "$item.flip; flip_default"
-=======
->>>>>>> 7dc204115f1d1996216976dfdd1808e221a302f9
             if {[$item.defined]} {
                  global varTabDisplay
                  set varTabDisplay [$item.varTabDisplay]            
                 .wiring.context add checkbutton -label "Display variable on tab" -command "$item.toggleVarTabDisplay" -variable varTabDisplay
-<<<<<<< HEAD
-            }                        
-=======
             }            
             .wiring.context add command -label "Flip" -command "$item.flip; flip_default"                     
->>>>>>> 7dc204115f1d1996216976dfdd1808e221a302f9
             if {[$item.type]=="parameter"} {
                 .wiring.context add command -label "Import CSV" -command {CSVImportDialog}
-                .wiring.context add command -label "Select dimensions to display" -command {setupPickDimMenu} 
-            }            
+                .wiring.context add command -label "Display CSV values on tab" -command {setupPickDimMenu}                 
+            }
             .wiring.context add command -label "Export as CSV" -command exportItemAsCSV
         }
         "Operation*|IntOp|DataOp" {
@@ -825,7 +817,7 @@ proc setupPickDimMenu {} {
     global dimLabelPicked
     if {![winfo exists .wiring.context.pick]} {
         toplevel .wiring.context.pick
-        wm title .wiring.context.pick "Pick two dimensions"
+        wm title .wiring.context.pick "Pick any two dimensions"
         frame .wiring.context.pick.select
         scrollbar .wiring.context.pick.select.vscroll -orient vertical -command {
             .wiring.context.pick.select.lb yview}
@@ -841,7 +833,7 @@ proc setupPickDimMenu {} {
             foreach i [.wiring.context.pick.select.lb curselection] {
                 lappend pick [lindex $dimLabelPicked $i]
             }
-            minsky.canvas.item.setDimLabelsPicked [lindex $pick 0] [lindex $pick 1]
+			minsky.canvas.item.setDimLabelsPicked [lindex $pick 0] [lindex $pick 1]
             reset
         }
         button .wiring.context.pick.buttonBar.clear -text "Clear" -command {
@@ -852,14 +844,11 @@ proc setupPickDimMenu {} {
     }
         
     set dimLabelPicked [minsky.canvas.item.dimLabels]
-    for {set i 0} {$i<[llength $dimLabelPicked]} {incr i} {
-        set idx([lindex $dimLabelPicked $i]) $i
-    }
     wm transient .wiring.context.pick
     wm geometry .wiring.context.pick +[winfo pointerx .]+[winfo pointery .]
     ensureWindowVisible .wiring.context.pick
     grab set .wiring.context.pick
-}
+}    
 
 proc lockSpecificHandles {} {
     global currentLockHandles

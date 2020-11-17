@@ -199,7 +199,7 @@ namespace minsky
     /// rename all instances of a flow variable
     void renameFlows(const std::string& from, const std::string& to);        
     /// rename a stock variable
-    void renameStock(const std::string& from, const std::string& to);    
+    void renameStock(const std::string& from, const std::string& to);     
   };
 
 }

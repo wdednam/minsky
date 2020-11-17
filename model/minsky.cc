@@ -1094,8 +1094,8 @@ namespace minsky
           else for (vector<Integral>::iterator ig=integrals.begin(); 
              ig!=integrals.end(); ++ig)
                 {
-                  assert(ig->input.idx()>=0);
-                  for (size_t k=0; k<ig->input.size(); ++k)
+                  assert(ig->stock.idx()>=0);
+                  for (size_t k=0; k<ig->stock.size(); ++k)
                       jac(i+k,j+k)=reverseFactor*d[i+k];
                 }
           

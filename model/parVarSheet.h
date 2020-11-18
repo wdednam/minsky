@@ -103,6 +103,8 @@ namespace minsky
     void populateItemVector();
     //virtual bool variableSelector(ItemPtr i) {return false;}    
     virtual bool variableSelector(ItemPtr i) = 0;
+    std::vector<std::string> varAttrib{"Name","Initial Value","Short Description", "Long Description","Slider Step","Slider Min","Slider Max","Value"};       
+    std::vector<std::string> varAttribVals;
     void draw(cairo_t* cairo); 
     void redraw(int, int, int width, int height) override;
     void requestRedraw() {if (surface.get()) surface->requestRedraw();}      
@@ -114,7 +116,6 @@ namespace minsky
     void mouseMoveB1(double x, double y);
     void mouseMove(double x, double y);
     void keyPress(int keySym, const std::string& utf8);
-
     enum ClickType {background, internal};                            // useful for editable par tab!!
     
     void highlightCell(cairo_t* cairo,unsigned row, unsigned col);                             // useful for editable par tab!!

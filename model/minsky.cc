@@ -1078,9 +1078,9 @@ namespace minsky
         ds[j]=1;
         for (size_t i=0; i<equations.size(); ++i)
           equations[i]->deriv(&df[0], df.size(), &ds[0], sv, &flow[0]);
-        double d[stockVars.size()];
+        vector<double> d(stockVars.size());
         for (size_t i=0; i<stockVars.size(); ++i) d[i]=0;
-        evalGodley.eval(d, &df[0]);
+        evalGodley.eval(&d[0], &df[0]);
         for (vector<Integral>::iterator i=integrals.begin(); 
              i!=integrals.end(); ++i)
           {

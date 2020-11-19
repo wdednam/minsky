@@ -120,7 +120,7 @@ namespace minsky
 					   cairo_move_to(cairo,x,y-0.5*rowHeight);                    
 				       pango.setMarkup(latexToPango(i));
 				       pango.show();                    
-				       colWidth=std::max(colWidth,5+pango.width());
+				       if (!i.empty()) colWidth=std::max(colWidth,5+pango.width());
                        x+=colWidth;		
 				   }
                     h_prev=h;
@@ -142,15 +142,15 @@ namespace minsky
                     { // draw horizontal grid line
                       cairo::CairoSave cs(cairo);
                       cairo_set_source_rgba(cairo,0,0,0,0.5);
-                      cairo_move_to(cairo,x0,y0+1.1*rowHeight);
-                      cairo_line_to(cairo,w+colWidth,y0+1.1*rowHeight);
+                      cairo_move_to(cairo,x0,y0-0.5*rowHeight);
+                      cairo_line_to(cairo,w+colWidth,y0-0.5*rowHeight);
                       cairo_stroke(cairo);
                     }                         
-                    //cairo::CairoSave cs(cairo);
-                    //// make sure rectangle has right height
-                    //cairo_rectangle(cairo,x0,y0,w+colWidth,y-y0);    
-                    //cairo_stroke(cairo);                          	        
-                    //cairo_clip(cairo);		        				                																												
+                    cairo::CairoSave cs(cairo);
+                    // make sure rectangle has right height
+                    cairo_rectangle(cairo,x0,y0-1.5*rowHeight,w+colWidth,y-y0+2*rowHeight);    
+                    cairo_stroke(cairo);                          	        
+                    cairo_clip(cairo);		        				                																												
 
                   }
                 else if (rank==1)
@@ -340,8 +340,8 @@ namespace minsky
 			
 						
                   }               
-                if (rank>0) y0=h+3.1*rowHeight;
-                else y0+=3.1*rowHeight;
+                if (rank>0) y0=h+4.1*rowHeight;
+                else y0+=4.1*rowHeight;
                 
                // indicate cell mouse is hovering over
                //if ((hoverRow>0 || hoverCol>0) &&                                

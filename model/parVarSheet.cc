@@ -122,6 +122,7 @@ namespace minsky
 				       pango.show();                    
 				       if (!i.empty()) colWidth=std::max(colWidth,5+pango.width());
                        x+=colWidth;		
+                       colLeftMargin.push_back(x);
 				   }
                     h_prev=h;
                     w=0;h=0;      
@@ -149,7 +150,19 @@ namespace minsky
                     cairo::CairoSave cs(cairo);
                     // make sure rectangle has right height
                     cairo_rectangle(cairo,x0,y0-1.5*rowHeight,w+colWidth,y-y0+2*rowHeight);    
-                    cairo_stroke(cairo);                          	        
+                    cairo_stroke(cairo);
+                    // indicate cell mouse is hovering over
+                    if ((hoverRow>0 || hoverCol>0) &&                                
+                        size_t(hoverRow)<rows() &&
+                        size_t(hoverCol)<cols())
+                      {
+                        CairoSave cs(cairo);
+                        cairo_rectangle(cairo,
+                                        colLeftMargin[hoverCol],hoverRow*rowHeight+topTableOffset,
+                                        colLeftMargin[hoverCol+1]-colLeftMargin[hoverCol],rowHeight);                          
+                        cairo_set_line_width(cairo,1);
+                        cairo_stroke(cairo);
+                      }                                              	        
                     cairo_clip(cairo);		        				                																												
 
                   }
@@ -752,11 +765,16 @@ namespace minsky
   ParVarSheet::ClickType ParVarSheet::clickType(double x, double y) const
   {
     int c=colX(x), r=rowY(y);
+    
+    if (r==0)
+      return row0;      
+    if (c==0)
+      return col0;  
   
     if (c>0 && c<int(cols()))
       if (r>0 && r<int(rows()))
         return internal;
-
+  
     return background;
   }
   

@@ -994,6 +994,55 @@ pack .variables.canvas -fill both -expand 1
 # ###useful for editable par tab!! 
 #proc defaultCursor {w} {$w configure -cursor {}}   
 
+bind .variables.canvas <<contextMenu>> "variableContext %x %y %X %Y"  
+menu .variables.context -tearoff 0   
+
+proc variableContext {x y X Y} {
+    .variables.context delete 0 end
+    #.$id.context add command -label Help -command {help GodleyTable}
+    #.$id.context add command -label Title -command "textEntryPopup .godleyTitle {[$id.godleyIcon.table.title]} {setGodleyTitleOK $id}"
+    switch [variableSheet.clickType $x $y] {
+        background {}
+        row0 {
+            #.$id.context add command -label "Add new stock variable" -command "$id.addStockVar $x; $id.requestRedraw"
+            #.$id.context add cascade -label "Import variable" -menu .$id.context.import
+            #.$id.context add command -label "Delete stock variable" -command "$id.deleteStockVar $x; $id.requestRedraw"
+            #.$id.context.import delete 0 end
+            #foreach var [matchingTableColumns $id.godleyIcon [$id.godleyIcon.table.assetClass [$id.colXZoomed $x] ]] {
+            #    .$id.context.import add command -label $var -command "$id.importStockVar $var $x; $id.requestRedraw"
+            #}
+        }
+        col0 {
+            #.$id.context add command -label "Add flow" -command "$id.addFlow $y; $id.requestRedraw"
+            #.$id.context add command -label "Delete flow" -command "$id.deleteFlow $y; $id.requestRedraw"
+        }
+        internal {}
+    }
+    #set r [variableSheet.rowY $y]
+    #set c [variableSheet.colX $x]
+    #if {$r>=0 && $c>=0} {
+    #    # if cell $r,$c not already selected, select it
+    #    if {$r!=[variableSheet.selectedRow] || $c!=[variableSheet.selectedCol]} {
+    #        $variableSheet.selectedRow $r
+    #        $variableSheet.selectedCol $c
+    #        $variableSheet.insertIdx 0
+    #        $variableSheet.selectIdx 0
+    #    }
+    #    #if {[string length [$id.godleyIcon.table.getCell $r $c]] && ($r!=1 || $c!=0)} {    # Cannot Cut cell(1,0). For ticket 1064
+    #    #    .$id.context add command -label "Cut" -command "$id.cut; $id.requestRedraw"    
+    #    #}    
+    #    #if {[string length [$id.godleyIcon.table.getCell $r $c]]} {     
+    #    #    .$id.context add command -label "Copy" -command "$id.copy"
+    #    #}
+    #}
+    #if {($r!=1 || $c!=0)} {   # Cannot Paste into cell(1,0). For ticket 1064
+    #    .$id.context add command -label "Paste" -command "$id.paste; $id.requestRedraw"
+    #    if {[getClipboard]==""} {
+    #        .$id.context entryconfigure end -state disabled 
+    #    }
+    #}
+    tk_popup .variables.context $X $Y
+}  
 
 source $minskyHome/godley.tcl
 source $minskyHome/plots.tcl

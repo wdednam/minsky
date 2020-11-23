@@ -28,7 +28,22 @@ namespace minsky
   class VariableSheet: public ParVarSheet
   {	  
   public:
-    bool variableSelector(ItemPtr i) override {if (auto v=i->variableCast()) return v->type()!=VariableType::parameter && v->attachedToDefiningVar(); return false;}  
+    bool variableSelector(ItemPtr i) override {if (auto v=i->variableCast()) return v->type()!=VariableType::parameter && v->attachedToDefiningVar(); return false;} 
+    //ClickType clickType(double x, double y) override
+    //{
+    //  int c=colX(x), r=rowY(y);
+    //  
+    //  if (r==0)
+    //    return row0;      
+    //  if (c==0)
+    //    return col0;  
+    //
+    //  if (c>0 && c<int(cols()))
+    //    if (r>0 && r<int(rows()))
+    //      return internal;
+    //
+    //  return background;
+    //}     
   };
   
 }

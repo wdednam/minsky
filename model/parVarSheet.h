@@ -105,6 +105,9 @@ namespace minsky
     virtual bool variableSelector(ItemPtr i) = 0;
     std::vector<std::string> varAttrib{"Name","Initial Value","Short Description", "Long Description","Slider Step","Slider Min","Slider Max","Value"};       
     std::vector<std::string> varAttribVals;
+    enum ClickType {background, row0, col0, internal};    
+    ClickType clickType(double x, double y) const;                                                              // useful for editable par tab!!    
+    
     void draw(cairo_t* cairo); 
     void redraw(int, int, int width, int height) override;
     void requestRedraw() {if (surface.get()) surface->requestRedraw();}      
@@ -116,7 +119,6 @@ namespace minsky
     void mouseMoveB1(double x, double y);
     void mouseMove(double x, double y);
     void keyPress(int keySym, const std::string& utf8);
-    enum ClickType {background, internal};                            // useful for editable par tab!!
     
     void highlightCell(cairo_t* cairo,unsigned row, unsigned col);                             // useful for editable par tab!!
 
@@ -156,7 +158,6 @@ namespace minsky
     int motionRow=-1, motionCol=-1; ///< current cell under mouse motion
     // Perform deep comparison of Godley tables in history to avoid spurious noAssetClass columns from arising during undo. For ticket 1118.
     std::deque<ItemPtr> history;
-    ClickType clickType(double x, double y) const;                                                              // useful for editable par tab!!
     void checkCell00(); ///<check if cell (0,0) is selected, and deselect if so
     /// handle delete or backspace. Cell assumed selected
     void handleBackspace();                                                                        // useful for editable par tab!!

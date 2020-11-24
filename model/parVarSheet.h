@@ -103,11 +103,15 @@ namespace minsky
     void populateItemVector();
     //virtual bool variableSelector(ItemPtr i) {return false;}    
     virtual bool variableSelector(ItemPtr i) = 0;
+    void toggleVarDisplay(int i) const {if (i>=0 && i<2*itemVector.size()) (itemVector[i/2])->variableCast()->toggleVarTabDisplay(); else return;}
     std::vector<std::string> varAttrib{"Name","Initial Value","Short Description", "Long Description","Slider Step","Slider Min","Slider Max","Value"};       
     std::vector<std::string> varAttribVals;
-    enum ClickType {background, row0, col0, internal};    
+    /// column at \a x in unzoomed coordinates
+    int colX(double x) const;
+    /// row at \a y in unzoomed coordinates
+    int rowY(double y) const;    
+    enum ClickType {background, internal};    
     ClickType clickType(double x, double y) const;                                                              // useful for editable par tab!!    
-    
     void draw(cairo_t* cairo); 
     void redraw(int, int, int width, int height) override;
     void requestRedraw() {if (surface.get()) surface->requestRedraw();}      
@@ -151,10 +155,6 @@ namespace minsky
     ~ParVarSheet() {}
    
   protected:
-    /// column at \a x in unzoomed coordinates
-    int colX(double x) const;
-    /// row at \a y in unzoomed coordinates
-    int rowY(double y) const;
     int motionRow=-1, motionCol=-1; ///< current cell under mouse motion
     // Perform deep comparison of Godley tables in history to avoid spurious noAssetClass columns from arising during undo. For ticket 1118.
     std::deque<ItemPtr> history;

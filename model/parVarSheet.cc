@@ -61,7 +61,7 @@ namespace minsky
     minsky().canvas.model->recursiveDo(&GroupItems::items,
                                        [&](Items&, Items::iterator i) {                                 
                                          if (variableSelector(*i))		                                 
-                                           itemVector.emplace_back(*i);
+                                           itemVector.push_back(*i);
                                          return false;
                                        });   	
   }
@@ -74,7 +74,7 @@ namespace minsky
         if (!itemVector.empty())
           {
             float x0, y0=1.5*rowHeight;//+pango.height();	
-            double w=0,h=0,h_prev,lh; 
+            double w=0,h=0,h_prev,lh;          
             for (auto& it: itemVector)
               {
                 auto v=it->variableCast();
@@ -87,7 +87,6 @@ namespace minsky
                 double colWidth=0;
 
                 colLeftMargin.clear();
-
                 pango.setMarkup("9999");
                 if (rank==0)
                   { 
@@ -112,18 +111,18 @@ namespace minsky
 				        pango.show();                  
 				        colWidth=std::max(colWidth,5+pango.width());  
                         x+=colWidth;					    
-				     }
-					
+                        colLeftMargin.push_back(x);
+				     }   					
 					x=0;
 				    for (auto& i : varAttribVals)
 				    {
 					   cairo_move_to(cairo,x,y-0.5*rowHeight);                    
 				       pango.setMarkup(latexToPango(i));
 				       pango.show();                    
-				       if (!i.empty()) colWidth=std::max(colWidth,5+pango.width());
+				       colWidth=std::max(colWidth,5+pango.width());
                        x+=colWidth;		
-                       colLeftMargin.push_back(x);
 				   }
+				   x=x0;
                     h_prev=h;
                     w=0;h=0;      
                     cairo_get_current_point (cairo,&w,&h);   
@@ -140,6 +139,16 @@ namespace minsky
                         }
 
                     }
+                    { // draw vertical grid lines
+                      cairo::CairoSave cs(cairo);
+                      cairo_set_source_rgba(cairo,0,0,0,0.5);
+                      for (x=x0; x<w+colWidth; x+=colWidth)
+                        {
+                          cairo_move_to(cairo,x,y-2*rowHeight);
+                          cairo_line_to(cairo,x,y+0.5*rowHeight);
+                          cairo_stroke(cairo);
+                        }
+                    }                       
                     { // draw horizontal grid line
                       cairo::CairoSave cs(cairo);
                       cairo_set_source_rgba(cairo,0,0,0,0.5);
@@ -149,20 +158,8 @@ namespace minsky
                     }                         
                     cairo::CairoSave cs(cairo);
                     // make sure rectangle has right height
-                    cairo_rectangle(cairo,x0,y0-1.5*rowHeight,w+colWidth,y-y0+2*rowHeight);    
-                    cairo_stroke(cairo);
-                    // indicate cell mouse is hovering over
-                    if ((hoverRow>0 || hoverCol>0) &&                                
-                        size_t(hoverRow)<rows() &&
-                        size_t(hoverCol)<cols())
-                      {
-                        CairoSave cs(cairo);
-                        cairo_rectangle(cairo,
-                                        colLeftMargin[hoverCol],hoverRow*rowHeight+topTableOffset,
-                                        colLeftMargin[hoverCol+1]-colLeftMargin[hoverCol],rowHeight);                          
-                        cairo_set_line_width(cairo,1);
-                        cairo_stroke(cairo);
-                      }                                              	        
+                    cairo_rectangle(cairo,x0,y0-1.5*rowHeight,w+colWidth,y-y0+2*rowHeight);     
+                    cairo_stroke(cairo);                                                            	        
                     cairo_clip(cairo);		        				                																												
 
                   }
@@ -237,18 +234,6 @@ namespace minsky
                     cairo_stroke(cairo);                          
                     
                     colLeftMargin.push_back(x);
-                    // indicate cell mouse is hovering over
-                    if ((hoverRow>0 || hoverCol>0) &&                                
-                        size_t(hoverRow)<rows() &&
-                        size_t(hoverCol)<cols())
-                      {
-                        CairoSave cs(cairo);
-                        cairo_rectangle(cairo,
-                                        colLeftMargin[hoverCol],hoverRow*rowHeight+topTableOffset,
-                                        colLeftMargin[hoverCol+1]-colLeftMargin[hoverCol],rowHeight);                          
-                        cairo_set_line_width(cairo,1);
-                        cairo_stroke(cairo);
-                      }
                     cairo_clip(cairo);                      
                     y0=h+3.1*rowHeight;                 
                   }
@@ -347,81 +332,72 @@ namespace minsky
                     cairo_rectangle(cairo,x0,y0,w+colWidth,rectHeight);    
                     cairo_stroke(cairo);                          	        
                     cairo_clip(cairo);		        
-                   
+                    
+                    colLeftMargin.push_back(x);
                     x+=0.25*colWidth;      
                     y=y0;                	
 			
 						
-                  }               
+                  }              
                 if (rank>0) y0=h+4.1*rowHeight;
                 else y0+=4.1*rowHeight;
                 
                // indicate cell mouse is hovering over
-               //if ((hoverRow>0 || hoverCol>0) &&                                
-               //    size_t(hoverRow)<rows() &&
-               //    size_t(hoverCol)<cols())
-               //  {
-               //    CairoSave cs(cairo);
-               //    cairo_rectangle(cairo,
-               //                    colLeftMargin[hoverCol],hoverRow*rowHeight+topTableOffset,
-               //                    colLeftMargin[hoverCol+1]-colLeftMargin[hoverCol],rowHeight);
-               //    cairo_set_line_width(cairo,1);
-               //    cairo_stroke(cairo);
-               //  }
-                     
+               if ((hoverRow>0 || hoverCol>0) &&                                
+                   size_t(hoverRow)<rows() &&
+                   size_t(hoverCol)<cols())
+                 {
+                   CairoSave cs(cairo);
+                   cairo_rectangle(cairo,
+                                   colLeftMargin[hoverCol],hoverRow*rowHeight+topTableOffset,
+                                   colLeftMargin[hoverCol+1]-colLeftMargin[hoverCol],rowHeight);
+                   cairo_set_line_width(cairo,1);
+                   cairo_stroke(cairo);
+                 }
+                   
                // indicate selected cells
-               //{
-               //  CairoSave cs(cairo);
-               //  if (selectedRow==0 || (selectedRow>=int(scrollRowStart) && selectedRow<int(rows())))
-               //    {
-               //      size_t i=0, j=0;
-               //      if (selectedRow>=int(scrollRowStart)) j=selectedRow-scrollRowStart+1;
-               //      double y=j*rowHeight+topTableOffset;
-	           //
-               //      if (motionCol>=0 && selectedRow==0 && selectedCol>0) // whole col being moved
-               //        {
-               //          highlightColumn(cairo,selectedCol);
-               //          highlightColumn(cairo,motionCol);
-               //        }
-               //      else if (motionRow>=0 && selectedCol==0 && selectedRow>0) // whole Row being moved
-               //        {
-               //          highlightRow(cairo,selectedRow);
-               //          highlightRow(cairo,motionRow);
-               //        }
-               //      else if (selectedCol==0 || /* selecting individual cell */
-               //               (selectedCol>=int(scrollColStart) && selectedCol<int(cols())))   
-               //        {
-               //          if ((selectedRow>1 || selectedRow <0) || selectedCol!=0) // can't select flows/stockVars or Initial Conditions labels
-               //            {
-               //              if (selectedCol>=int(scrollColStart)) i=selectedCol-scrollColStart+1;
-               //              double x=colLeftMargin[i];
-               //              cairo_set_source_rgba(cairo,1,1,1,1);
-               //              cairo_rectangle(cairo,x,y,colLeftMargin[i+1]-x,rowHeight);
-               //              cairo_fill(cairo);
-               //              pango.setMarkup(defang(cell(selectedRow,selectedCol)));
-               //              cairo_set_source_rgba(cairo,0,0,0,1);
-               //              cairo_move_to(cairo,x,y);
-               //              pango.show();
-	           //			  
-               //              // show insertion cursor
-               //              cairo_move_to(cairo,x+Pango::idxToPos(insertIdx),y);
-               //              cairo_rel_line_to(cairo,0,rowHeight);
-               //              cairo_set_line_width(cairo,1);
-               //              cairo_stroke(cairo);
-               //              if (motionRow>0 && motionCol>0)
-               //                highlightCell(cairo,motionRow,motionCol);
-               //              if (selectIdx!=insertIdx)
-               //                {
-               //                  // indicate some text has been selected
-               //                  cairo_rectangle(cairo,x+Pango::idxToPos(insertIdx),y,
-               //                                  Pango::idxToPos(selectIdx)-Pango::idxToPos(insertIdx),rowHeight);
-               //                  cairo_set_source_rgba(cairo,0.5,0.5,0.5,0.5);
-               //                  cairo_fill(cairo);
-               //               }
-               //            }
-               //        }
-               //    }
-               //}                                  
+               {
+                 CairoSave cs(cairo);
+                 if (selectedRow==0 || (selectedRow>=int(scrollRowStart) && selectedRow<int(rows())))
+                   {
+                     size_t i=0, j=0;
+                     if (selectedRow>=int(scrollRowStart)) j=selectedRow-scrollRowStart+1;
+                     double y1=j*rowHeight+topTableOffset;
+	           
+                     if (selectedCol==0 || /* selecting individual cell */
+                              (selectedCol>=int(scrollColStart) && selectedCol<int(cols())))   
+                       {
+                         if ((selectedRow>1 || selectedRow <0) || selectedCol!=0) // can't select flows/stockVars or Initial Conditions labels
+                           {
+                             if (selectedCol>=int(scrollColStart)) i=selectedCol-scrollColStart+1;
+                             double x1=colLeftMargin[i];
+                             cairo_set_source_rgba(cairo,1,1,1,1);
+                             cairo_rectangle(cairo,x1,y1,colLeftMargin[i+1]-x1,rowHeight);
+                             cairo_fill(cairo);
+                             pango.setMarkup(defang(cell(selectedRow,selectedCol)));
+                             cairo_set_source_rgba(cairo,0,0,0,1);
+                             cairo_move_to(cairo,x1,y1);
+                             pango.show();
+	           			  
+                             // show insertion cursor
+                             cairo_move_to(cairo,x1+pango.idxToPos(insertIdx),y1);
+                             cairo_rel_line_to(cairo,0,rowHeight);
+                             cairo_set_line_width(cairo,1);
+                             cairo_stroke(cairo);
+                             if (motionRow>0 && motionCol>0)
+                               highlightCell(cairo,motionRow,motionCol);
+                             if (selectIdx!=insertIdx)
+                               {
+                                 // indicate some text has been selected
+                                 cairo_rectangle(cairo,x1+pango.idxToPos(insertIdx),y1,
+                                                 pango.idxToPos(selectIdx)-pango.idxToPos(insertIdx),rowHeight);
+                                 cairo_set_source_rgba(cairo,0.5,0.5,0.5,0.5);
+                                 cairo_fill(cairo);
+                              }
+                           }
+                       }
+                   }
+               }                                  
                
               }
           }
@@ -474,20 +450,23 @@ namespace minsky
   
   int ParVarSheet::colX(double x) const
   { 
-	if (x==-1 || itemVector.empty()) return -1;  
-    if (x<colLeftMargin[0]) return -1;
-    if (x<colLeftMargin[1]) return 0;
-    auto p=std::upper_bound(colLeftMargin.begin(), colLeftMargin.end(), x);
+	if (itemVector.empty()) return -1;
+    if ((x-offsx)<colLeftMargin[0]) return -1;
+    if ((x-offsx)<colLeftMargin[1]) return 0;
+    auto p=std::upper_bound(colLeftMargin.begin(), colLeftMargin.end(), (x-offsx));
     size_t r=p-colLeftMargin.begin()-2+scrollColStart;
-    if (r>cols()-1) r=-1; // out of bounds, invalidate. Also exclude A-L-E column. For ticket 1163.
+    //if (r>cols()-1) r=-1; // out of bounds, invalidate. Also exclude A-L-E column. For ticket 1163.
+    if (r<0) r=-1;
     return r;
   }
 
   int ParVarSheet::rowY(double y) const
   {
-    int c=(y-topTableOffset)/rowHeight;
-    if (c>0) c+=scrollRowStart-1;
-    if (c<0 || size_t(c)>rows()) c=-1; // out of bounds, invalidate
+	if (itemVector.empty()) return -1;      
+    int c=(y-offsy)/(2.1*rowHeight);
+    //if (c>0) c+=scrollRowStart-1; 
+    //if (c<0 || size_t(c)>rows()) c=-1; // out of bounds, invalidate
+    if (c<0) c=-1; // out of bounds, invalidate
     return c;
   }
 
@@ -765,14 +744,11 @@ namespace minsky
   ParVarSheet::ClickType ParVarSheet::clickType(double x, double y) const
   {
     int c=colX(x), r=rowY(y);
-    
-    if (r==0)
-      return row0;      
-    if (c==0)
-      return col0;  
-  
-    if (c>0 && c<int(cols()))
-      if (r>0 && r<int(rows()))
+        
+    //if (c>=0 && c<int(cols()))
+    //  if (r>=0 && r<int(rows()))
+    if (c>=0 && c<varAttribVals.size())
+      if (r>=0 && r<2*itemVector.size())
         return internal;
   
     return background;

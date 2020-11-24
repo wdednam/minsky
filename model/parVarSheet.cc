@@ -89,11 +89,7 @@ namespace minsky
                 colLeftMargin.clear();
                 pango.setMarkup("9999");
                 if (rank==0)
-                  { 
-                    //cairo_move_to(cairo,x,y-1.5*rowHeight);
-                    //pango.setMarkup(latexToPango(value->name)+" = "+str(value->value(0)));
-                    //pango.show();
-                    
+                  {                   
                     varAttribVals.clear();
                     varAttribVals.push_back(v->name());
                     varAttribVals.push_back(v->init());
@@ -213,7 +209,6 @@ namespace minsky
                     w=0;h=0;      
                     cairo_get_current_point (cairo,&w,&h);   
                     if (h<h_prev) h+=h_prev;                                                                        
-                    //cout << " " << w << " " << h << " "<< x0 << " " << y0 << endl;
 
                     // draw grid
                     {
@@ -463,7 +458,7 @@ namespace minsky
   int ParVarSheet::rowY(double y) const
   {
 	if (itemVector.empty()) return -1;      
-    int c=(y-offsy)/(2.1*rowHeight);
+    int c=(y-offsy)/(2*rowHeight);
     //if (c>0) c+=scrollRowStart-1; 
     //if (c<0 || size_t(c)>rows()) c=-1; // out of bounds, invalidate
     if (c<0) c=-1; // out of bounds, invalidate
@@ -792,10 +787,10 @@ namespace minsky
   void ParVarSheet::update()
   {
     // if the contents of the cell are cleared, set the cell to "0". For #1181
-    if (!savedText.empty() && cell(selectedRow,selectedCol).empty())
-          cell(selectedRow,selectedCol)="0";
+    //if (!savedText.empty() && cell(selectedRow,selectedCol).empty())
+    //      cell(selectedRow,selectedCol)="0";
 
-    //requestRedraw();
+    requestRedraw();
   }  
   
   

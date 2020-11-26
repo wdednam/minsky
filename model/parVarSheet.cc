@@ -61,7 +61,7 @@ namespace minsky
     minsky().canvas.model->recursiveDo(&GroupItems::items,
                                        [&](Items&, Items::iterator i) {                                 
                                          if (variableSelector(*i))		                                 
-                                           itemVector.push_back(*i);
+                                           itemVector.emplace_back(*i);
                                          return false;
                                        });   	
   }
@@ -85,7 +85,6 @@ namespace minsky
                 x0=0.0;
                 float x=x0, y=y0;
                 double colWidth=0;
-
                 colLeftMargin.clear();
                 pango.setMarkup("9999");
                 if (rank==0)
@@ -157,7 +156,6 @@ namespace minsky
                     cairo_rectangle(cairo,x0,y0-1.5*rowHeight,w+colWidth,y-y0+2*rowHeight);     
                     cairo_stroke(cairo);                                                            	        
                     cairo_clip(cairo);		        				                																												
-
                   }
                 else if (rank==1)
                   {
@@ -209,7 +207,6 @@ namespace minsky
                     w=0;h=0;      
                     cairo_get_current_point (cairo,&w,&h);   
                     if (h<h_prev) h+=h_prev;                                                                        
-
                     // draw grid
                     {
                       cairo::CairoSave cs(cairo);
@@ -227,9 +224,8 @@ namespace minsky
                     else rectHeight=y-y0-rowHeight;                    
                     cairo_rectangle(cairo,0.0,y0,w+colWidth,rectHeight);    
                     cairo_stroke(cairo);                          
-                    
-                    colLeftMargin.push_back(x);
                     cairo_clip(cairo);                      
+                    colLeftMargin.push_back(x);                    
                     y0=h+3.1*rowHeight;                 
                   }
                 else
@@ -310,7 +306,6 @@ namespace minsky
                           cairo_rectangle(cairo,x0,y,w+colWidth,rowHeight);
                           cairo_fill(cairo);
                         }
-
                     }
                     { // draw horizontal grid line
                       cairo::CairoSave cs(cairo);
@@ -326,8 +321,7 @@ namespace minsky
                     else rectHeight=y-y0-rowHeight;
                     cairo_rectangle(cairo,x0,y0,w+colWidth,rectHeight);    
                     cairo_stroke(cairo);                          	        
-                    cairo_clip(cairo);		        
-                    
+                    cairo_clip(cairo);		                            
                     colLeftMargin.push_back(x);
                     x+=0.25*colWidth;      
                     y=y0;                	
@@ -449,7 +443,7 @@ namespace minsky
     if ((x-offsx)<colLeftMargin[0]) return -1;
     if ((x-offsx)<colLeftMargin[1]) return 0;
     auto p=std::upper_bound(colLeftMargin.begin(), colLeftMargin.end(), (x-offsx));
-    size_t r=p-colLeftMargin.begin()-2+scrollColStart;
+    size_t r=p-colLeftMargin.begin(); //-2+scrollColStart;
     //if (r>cols()-1) r=-1; // out of bounds, invalidate. Also exclude A-L-E column. For ticket 1163.
     if (r<0) r=-1;
     return r;
@@ -742,8 +736,7 @@ namespace minsky
         
     //if (c>=0 && c<int(cols()))
     //  if (r>=0 && r<int(rows()))
-    if (c>=0 && c<varAttribVals.size())
-      if (r>=0 && r<2*itemVector.size())
+    if (c>=0 && c<int(varAttribVals.size())&& r>=0 && r<int(2*itemVector.size()))
         return internal;
   
     return background;

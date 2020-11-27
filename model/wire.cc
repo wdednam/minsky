@@ -103,6 +103,7 @@ namespace minsky
   {
     auto f=from(), t=to();
     if (attachedToDefiningVar()) return false;
+    if (f->item().attachedToDefiningVar()) return false;
     assert(f->item().group.lock() && t->item().group.lock());
     return f && t && 
       (f->item().group.lock()->displayContents() ||

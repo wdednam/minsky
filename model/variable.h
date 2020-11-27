@@ -247,6 +247,7 @@ namespace minsky
     std::string valueId() const override {return "constant:"+str(id);}
     std::string name() const override {return init();}
     std::string name(const std::string& nm) override {ensureValueExists(nullptr,""); return name();}
+    bool attachedToDefiningVar() const override {return Item::attachedToDefiningVar();}        
     using VariableBase::value;
     double value(const double& x) override {init(str(x)); return x;}
     VarConstant* clone() const override {auto r=new VarConstant(*this); r->group.reset(); return r;}

@@ -114,7 +114,7 @@ namespace minsky
     /// row at \a y in unzoomed coordinates
     int rowY(double y) const;    
     enum ClickType {background, internal};    
-    ClickType clickType(double x, double y) const;                                                            // useful for editable par tab!!    
+    ClickType clickType(double x, double y) const;         
     void draw(cairo_t* cairo); 
     void redraw(int, int, int width, int height) override;
     void requestRedraw() {if (surface.get()) surface->requestRedraw();}      

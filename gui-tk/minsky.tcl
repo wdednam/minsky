@@ -1014,7 +1014,7 @@ proc variableContext {x y X Y} {
     #}
     tk_popup .variables.context $X $Y
 }  
-	    
+
 source $minskyHome/godley.tcl
 source $minskyHome/plots.tcl
 source $minskyHome/group.tcl

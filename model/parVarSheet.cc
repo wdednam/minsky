@@ -21,9 +21,6 @@
 #include "latexMarkup.h"
 #include "group.h"
 #include <pango.h>
-#include <vector>
-#include <map>
-#include <string>
 #include "minsky_epilogue.h"
 #include "minsky.h"
 #include "equations.h"
@@ -107,7 +104,7 @@ namespace
 {
   std::string definition(const string& valueId)
   {
-    SystemOfEquations system(minsky());	  
+    SystemOfEquations system(cminsky());	  
 	ostringstream o;
 
     for (const VariableDAG* i: system.variables)

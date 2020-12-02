@@ -768,10 +768,16 @@ namespace MathDAG
   {
     NodePtr r;
     if (expressionCache.exists(*v))
+    {
+	  //if (dynamic_cast<const IntegralInputVariableDAG*>(expressionCache[*v].get())) 
+	  //{
+	  //    VariableDAGPtr input=expressionCache.getIntegralInput(v->valueId());  	 
+	  //   if (input) return input;
+	  //}
       return dynamic_pointer_cast<VariableDAG>(expressionCache[*v]);
+    }
     else
       if (v && v->type()!=VariableBase::undefined) 
-        // we're wired to a variable
         r=makeDAG(*v);
     return dynamic_pointer_cast<VariableDAG>(r);
   }         

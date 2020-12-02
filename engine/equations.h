@@ -334,7 +334,7 @@ namespace MathDAG
     // these are weak references
     vector<VariableDAG*> variables;
     vector<VariableDAG*> integrationVariables;
-  private:  
+  private: 
     set<string> processedColumns; // to avoid double counting shared columns
     vector<pair<VariableDAGPtr,string>> derivInputs; //handle recursively defined stock vars and derivatives
     

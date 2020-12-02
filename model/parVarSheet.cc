@@ -130,7 +130,7 @@ namespace
    
     return o.str();	  
   }
-}
+}  
 	
   void ParVarSheet::draw(cairo_t* cairo)
   {   
@@ -158,7 +158,7 @@ namespace
                   { 
                     varAttribVals.clear();
                     varAttribVals.push_back(v->name());
-                    varAttribVals.push_back(definition(v->valueId()));
+                    varAttribVals.push_back(definition(v->valueId()));                    
                     varAttribVals.push_back(v->init());
                     varAttribVals.push_back(it->tooltip);
                     varAttribVals.push_back(it->detailedText);

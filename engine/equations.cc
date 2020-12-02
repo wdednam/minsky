@@ -762,7 +762,19 @@ namespace MathDAG
           }
       }
     return r;
-  }     
+  }
+  
+  VariableDAGPtr SystemOfEquations::getNodeFromVar(const VariablePtr v)
+  {
+    NodePtr r;
+    if (expressionCache.exists(*v))
+      return dynamic_pointer_cast<VariableDAG>(expressionCache[*v]);
+    else
+      if (v && v->type()!=VariableBase::undefined) 
+        // we're wired to a variable
+        r=makeDAG(*v);
+    return dynamic_pointer_cast<VariableDAG>(r);
+  }         
   
     
   ostream& SystemOfEquations::latex(ostream& o) const

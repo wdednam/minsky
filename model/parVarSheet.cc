@@ -102,33 +102,76 @@ namespace minsky
 
 namespace
 {
-  std::string definition(const string& valueId)
+//  std::string definition(const string& valueId)
+//  {
+//    SystemOfEquations system(cminsky());	  
+//	ostringstream o;
+//
+//    for (const VariableDAG* i: system.variables)
+//      {
+//		if (i->valueId==valueId) 
+//		{  		  
+//           if (dynamic_cast<const IntegralInputVariableDAG*>(i) ||
+//               !i || i->type==VariableType::constant) continue;
+//           if (i->rhs)
+//             o << i->rhs->matlab();
+//	    }
+//      }
+//
+//    for (const VariableDAG* i: system.integrationVariables)
+//      {
+//		if (i->valueId==valueId) 
+//		{  
+//            VariableDAGPtr input=system.expressionCache.getIntegralInput(i->valueId);
+//            if (input && input->rhs)
+//              input->rhs->matlab(o);
+//	    }
+//      }
+//   
+//    return o.str();	  
+//  }
+
+  std::string definition(const VariablePtr v)
   {
-    SystemOfEquations system(cminsky());	  
-	ostringstream o;
+    //SystemOfEquations system(cminsky());	  
+	//stringstream o;
+	
+	//auto varDAG=system.getNodeFromVar(*v);
+	//cout << varDAG->rhs->matlab() << endl;
+    //if (dynamic_cast<const IntegralInputVariableDAG*>(varDAG.get()) ||	   
+    //    !varDAG || varDAG->type==VariableType::constant) continue;	
+        
+    //VariableDAGPtr input=system.expressionCache.getIntegralInput(varDAG->valueId);
+    //if (input && input->rhs)        
+    //  input->rhs->matlab(o);           
+    //if (!dynamic_cast<const IntegralInputVariableDAG*>(varDAG.get()) &&
+    //    varDAG && varDAG->rhs && varDAG->type!=VariableType::constant)	    
+    //  o << varDAG->rhs->matlab();	 
+        
+	   
 
-    for (const VariableDAG* i: system.variables)
-      {
-		if (i->valueId==valueId) 
-		{  		  
-           if (dynamic_cast<const IntegralInputVariableDAG*>(i) ||
-               !i || i->type==VariableType::constant) continue;
-           if (i->rhs)
-             o << i->rhs->matlab();
-	    }
-      }
-
-    for (const VariableDAG* i: system.integrationVariables)
-      {
-		if (i->valueId==valueId) 
-		{  
-            VariableDAGPtr input=system.expressionCache.getIntegralInput(i->valueId);
-            if (input && input->rhs)
-              input->rhs->matlab(o);
-	    }
-      }
+    //for (const VariableDAG* i: system.variables)
+    //  {
+	//	if (i->valueId==valueId) 
+	//	{  		  
+    //       if (dynamic_cast<const IntegralInputVariableDAG*>(i) ||
+    //           !i || i->type==VariableType::constant) continue;
+    //       if (i->rhs)
+    //         o << i->rhs->matlab();
+	//    }
+    //  }
+	//
+    //for (const VariableDAG* i: system.integrationVariables)
+    //  {
+	//	if (i->valueId==valueId) 
+	//	{  
+    //        VariableDAGPtr input=system.expressionCache.getIntegralInput(i->valueId);
+    //        if (input && input->rhs)
+    //          input->rhs->matlab(o);
+	//    }
+    //  }
    
-    return o.str();	  
+    return v->name();	  
   }
 }  
 	
@@ -158,7 +201,8 @@ namespace
                   { 
                     varAttribVals.clear();
                     varAttribVals.push_back(v->name());
-                    varAttribVals.push_back(definition(v->valueId()));                    
+                    varAttribVals.push_back(definition(v));                    
+                    //varAttribVals.push_back(definition(v->valueId()));                    
                     varAttribVals.push_back(v->init());
                     varAttribVals.push_back(it->tooltip);
                     varAttribVals.push_back(it->detailedText);

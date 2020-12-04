@@ -101,9 +101,8 @@ namespace minsky
 
   bool Wire::visible() const
   {
-	if (attachedToDefiningVar()) return false;  
+    if (attachedToDefiningVar()) return false;	  
     auto f=from(), t=to();
-    //if (attachedToDefiningVar() || f->item().attachedToDefiningVar()) return false; // ensure wires attached to out port do not dangle. for ticket 1275
     assert(f->item().group.lock() && t->item().group.lock());
     return f && t && 
       (f->item().group.lock()->displayContents() ||

@@ -417,7 +417,6 @@ bool VariableBase::visible() const
   if ((!g || !g->group.lock()) && g==controller.lock()) return true;
   // ensure pars and constants with invisible out wires are made invisible. for ticket 1275  
   if (type()==constant || type()==parameter)
-  if (type()==constant || type()==parameter)
   {
 	if (std::all_of(ports[0]->wires().begin(),ports[0]->wires().end(), [](Wire* w){return w->attachedToDefiningVar() && !w->visible();})) return false;
 	else return true;

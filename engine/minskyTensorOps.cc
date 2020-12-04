@@ -51,12 +51,20 @@ namespace minsky
     double operator[](size_t) const override {return EvalOpBase::t;}
     Timestamp timestamp() const override {return {};}
   };
-   
+
+  // insert a setState virtual call for those that need
+  struct SetState
+  {
+    virtual ~SetState() {}
+    virtual void setState(const OperationPtr&)=0;
+  };
+  
   // Default template calls the regular legacy double function
-  template <OperationType::Type op> struct MinskyTensorOp: public civita::ElementWiseOp, public DerivativeMixin
+  template <OperationType::Type op> struct MinskyTensorOp: public civita::ElementWiseOp, public DerivativeMixin, public SetState
   {
     EvalOp<op> eo;
     MinskyTensorOp(): ElementWiseOp([this](double x){return eo.evaluate(x);}) {}
+    void setState(const OperationPtr& state) override {eo.state=state;}
     void setArguments(const std::vector<TensorPtr>& a,const std::string&,double) override
     {if (!a.empty()) setArgument(a[0],{},0);}
     double dFlow(size_t ti, size_t fi) const override {
@@ -75,10 +83,11 @@ namespace minsky
     }
   };
 
-  template <OperationType::Type op> struct TensorBinOp: civita::BinOp, public DerivativeMixin
+  template <OperationType::Type op> struct TensorBinOp: civita::BinOp, public DerivativeMixin, public SetState
   {
     EvalOp<op> eo;
     TensorBinOp(): BinOp([this](double x,double y){return eo.evaluate(x,y);}) {}
+    void setState(const OperationPtr& state) override {eo.state=state;}
     void setArguments(const TensorPtr& a1, const TensorPtr& a2) override
     {
       if (a1 && a1->rank()>0)
@@ -562,18 +571,20 @@ namespace minsky
   };
        
   std::shared_ptr<ITensor> TensorOpFactory::create
-  (const Item& it, const TensorsFromPort& tfp)
+  (const ItemPtr& it, const TensorsFromPort& tfp)
   {
-    if (auto ravel=dynamic_cast<const Ravel*>(&it))
+    if (auto ravel=dynamic_cast<const Ravel*>(it.get()))
 	    {
 	      auto r=make_shared<RavelTensor>(*ravel);
-	      r->setArguments(tfp.tensorsFromPorts(it.ports));
+	      r->setArguments(tfp.tensorsFromPorts(it->ports));
 	      return r;
 	    }
-    else if (auto op=it.operationCast())
+    else if (auto op=it->operationCast())
       try
         {
           TensorPtr r{create(op->type())};
+          if (auto ss=dynamic_cast<SetState*>(r.get()))
+            ss->setState(dynamic_pointer_cast<OperationBase>(it));
           switch (op->ports.size())
             {
             case 2:
@@ -592,12 +603,12 @@ namespace minsky
           // rethrow with op attached to mark op on canvas
           op->throw_error(ex.what());
         }
-    else if (auto v=it.variableCast())
+    else if (auto v=it->variableCast())
       return make_shared<ConstTensorVarVal>(v->vValue(), tfp.ev);
-    else if (auto sw=dynamic_cast<const SwitchIcon*>(&it))
+    else if (auto sw=dynamic_cast<const SwitchIcon*>(it.get()))
       {
         auto r=make_shared<SwitchTensor>();
-        r->setArguments(tfp.tensorsFromPorts(it.ports));
+        r->setArguments(tfp.tensorsFromPorts(it->ports));
         return r;
       }
     return {};
@@ -625,7 +636,7 @@ namespace minsky
                   throw std::runtime_error("Tensor derivative not implemented");
               }
           }
-        r.push_back(tensorOpFactory.create(item, *this));
+        r.push_back(tensorOpFactory.create(item.itemPtrFromThis(), *this));
         assert(r.back());
       }
     return r;
@@ -662,7 +673,7 @@ namespace minsky
   {
     result.index(src->index());
     result.hypercube(src->hypercube());
-    Operation<OperationType::copy> tmp;
+    OperationPtr tmp(OperationType::copy);
     auto copy=dynamic_pointer_cast<ITensor>(tensorOpFactory.create(tmp));
     copy->setArgument(make_shared<ConstTensorVarVal>(src,result.ev));
     rhs=move(copy);

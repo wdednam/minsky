@@ -853,6 +853,12 @@ proc setupPickDimMenu {} {
 proc lockSpecificHandles {} {
     global currentLockHandles
 
+    if {![llength [info commands minsky.canvas.item.lockGroup.allLockHandles]]} {
+        minsky.canvas.lockRavelsInSelection
+        # reinitialise the canvas item commands
+        getItemAt [minsky.canvas.item.x] [minsky.canvas.item.y]
+        if {![llength [info commands minsky.canvas.item.lockGroup.allLockHandles]]} return
+    }    
     if {[winfo exists .wiring.context.lockHandles]} {destroy .wiring.context.lockHandles}
     toplevel .wiring.context.lockHandles
     foreach h [minsky.canvas.item.lockGroup.allLockHandles] {
@@ -1255,6 +1261,7 @@ proc deiconifyEditConstant {} {
         foreach var {
             "Name"
             "Value"
+            "Expression"
             "Units"
             "Rotation"
             "Slider Bounds: Max"
@@ -1388,6 +1395,9 @@ proc setDataValue {} {
     set item minsky.canvas.item
     $item.description "$constInput(Name)"
     $item.rotation $constInput(Rotation)
+    if [llength [info commands $item.expression]] {
+        $item.expression $constInput(Expression)
+    }
 }
 
 proc setIntegralIValue {} {
@@ -1430,10 +1440,13 @@ proc configEditConstantForData {} {
     global rowdict
     cleanEditConstantConfig
     set i 10
-    foreach var {
+    set items {
         "Name"
         "Rotation"
-    } {
+    }
+    if [llength [info commands minsky.canvas.item.expression]] {lappend items "Expression"}
+    
+    foreach var $items {
         set row $rowdict($var)
         grid .wiring.editConstant.label$row -row $i -column 10 -sticky e
         grid .wiring.editConstant.entry$row -row $i -column 20 -sticky ew -columnspan 2
@@ -1456,7 +1469,7 @@ proc editItem {} {
             grab set .wiring.editOperation
             wm transient .wiring.editOperation
         }
-        "IntOp|DataOp" {
+        "IntOp|DataOp|UserFunction" {
             set constInput(Value) ""
             set "constInput(Slider Bounds: Min)" ""
             set "constInput(Slider Bounds: Max)" ""

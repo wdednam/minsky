@@ -943,6 +943,8 @@ addTab parameters "Parameters" minsky.parameterSheet
 pack .parameters.canvas -fill both -expand 1
 addTab variables "Variables" minsky.variableSheet
 pack .variables.canvas -fill both -expand 1
+#addTab plots "Plots" minsky.plots
+#pack .plots.canvas -fill both -expand 1
 .tabs select 0
 #bind .parameters.canvas  <ButtonRelease-1> "defaultCursor .parameters.canvas" 
 #bind .parameters.canvas <B1-Motion> "motionCursor .parameters.canvas ; parVarSheet.mouseMoveB1 %x %y"                     

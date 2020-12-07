@@ -161,9 +161,11 @@ namespace minsky
  
   bool Item::visible() const 
   {
-	if (attachedToDefiningVar()) return false;   
+    if (attachedToDefiningVar() && !ports[0]->wires().empty())
+      if (std::any_of(ports[0]->wires().begin(),ports[0]->wires().end(), [](Wire* w){return w->attachedToDefiningVar() && !w->visible();})) return false;  	  
     auto g=group.lock();
     return (!g || g->displayContents());
+    
   }
   
 

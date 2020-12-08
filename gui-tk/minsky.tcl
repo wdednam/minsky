@@ -943,8 +943,8 @@ addTab parameters "Parameters" minsky.parameterSheet
 pack .parameters.canvas -fill both -expand 1
 addTab variables "Variables" minsky.variableSheet
 pack .variables.canvas -fill both -expand 1
-#addTab plots "Plots" minsky.plots
-#pack .plots.canvas -fill both -expand 1
+addTab plots "Plots" minsky.plotSheet
+pack .plots.canvas -fill both -expand 1
 .tabs select 0
 #bind .parameters.canvas  <ButtonRelease-1> "defaultCursor .parameters.canvas" 
 #bind .parameters.canvas <B1-Motion> "motionCursor .parameters.canvas ; parVarSheet.mouseMoveB1 %x %y"                     
@@ -1034,6 +1034,7 @@ bind .wiring.canvas <Configure> {setScrollBars; minsky.panopticon.width %w; mins
 bind .equations.canvas <Configure> {setScrollBars}
 bind .parameters.canvas <Configure> {setScrollBars}
 bind .variables.canvas <Configure> {setScrollBars}
+bind .plots.canvas <Configure> {setScrollBars}
 
 set helpTopics(.wiring.panopticon) Panopticon
 
@@ -1066,7 +1067,13 @@ proc setScrollBars {} {
             set y0 [expr (10000-[variableSheet.offsy])/20000.0]
             .hscroll set $x0 [expr $x0+[winfo width .variables.canvas]/20000.0]
             .vscroll set $y0 [expr $y0+[winfo height .variables.canvas]/20000.0]                 
-        }        
+        }
+        .plots {
+            set x0 [expr (10000-[plotSheet.offsx])/20000.0]
+            set y0 [expr (10000-[plotSheet.offsy])/20000.0]
+            .hscroll set $x0 [expr $x0+[winfo width .plots.canvas]/20000.0]
+            .vscroll set $y0 [expr $y0+[winfo height .plots.canvas]/20000.0]                 
+        }                  
     }
 }
 

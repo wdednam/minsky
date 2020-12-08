@@ -79,6 +79,10 @@ namespace minsky
     enum PlotType {line, bar, automatic};
     PlotType plotType=automatic;
     
+    bool plotTabDisplay=false;
+    void togglePlotTabDisplay() {plotTabDisplay=!plotTabDisplay;}     
+    bool plotOnTab() const {return plotTabDisplay;}       
+    
     PlotWidget();
 
     // pick the Item width method, not ecolab::Plot's

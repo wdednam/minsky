@@ -163,7 +163,8 @@ namespace
             int iC=0;                
             for (auto& it: itemVector)
               {
-                auto v=it->variableCast();
+                if (auto v=it->variableCast())
+                {
                 auto value=v->vValue();
                 auto rank=value->hypercube().rank();
                 auto dims=value->hypercube().dims();                
@@ -474,7 +475,16 @@ namespace
                            }
                        }
                    }
-               }                                                
+               }
+		      } else if (auto p=dynamic_cast<PlotWidget*>(it.get()))
+		         {
+			   	  cairo_move_to(cairo,x0,y0-1.5*rowHeight); 	 
+				  p->draw(cairo);
+				  p->redrawWithBounds();
+				  cout << p->title << endl;
+				  y0+=4.1*rowHeight;  
+			     }
+		                                                          
               }
           }
       }

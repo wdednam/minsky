@@ -18,19 +18,19 @@
   along with Minsky.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef VARIABLESHEET_H
-#define VARIABLESHEET_H
+#ifndef PLOTSHEET_H
+#define PLOTSHEET_H
 #include <parVarSheet.h>
 
 namespace minsky
 {
 	 
-  class VariableSheet: public ParVarSheet
+  class PlotSheet: public ParVarSheet
   {	  
   public:
-    bool variableSelector(ItemPtr i) override {if (auto v=i->variableCast()) return v->type()!=VariableType::parameter && v->attachedToDefiningVar(); return false;}    
+    bool variableSelector(ItemPtr i) override {if (auto p=dynamic_cast<PlotWidget*>(i.get())) return p->plotOnTab(); return false;}    
   };
   
 }
-#include "variableSheet.cd"
+#include "plotSheet.cd"
 #endif

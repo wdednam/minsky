@@ -151,7 +151,6 @@ tooltip .wiring.menubar.reductionops.menu -index 0 "reduction operations toolbox
 tooltip .wiring.menubar.scanops.menu -index 0 "scans toolbox"
 tooltip .wiring.menubar.tensorops.menu -index 0 "tensor toolbox"
 
-
 button .wiring.menubar.data -image dataImg \
     -height 24 -width 37 -command {addOperation data}
 tooltip .wiring.menubar.data "data"
@@ -745,6 +744,9 @@ proc contextMenu {x y X Y} {
             .wiring.context add command -label "Make Group Plot" -command "$item.makeDisplayPlot"
             .wiring.context add command -label "Options" -command "doPlotOptions $item"
             .wiring.context add command -label "Pen Styles" -command "penStyles $item"
+             global plotTabDisplay
+             set plotTabDisplay [$item.plotTabDisplay]            
+            .wiring.context add checkbutton -label "Display plot on tab" -command "$item.togglePlotTabDisplay" -variable plotTabDisplay            
             .wiring.context add command -label "Export as CSV" -command exportItemAsCSV
             .wiring.context add command -label "Export as Image" -command exportItemAsImg
         }

@@ -432,7 +432,6 @@ proc textOK {} {
             
             getItemAtFocus
             editVar
-            refreshEqTab
         }
     }
     canvas.mouseUp [get_pointer_x .wiring.canvas] [get_pointer_y .wiring.canvas]

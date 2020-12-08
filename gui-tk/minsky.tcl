@@ -929,12 +929,6 @@ proc addTab {window label surface} {
     set tabSurface($label) $surface
 }
 
-# 
-proc refreshEqTab {} {
-    .tabs select 1
-    after 10 {.tabs select 0}
-}
-
 # add the tabbed windows
 addTab wiring "Wiring" minsky.canvas
 addTab equations "Equations" minsky.equationDisplay
@@ -1389,8 +1383,6 @@ proc openNamedFile {ofname} {
     canvas.requestRedraw
     # not sure why this is needed, but initial draw doesn't happen without it
     event generate .wiring.canvas <Expose>
-    # not sure why this is needed, but renamed variables not synchronised with equations rendered on equations tab. for ticket 1257
-    refreshEqTab
     # setting simulationDelay causes the edited (dirty) flag to be set
     pushHistory
     doPushHistory 1

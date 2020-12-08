@@ -24,6 +24,7 @@
 #include "minsky_epilogue.h"
 #include "minsky.h"
 #include "equations.h"
+#include "plotWidget.h"
 using namespace std;
 using namespace MathDAG;
 using ecolab::cairo::Surface;
@@ -480,11 +481,10 @@ namespace
 		         {
 			   	  cairo_move_to(cairo,x0,y0-1.5*rowHeight); 	 
 				  p->draw(cairo);
-				  p->redrawWithBounds();
-				  cout << p->title << endl;
+				  //cout << p->title << endl;
 				  y0+=4.1*rowHeight;  
 			     }
-		                                                          
+	                                                          
               }
           }
       }

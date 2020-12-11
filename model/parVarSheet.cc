@@ -63,8 +63,11 @@ namespace minsky
     itemVector.clear();	
     minsky().canvas.model->recursiveDo(&GroupItems::items,
                                        [&](Items&, Items::iterator i) {                                 
-                                         if (variableSelector(*i))		                                 
+                                         if (variableSelector(*i)) 
+                                         {		                                 
                                            itemVector.emplace_back(*i);
+                                           if (auto p=(*i)->plotWidgetCast()) itemCoords.emplace(make_pair(*i,make_pair(p->x(),p->y()))); 
+									     }
                                          return false;
                                        });   	
   }
@@ -91,15 +94,96 @@ namespace minsky
     return r;
   }
   
-  ParVarSheet::ClickType ParVarSheet::clickType(double x, double y) const
+  void ParVarSheet::moveTo(float x, float y)
+  {   
+	 if (itemFocus) {    
+       xItem=x;	                               
+       yItem=y;
+       assert(abs(x-xItem)<1 && abs(y-yItem)<1);
+     }
+  }  
+  
+  ParVarSheet::ClickType ParVarSheet::clickType(double x, double y)
   {
     int c=colX(x), r=rowY(y);
 
     if (c>=0 && c<int(colLeftMargin.size())&& r>=0 && r<int(itemVector.size()))
         return internal;
+        
+    if (itemFocus) return internal;   
   
     return background;
   }
+      
+  void ParVarSheet::mouseDownCommon(float x, float y)
+  {
+	 if (itemFocus=itemAt(x,y))
+        switch (clickType(x,y))
+          {
+          case internal:
+            moveOffsX=x-itemCoords[itemFocus].first;
+            moveOffsY=y-itemCoords[itemFocus].second;
+            break;
+          case background:
+            itemFocus.reset();
+            break;
+          default:
+            break;  
+          }
+  }  
+  
+  void ParVarSheet::mouseUp(float x, float y)
+  {
+    mouseMove(x,y);
+    itemFocus.reset();
+  }
+  
+  void ParVarSheet::mouseMove(float x, float y)
+  {
+	    
+    try
+      {
+		 if (itemFocus)
+            switch (clickType(x,y))
+              {
+              case internal:
+                moveTo(x-moveOffsX,y-moveOffsY);
+                requestRedraw();
+                return;
+              default:
+                break;
+              }
+      }
+    catch (...) {/* absorb any exceptions, as they're not useful here */}  
+  }
+  
+  void ParVarSheet::displayDelayedTooltip(float x, float y)
+  {
+    if (auto item=itemAt(x,y))
+      {
+        item->displayDelayedTooltip(x,y);
+        requestRedraw();
+      }
+  } 
+  
+  ItemPtr ParVarSheet::itemAt(float x, float y)
+  {
+    ItemPtr item;                    
+    auto minD=numeric_limits<float>::max();
+    for (auto& i: itemCoords)
+    {
+	  float d=sqr((i.second).first-x)+sqr((i.second).second-y);
+	  float z=i.first->zoomFactor();
+	  float plotExt=std::min(sqr(0.5*i.first->iWidth()*z),sqr(0.5*i.first->iHeight()*z));
+      if (d<minD && d<plotExt)
+        {
+          minD=d;
+          item=i.first;
+        }
+	}
+    
+    return item;
+  }    
 
 namespace
 {
@@ -448,15 +532,17 @@ namespace
                        }
                    }
                }
-		      } else if (auto p=dynamic_cast<PlotWidget*>(it.get()))
-		         {
-			   	  cairo_move_to(cairo,x0,y0-1.5*rowHeight); 	 
-				  p->draw(cairo);
-				  //cout << p->title << endl;
-				  y0+=4.1*rowHeight;  
-			     }
-	                                                          
-              }
+              } else if (auto p=it->plotWidgetCast())
+		       {
+				cairo::CairoSave cs(cairo);   
+				if (it==itemFocus) {
+					cairo_translate(cairo,xItem,yItem);  		    				   
+                    itemCoords.erase(itemFocus);   
+                    itemCoords.emplace(make_pair(itemFocus,make_pair(xItem,yItem)));         
+                 } else cairo_translate(cairo,itemCoords[it].first,itemCoords[it].second);      
+			    p->draw(cairo);
+			   }
+		      }  
           }
       }
     catch (...) {throw;/* exception most likely invalid variable value */}

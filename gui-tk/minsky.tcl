@@ -975,7 +975,29 @@ pack .plots.canvas -fill both -expand 1
 #proc defaultCursor {w} {$w configure -cursor {}}   
 
 bind .variables.canvas <<contextMenu>> "variableContext %x %y %X %Y"  
-menu .variables.context -tearoff 0   
+menu .variables.context -tearoff 0
+
+bind .plts.canvas <<contextMenu>> "plotTabContext %x %y %X %Y"  
+menu .plts.context -tearoff 0     
+
+# support tooltips
+proc hoverMouseTab {} {
+    plotSheet.displayDelayedTooltip [get_pointer_x .plts.canvas] [get_pointer_y .plts.canvas]
+}
+
+# reset hoverMouse timer
+proc wrapHoverMouseTab {op x y} {
+    after cancel hoverMouseTab
+    # ignore any exceptions
+    catch {plotSheet.$op $x $y}
+    after 3000 hoverMouseTab
+}
+  
+bind .plts.canvas <ButtonPress-1> {wrapHoverMouseTab mouseDownCommon %x %y}
+bind .plts.canvas <$meta-ButtonPress-1> {wrapHoverMouseTab controlMousDown %x %y}
+bind .plts.canvas <ButtonRelease-1> {wrapHoverMouseTab mouseUp %x %y}
+bind .plts.canvas <Motion> {.plts.canvas configure -cursor {}; wrapHoverMouseTab mouseMove %x %y}
+bind .plts.canvas <Leave> {after cancel hoverMouseTab}   
 
 proc variableContext {x y X Y} {
     .variables.context delete 0 end
@@ -1009,7 +1031,20 @@ proc variableContext {x y X Y} {
     #    }
     #}
     tk_popup .variables.context $X $Y
-}  
+}
+
+# Don't understand why this doesn't work???
+proc plotTabContext {x y X Y} { 
+    .plts.context delete 0 end
+    switch [plotSheet.clickType $x $y] {
+        background {}
+        internal {
+			puts {$x $y}
+			.plts.context add command -label "Remove plot from tab" -command "plotSheet.togglePlotTabDisplay;  plotSheet.requestRedraw"
+		}
+    }
+    tk_popup .plts.context $X $Y
+}		  
 
 source $minskyHome/godley.tcl
 source $minskyHome/plots.tcl
@@ -1028,7 +1063,7 @@ bind .wiring.canvas <Configure> {setScrollBars; minsky.panopticon.width %w; mins
 bind .equations.canvas <Configure> {setScrollBars}
 bind .parameters.canvas <Configure> {setScrollBars}
 bind .variables.canvas <Configure> {setScrollBars}
-bind .plots.canvas <Configure> {setScrollBars}
+bind .plts.canvas <Configure> {setScrollBars}
 
 set helpTopics(.wiring.panopticon) Panopticon
 
@@ -1062,12 +1097,12 @@ proc setScrollBars {} {
             .hscroll set $x0 [expr $x0+[winfo width .variables.canvas]/20000.0]
             .vscroll set $y0 [expr $y0+[winfo height .variables.canvas]/20000.0]                 
         }
-        .plots {
+        .plts {
             set x0 [expr (10000-[plotSheet.offsx])/20000.0]
             set y0 [expr (10000-[plotSheet.offsy])/20000.0]
-            .hscroll set $x0 [expr $x0+[winfo width .plots.canvas]/20000.0]
-            .vscroll set $y0 [expr $y0+[winfo height .plots.canvas]/20000.0]                 
-        }                  
+            .hscroll set $x0 [expr $x0+[winfo width .plts.canvas]/20000.0]
+            .vscroll set $y0 [expr $y0+[winfo height .plts.canvas]/20000.0]           
+        }                 
     }
 }
 
@@ -1096,6 +1131,11 @@ proc panCanvas {offsx offsy} {
             variableSheet.offsy $offsy						
             variableSheet.requestRedraw
         }           
+        .plts {
+            plotSheet.offsx $offsx
+            plotSheet.offsy $offsy	
+            plotSheet.requestRedraw
+        }            
     }
     setScrollBars
 }
@@ -1139,6 +1179,14 @@ proc scrollCanvases {xyview args} {
             set x1 [expr 0.5*$w]
             set y1 [expr 0.5*$h]
         }                
+        .plts {
+            set x [plotSheet.offsx]
+            set y [plotSheet.offsy]
+            set w [expr 10*$ww]
+            set h [expr 10*$wh]
+            set x1 [expr 0.5*$w]
+            set y1 [expr 0.5*$h]
+        }           
     }
     switch [lindex $args 0] {
         moveto {
@@ -1177,6 +1225,8 @@ if {[tk windowingsystem] == "aqua"} {
     set panIcon fleur
 }
 
+
+
 # equations pan mode
 .equations.canvas configure -cursor $panIcon
 bind .equations.canvas <Button-1> {
@@ -1200,6 +1250,13 @@ bind .variables.canvas <Button-1> {
     set panOffsY [expr %y-[variableSheet.offsy]]
 }
 bind .variables.canvas <B1-Motion> {panCanvas [expr %x-$panOffsX] [expr %y-$panOffsY]}
+
+# plots pan mode
+bind .plts.canvas <Shift-Button-1> {
+    set panOffsX [expr %x-[plotSheet.offsx]]
+    set panOffsY [expr %y-[plotSheet.offsy]]
+}
+bind .plts.canvas <Shift-B1-Motion> {.plts.canvas configure -cursor $panIcon; panCanvas [expr %x-$panOffsX] [expr %y-$panOffsY]}
 grid .sizegrip -row 999 -column 999
 grid .vscroll -column 999 -row 10 -rowspan 989 -sticky ns
 grid .hscroll -row 999 -column 0 -columnspan 999 -sticky ew

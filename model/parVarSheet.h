@@ -112,19 +112,24 @@ namespace minsky
     /// column at \a x in unzoomed coordinates
     int colX(double x) const;
     /// row at \a y in unzoomed coordinates
-    int rowY(double y) const;    
+    int rowY(double y) const;
+    void moveTo(float x, float y);  
+         
+    float moveOffsX, moveOffsY,xItem,yItem;
+    ItemPtr itemFocus;        
     enum ClickType {background, internal};    
-    ClickType clickType(double x, double y) const;         
+    ClickType clickType(double x, double y);         
     void draw(cairo_t* cairo); 
     void redraw(int, int, int width, int height) override;
-    void requestRedraw() {if (surface.get()) surface->requestRedraw();}      
-    
-    /// event handling 
-    void mouseDown(double x, double y);                                              // useful for editable par tab!!
-    void mouseUp(double x, double y);
-    /// mouse motion with button 1 pressed
-    void mouseMoveB1(double x, double y);
-    void mouseMove(double x, double y);
+    void requestRedraw() {if (surface.get()) surface->requestRedraw();}         
+
+    /// event handling for the canvas
+    void mouseDownCommon(float x, float y);
+    void mouseUp(float x, float y);
+    void mouseMove(float x, float y);    
+    ItemPtr itemAt(float x, float y);
+    void togglePlotTabDisplay() {if (itemFocus) {itemFocus->plotWidgetCast()->togglePlotTabDisplay();} else return;}
+    void displayDelayedTooltip(float x, float y);    
     void keyPress(int keySym, const std::string& utf8);
     
     void highlightCell(cairo_t* cairo,unsigned row, unsigned col);                             // useful for editable par tab!!

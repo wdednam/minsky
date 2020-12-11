@@ -47,6 +47,7 @@ namespace minsky
     double rowHeight=0;
     double colWidth=50; 
     float offsx=0, offsy=0;       
+    std::map<ItemPtr,std::pair<float,float>> itemCoords;        
     float m_width=600, m_height=800;
     virtual float width() const {return m_width;}
     virtual float height() const {return m_height;}

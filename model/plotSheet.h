@@ -28,7 +28,7 @@ namespace minsky
   class PlotSheet: public ParVarSheet
   {	  
   public:
-    bool variableSelector(ItemPtr i) override {if (auto p=dynamic_cast<PlotWidget*>(i.get())) return p->plotOnTab(); return false;}    
+    bool variableSelector(ItemPtr i) override {if (auto p=i->plotWidgetCast()) {return p->plotOnTab();}; return false;}    
   };
   
 }

@@ -608,72 +608,72 @@ namespace
     return 0;
   }
 
-  void ParVarSheet::mouseDown(double x, double y)
-  {
-     // catch exception, as the intention here is to allow the user to fix a problem
-     try {update();}
-     catch (...) {}
-     selectedCol=colX(x);
-     selectedRow=rowY(y);
-     if (selectedRow>=0 && selectedRow<int(rows()) &&
-         selectedCol>=0 && selectedCol<int(cols()) && (selectedRow!=1 || selectedCol!=0)) // Cannot save text in cell(1,0). For ticket 1064
-        {
-          selectIdx=insertIdx = textIdx(x);
-          savedText=cell(selectedRow, selectedCol);
-        }
-     else
-       selectIdx=insertIdx=0;
-  }
+//  void ParVarSheet::mouseDown(double x, double y)
+//  {
+//     // catch exception, as the intention here is to allow the user to fix a problem
+//     try {update();}
+//     catch (...) {}
+//     selectedCol=colX(x);
+//     selectedRow=rowY(y);
+//     if (selectedRow>=0 && selectedRow<int(rows()) &&
+//         selectedCol>=0 && selectedCol<int(cols()) && (selectedRow!=1 || selectedCol!=0)) // Cannot save text in cell(1,0). For ticket 1064
+//        {
+//          selectIdx=insertIdx = textIdx(x);
+//          savedText=cell(selectedRow, selectedCol);
+//        }
+//     else
+//       selectIdx=insertIdx=0;
+//  }
 
-  void ParVarSheet::mouseUp(double x, double y)
-  {
-    int c=colX(x), r=rowY(y);
-    motionRow=motionCol=-1;
-    // Cannot swap cell(1,0) with another. For ticket 1064. Also cannot move cells outside an existing Godley table to create new rows or columns. For ticket 1066. 
-    //if ((selectedCol==0 && selectedRow==1) || (c==0 && r==1) || size_t(selectedRow)>=(godleyIcon->table.rows()) || size_t(r)>=(godleyIcon->table.rows()) || size_t(c)>=(godleyIcon->table.cols()) || size_t(selectedCol)>=(godleyIcon->table.cols()))
-    //  return;  
-    //else if (selectedRow==0)
-    //  {  
-	//	// Disallow moving flow labels column and prevent columns from moving when import stockvar dropdown button is pressed in empty column. For tickets 1053/1064/1066
-    //    if (c>0 && size_t(c)<godleyIcon->table.cols() && selectedCol>0 && size_t(selectedCol)<godleyIcon->table.cols() && c!=selectedCol && !(colLeftMargin[c+1]-x < pulldownHot)) 
-    //      godleyIcon->table.moveCol(selectedCol,c-selectedCol);
-    //  }
-    //else if (r>0 && selectedCol==0)
-    //  {
-    //    if (r!=selectedRow && !godleyIcon->table.initialConditionRow(selectedRow) && !godleyIcon->table.initialConditionRow(r))  // Cannot move Intitial Conditions row. For ticket 1064.
-    //      godleyIcon->table.moveRow(selectedRow,r-selectedRow);
-    //  } 
-    //else if ((c!=selectedCol || r!=selectedRow) && c>0 && r>0)
-    //  {
-    //    swap(godleyIcon->table.cell(selectedRow,selectedCol), godleyIcon->table.cell(r,c));
-    //    selectedCol=c;
-    //    selectedRow=r;
-    //  }
-    //else 
-    if (selectIdx!=insertIdx)
-      copy();
-  }
+//  void ParVarSheet::mouseUp(double x, double y)
+//  {
+//    int c=colX(x), r=rowY(y);
+//    motionRow=motionCol=-1;
+//    // Cannot swap cell(1,0) with another. For ticket 1064. Also cannot move cells outside an existing Godley table to create new rows or columns. For ticket 1066. 
+//    //if ((selectedCol==0 && selectedRow==1) || (c==0 && r==1) || size_t(selectedRow)>=(godleyIcon->table.rows()) || size_t(r)>=(godleyIcon->table.rows()) || size_t(c)>=(godleyIcon->table.cols()) || size_t(selectedCol)>=(godleyIcon->table.cols()))
+//    //  return;  
+//    //else if (selectedRow==0)
+//    //  {  
+//	//	// Disallow moving flow labels column and prevent columns from moving when import stockvar dropdown button is pressed in empty column. For tickets 1053/1064/1066
+//    //    if (c>0 && size_t(c)<godleyIcon->table.cols() && selectedCol>0 && size_t(selectedCol)<godleyIcon->table.cols() && c!=selectedCol && !(colLeftMargin[c+1]-x < pulldownHot)) 
+//    //      godleyIcon->table.moveCol(selectedCol,c-selectedCol);
+//    //  }
+//    //else if (r>0 && selectedCol==0)
+//    //  {
+//    //    if (r!=selectedRow && !godleyIcon->table.initialConditionRow(selectedRow) && !godleyIcon->table.initialConditionRow(r))  // Cannot move Intitial Conditions row. For ticket 1064.
+//    //      godleyIcon->table.moveRow(selectedRow,r-selectedRow);
+//    //  } 
+//    //else if ((c!=selectedCol || r!=selectedRow) && c>0 && r>0)
+//    //  {
+//    //    swap(godleyIcon->table.cell(selectedRow,selectedCol), godleyIcon->table.cell(r,c));
+//    //    selectedCol=c;
+//    //    selectedRow=r;
+//    //  }
+//    //else 
+//    if (selectIdx!=insertIdx)
+//      copy();
+//  }
 
-  void ParVarSheet::mouseMoveB1(double x, double y)
-  {
-    motionCol=colX(x), motionRow=rowY(y);
-    if (motionCol==selectedCol && motionRow==selectedRow)
-      selectIdx=textIdx(x);
-  }
+//  void ParVarSheet::mouseMoveB1(double x, double y)
+//  {
+//    motionCol=colX(x), motionRow=rowY(y);
+//    if (motionCol==selectedCol && motionRow==selectedRow)
+//      selectIdx=textIdx(x);
+//  }
 
-  void ParVarSheet::mouseMove(double x, double y)
-  {
-    hoverRow=hoverCol=-1;
-    switch (clickType(x,y))
-      {
-      case background:
-        break;
-      default:
-        hoverRow=rowY(y);
-        hoverCol=colX(x);
-        break;
-      }  
-  }
+//  void ParVarSheet::mouseMove(double x, double y)
+//  {
+//    hoverRow=hoverCol=-1;
+//    switch (clickType(x,y))
+//      {
+//      case background:
+//        break;
+//      default:
+//        hoverRow=rowY(y);
+//        hoverCol=colX(x);
+//        break;
+//      }  
+//  }
 
   inline constexpr char control(char x) {return x-'`';}
   

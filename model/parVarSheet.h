@@ -21,6 +21,7 @@
 #ifndef PARVARSHEET_H
 #define PARVARSHEET_H
 #include <variable.h>
+#include "plotWidget.h"
 #include <cairoSurfaceImage.h>
 #include "classdesc_access.h"
 

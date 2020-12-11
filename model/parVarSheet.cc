@@ -103,34 +103,6 @@ namespace minsky
 
 namespace
 {
-//  std::string definition(const string& valueId)
-//  {
-//    SystemOfEquations system(cminsky());	  
-//	ostringstream o;
-//
-//    for (const VariableDAG* i: system.variables)
-//      {
-//		if (i->valueId==valueId) 
-//		{  		  
-//           if (dynamic_cast<const IntegralInputVariableDAG*>(i) ||
-//               !i || i->type==VariableType::constant) continue;
-//           if (i->rhs)
-//             o << i->rhs->matlab();
-//	    }
-//      }
-//
-//    for (const VariableDAG* i: system.integrationVariables)
-//      {
-//		if (i->valueId==valueId) 
-//		{  
-//            VariableDAGPtr input=system.expressionCache.getIntegralInput(i->valueId);
-//            if (input && input->rhs)
-//              input->rhs->matlab(o);
-//	    }
-//      }
-//   
-//    return o.str();	  
-//  }
 
   std::string definition(const VariableBase& v)
   {
@@ -178,7 +150,6 @@ namespace
                     varAttribVals.clear();
                     varAttribVals.push_back(v->name());
                     varAttribVals.push_back(definition(*v));                    
-                    //varAttribVals.push_back(v->valueId());                    
                     varAttribVals.push_back(v->init());
                     varAttribVals.push_back(it->tooltip);
                     varAttribVals.push_back(it->detailedText);

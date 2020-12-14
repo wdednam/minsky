@@ -120,7 +120,7 @@ namespace minsky
     float moveOffsX, moveOffsY,xItem,yItem;
     ItemPtr itemFocus;        
     enum ClickType {background, internal};    
-    ClickType clickType(double x, double y);         
+    ClickType clickType(double x, double y) const;         
     void draw(cairo_t* cairo); 
     void redraw(int, int, int width, int height) override;
     void requestRedraw() {if (surface.get()) surface->requestRedraw();}         
@@ -130,7 +130,7 @@ namespace minsky
     void mouseUp(float x, float y);
     void mouseMove(float x, float y);    
     ItemPtr itemAt(float x, float y);
-    void togglePlotTabDisplay() {if (itemFocus) {itemFocus->plotWidgetCast()->togglePlotTabDisplay();} else return;}
+    void togglePlotDisplay() const;
     void displayDelayedTooltip(float x, float y);    
     void keyPress(int keySym, const std::string& utf8);
     

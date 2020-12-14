@@ -103,7 +103,7 @@ namespace minsky
      }
   }  
   
-  ParVarSheet::ClickType ParVarSheet::clickType(double x, double y)
+  ParVarSheet::ClickType ParVarSheet::clickType(double x, double y) const
   {
     int c=colX(x), r=rowY(y);
 
@@ -185,7 +185,7 @@ namespace minsky
     return item;
   }
   
-  void ParVarSheet::togglePlotDisplay()      
+  void ParVarSheet::togglePlotDisplay() const      
   {
 	if (auto p=itemFocus->plotWidgetCast()) p->togglePlotTabDisplay();
 	else return;
@@ -544,8 +544,9 @@ namespace
 				cairo::CairoSave cs(cairo);   
 				if (it==itemFocus) {
 					cairo_translate(cairo,xItem,yItem);  		    				   
-                    itemCoords.erase(itemFocus);   
-                    itemCoords.emplace(make_pair(itemFocus,make_pair(xItem,yItem)));         
+                    itemCoords.erase(itemFocus);
+                    itemCoords[itemFocus]=make_pair(xItem,yItem);   
+                    //itemCoords.emplace(make_pair(itemFocus,make_pair(xItem,yItem)));         
                  } else cairo_translate(cairo,itemCoords[it].first,itemCoords[it].second);      
 			    p->draw(cairo);
 			   }

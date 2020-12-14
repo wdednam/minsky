@@ -500,7 +500,6 @@ namespace minsky
       (&Group::items,
        [&](Items& m, Items::iterator i)
        {
-         //if (auto p=dynamic_cast<PlotWidget*>(i->get()))
          if (auto p=(*i)->plotWidgetCast())
            {
              p->disconnectAllVars();// clear any old associations
@@ -536,7 +535,6 @@ namespace minsky
          else if (!(*i)->ports.empty() && !(*i)->ports[0]->input() &&
                   (*i)->ports[0]->wires().empty())
            (*i)->checkUnits(); // check anything with an unwired output port
-         //else if (auto p=dynamic_cast<PlotWidget*>(i->get()))
          else if (auto p=(*i)->plotWidgetCast())
            for (auto& i: p->ports)
              i->checkUnits();
@@ -885,7 +883,6 @@ namespace minsky
       (&Group::items,
        [&](Items& m, Items::iterator i)
        {
-         //if (auto p=dynamic_cast<PlotWidget*>(i->get()))
          if (auto p=(*i)->plotWidgetCast())
            {
              p->clear();
@@ -1480,7 +1477,6 @@ namespace minsky
     unsigned plotNum=0;
     model->recursiveDo(&Group::items,
                        [&](Items&, Items::iterator i) {
-                         //if (auto p=dynamic_cast<PlotWidget*>(i->get()))
                          if (auto p=(*i)->plotWidgetCast())
                            {
                              if (!p->title.empty())
@@ -1496,7 +1492,6 @@ namespace minsky
     unsigned plotNum=0;
     model->recursiveDo(&Group::items,
                        [&](Items&, Items::iterator i) {
-                         //if (auto p=dynamic_cast<PlotWidget*>(i->get()))
                          if (auto p=(*i)->plotWidgetCast())
                            {
                              if (!p->title.empty())

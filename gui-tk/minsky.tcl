@@ -975,7 +975,7 @@ pack .plts.canvas -fill both -expand 1
 #proc defaultCursor {w} {$w configure -cursor {}}   
 
 bind .variables.canvas <<contextMenu>> "variableContext %x %y %X %Y"  
-menu .variables.context -tearoff 0
+menu .variables.context -tearoff 0 
 
 bind .plts.canvas <<contextMenu>> "plotTabContext %x %y %X %Y"  
 menu .plts.context -tearoff 0     
@@ -997,7 +997,7 @@ bind .plts.canvas <ButtonPress-1> {wrapHoverMouseTab mouseDownCommon %x %y}
 bind .plts.canvas <$meta-ButtonPress-1> {wrapHoverMouseTab controlMousDown %x %y}
 bind .plts.canvas <ButtonRelease-1> {wrapHoverMouseTab mouseUp %x %y}
 bind .plts.canvas <Motion> {.plts.canvas configure -cursor {}; wrapHoverMouseTab mouseMove %x %y}
-bind .plts.canvas <Leave> {after cancel hoverMouseTab}   
+bind .plts.canvas <Leave> {after cancel hoverMouseTab}
 
 proc variableContext {x y X Y} {
     .variables.context delete 0 end
@@ -1039,12 +1039,11 @@ proc plotTabContext {x y X Y} {
     switch [plotSheet.clickType $x $y] {
         background {}
         internal {
-			puts {$x $y}
-			.plts.context add command -label "Remove plot from tab" -command "plotSheet.togglePlotTabDisplay;  plotSheet.requestRedraw"
+			.plts.context add command -label "Remove plot from tab" -command "plotSheet.togglePlotDisplay;  plotSheet.requestRedraw"
 		}
     }
     tk_popup .plts.context $X $Y
-}		  
+}		
 
 source $minskyHome/godley.tcl
 source $minskyHome/plots.tcl
@@ -1471,7 +1470,13 @@ proc recentreCanvas {} {
             variableSheet.offsx 0
             variableSheet.offsy 0
             variableSheet.requestRedraw
-        }                
+        }       
+        .plts {
+            plotSheet.offsx 0
+            plotSheet.offsy 0
+            plotSheet.requestRedraw
+        }               
+                 
     }
 }
 

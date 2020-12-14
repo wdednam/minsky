@@ -152,7 +152,7 @@ namespace minsky
     ParameterSheet parameterSheet;
     VariableSheet variableSheet;
     PlotSheet plotSheet;
-    //ParVarSheet parVarSheet;
+
         // Allow multiple equity columns.
     bool multipleEquities=false;   
 

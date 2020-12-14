@@ -165,7 +165,7 @@ namespace minsky
         requestRedraw();
       }
   } 
-  
+ 
   ItemPtr ParVarSheet::itemAt(float x, float y)
   {
     ItemPtr item;                    
@@ -183,7 +183,13 @@ namespace minsky
 	}
     
     return item;
-  }    
+  }
+  
+  void ParVarSheet::togglePlotDisplay()      
+  {
+	if (auto p=itemFocus->plotWidgetCast()) p->togglePlotTabDisplay();
+	else return;
+  }
 
 namespace
 {
@@ -219,9 +225,9 @@ namespace
             rowTopMargin.clear();
             int iC=0;                
             for (auto& it: itemVector)
+            {
+              if (auto v=it->variableCast())
               {
-                if (auto v=it->variableCast())
-                {
                 auto value=v->vValue();
                 auto rank=value->hypercube().rank();
                 auto dims=value->hypercube().dims();                
@@ -532,6 +538,7 @@ namespace
                        }
                    }
                }
+
               } else if (auto p=it->plotWidgetCast())
 		       {
 				cairo::CairoSave cs(cairo);   
@@ -542,7 +549,7 @@ namespace
                  } else cairo_translate(cairo,itemCoords[it].first,itemCoords[it].second);      
 			    p->draw(cairo);
 			   }
-		      }  
+		      }              
           }
       }
     catch (...) {throw;/* exception most likely invalid variable value */}

@@ -90,7 +90,7 @@ namespace minsky
     float height() const {return Item::height();}
     
     const PlotWidget* plotWidgetCast() const override {return this;}
-    PlotWidget* plotWidgetCast() override {return this;}            
+    PlotWidget* plotWidgetCast() override {return this;}        
     
     void addPlotPt(double t); ///< add another plot point
     void updateIcon(double t) override {addPlotPt(t);}
@@ -104,7 +104,11 @@ namespace minsky
     void requestRedraw(); ///< redraw plot using current data to all open windows
     void redraw(int x0, int y0, int width, int height) override
     {if (surface.get()) {Plot::draw(surface->cairo(),width,height); surface->blit();}}
-    void redrawWithBounds() override {redraw(0,0,500,500);}
+    void redrawWithBounds() override {redraw(0,0,500,500);}    
+    
+    bool plotTabDisplay=false;
+    void togglePlotTabDisplay() {plotTabDisplay=!plotTabDisplay;}     
+    bool plotOnTab() const {return plotTabDisplay;}     
     
     /// add this as a display plot to its group
     void makeDisplayPlot();

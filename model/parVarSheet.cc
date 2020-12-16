@@ -292,7 +292,6 @@ namespace
                           cairo_line_to(cairo,x,y+0.5*rowHeight);
                           cairo_stroke(cairo);
                         }
-
                     }                                            
                     { // draw horizontal grid line
                       cairo::CairoSave cs(cairo);
@@ -342,9 +341,7 @@ namespace
                           y=y0+value->index()[i]*rowHeight;
                         cairo_move_to(cairo,x,y);
                         auto v=value->value(i);
-
                         insertRow(i+1);
-
                         if (!std::isnan(v))
                           {
                             pango.setMarkup(str(v));
@@ -353,7 +350,6 @@ namespace
                         y+=rowHeight;
                       }
                     resize(value->size(),size_t(rank));  
-
                     h_prev=h;
                     w=0;h=0;      
                     cairo_get_current_point (cairo,&w,&h);   
@@ -476,6 +472,7 @@ namespace
                     rowTopMargin.push_back(y);    	        
                     x+=0.25*colWidth;      
                     y=y0;                	
+
 
                   }              
                 if (rank>0) y0=h+4.1*rowHeight;

@@ -1,0 +1,180 @@
+/*
+  @copyright Steve Keen 2020
+  @author Russell Standish
+  @author Wynand Dednam
+  This file is part of Minsky.
+
+  Minsky is free software: you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  Minsky is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with Minsky.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef ITEMTAB_H
+#define ITEMTAB_H
+#include <variable.h>
+#include <cairoSurfaceImage.h>
+#include "classdesc_access.h"
+
+namespace minsky
+{
+		 
+  class ItemTab: public ecolab::CairoSurface
+  {
+  public:
+    typedef std::vector<std::vector<std::string>> Data;  
+  private:
+    CLASSDESC_ACCESS(ItemTab);    
+    Data data;  
+    void markEdited(); ///< mark model as having changed
+    void _resize(unsigned rows, unsigned cols) {                               
+      // resize existing
+      for (size_t i=0; i<data.size(); ++i) data[i].resize(cols);
+      data.resize(rows, std::vector<std::string>(cols));
+    }            
+  public: 
+    ItemTab() {} 
+  
+    double xoffs=80;
+    double rowHeight=0;
+    double colWidth=50; 
+    float offsx=0, offsy=0;
+    std::map<ItemPtr,std::pair<float,float>> itemCoords;       
+    float m_width=600, m_height=800;
+    virtual float width() const {return m_width;}
+    virtual float height() const {return m_height;}
+    Items itemVector;    
+    
+    std::string title;     
+    
+    size_t rows() const {return data.size();}                                           // useful for editable par tab!!
+    size_t cols() const {return data.empty()? 0: data[0].size();}      
+       
+    void clear() {data.clear(); markEdited();}
+    void resize(unsigned rows, unsigned cols){_resize(rows,cols); markEdited();}              
+    
+    /// insert row at \a row
+    void insertRow(unsigned row);  
+    
+    /// insert col at \a col
+    void insertCol(unsigned col);        
+    
+    std::string& cell(unsigned row, unsigned col) {                                       // useful for editable par tab!!
+      if (row>=rows() || col>=cols())
+        _resize(row+1, col+1);
+      return data[row][col];
+    }
+    const std::string& cell(unsigned row, unsigned col) const {                          // useful for editable par tab!!
+      if (row>=data.size() || col>=data[row].size())
+        throw std::out_of_range("Tab sheet index error");
+      return data[row][col];
+    }
+    std::string getCell(unsigned row, unsigned col) const {
+      if (row<rows() && col<cols())
+        return cell(row,col);
+      else
+        return "";
+    }
+    
+    std::string savedText;                                                     // useful for editable par tab!!        
+    
+    /// accessor for schema access
+    const Data& getData() const {return data;} 
+          
+    double topTableOffset=15;
+
+    /// starting row/col number of the scrolling region
+    unsigned scrollRowStart=1, scrollColStart=1;    
+    /// which cell is active, none initially
+    int selectedRow=-1, selectedCol=-1;                                      // useful for editable par tab!!
+    int hoverRow=-1, hoverCol=-1;
+    
+    unsigned insertIdx=0, selectIdx=0;                                       // useful for editable par tab!!          
+
+    /// computed positions of the table columns
+    std::map<int,std::vector<double>> colLeftMargin;             
+    /// computed positions of the variable rows
+    std::vector<double> rowTopMargin;                      
+
+    void populateItemVector();
+    virtual bool itemSelector(ItemPtr i) = 0;
+    void toggleVarDisplay(int i) const {if (i>=0 && i<int(itemVector.size())) (itemVector[i])->variableCast()->toggleVarTabDisplay(); else return;}
+    std::string getVarName(int i) const {if (i>=0 && i<int(itemVector.size())) return (itemVector[i])->variableCast()->name(); else return "";}
+    std::vector<std::string> varAttrib{"Name","Definition","Initial Value","Short Description", "Long Description","Slider Step","Slider Min","Slider Max","Value"};       
+    std::vector<std::string> varAttribVals;
+    /// column at \a x in unzoomed coordinates
+    int colX(double x) const;
+    /// row at \a y in unzoomed coordinates
+    int rowY(double y) const;
+    void moveTo(float x, float y);  
+         
+    float moveOffsX, moveOffsY,xItem,yItem;
+    ItemPtr itemFocus;        
+    enum ClickType {background, internal};    
+    ClickType clickType(double x, double y) const;         
+    void draw(cairo_t* cairo); 
+    void redraw(int, int, int width, int height) override;
+    void requestRedraw() {if (surface.get()) surface->requestRedraw();}         
+
+    /// event handling for the canvas
+    void mouseDownCommon(float x, float y);
+    void mouseUp(float x, float y);
+    void mouseMove(float x, float y);    
+    ItemPtr itemAt(float x, float y);
+    void togglePlotDisplay() const;
+    void displayDelayedTooltip(float x, float y);
+    
+    void keyPress(int keySym, const std::string& utf8);
+    
+    void highlightCell(cairo_t* cairo,unsigned row, unsigned col);                             // useful for editable par tab!!
+
+    // support cut/copy/paste operations
+    void delSelection();                                                   // useful for editable par tab!!
+    void cut();
+    void copy();
+    void paste();
+    
+    int textIdx(double x) const;                                                     // useful for editable par tab!!
+
+    size_t maxHistory{100}; ///< maximum no. of history states to save                  
+    size_t historyPtr=0;                                                   // useful for editable par tab!!
+    // push state onto history if different
+    virtual void pushHistory(ItemPtr i);                                                    // useful for editable par tab!!
+    /// restore to state \a changes ago 
+    virtual void undo(int changes, ItemPtr i);                                                      // useful for editable par tab!!    
+    
+    /// update canvas godleyIcon, and any related godley icons. Can throw
+    void update();     
+    
+    /// @{ move selected cell right, left, up or down, moving to next
+    /// line and wrapping if at end of row or col
+    void navigateRight();                                                              // useful for editable par tab!!
+    void navigateLeft();
+    void navigateUp();
+    void navigateDown();
+    /// @}            
+       
+    virtual ~ItemTab() {}
+    
+  protected:
+    int motionRow=-1, motionCol=-1; ///< current cell under mouse motion
+    // Perform deep comparison of Godley tables in history to avoid spurious noAssetClass columns from arising during undo. For ticket 1118.
+    std::deque<ItemPtr> history;
+    void checkCell00(); ///<check if cell (0,0) is selected, and deselect if so
+    /// handle delete or backspace. Cell assumed selected
+    void handleBackspace();                                                                        // useful for editable par tab!!
+    void handleDelete();        
+  };
+  
+}
+
+#include "itemTab.cd"
+#endif

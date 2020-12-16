@@ -360,6 +360,15 @@ namespace minsky
         hc.xvectors.insert(hc.xvectors.begin(), xv2.begin()+1, xv2.end());        
         hc.xvectors.insert(hc.xvectors.begin(), xv1.begin(), xv1.end()-1);
         cachedResult.hypercube(move(hc));
+        
+        //set<size_t> newIdx;
+        //size_t stride=arg1->hypercube().numElements();
+        //
+        //for (auto& i: arg1->index())
+        //  for (auto& j: arg2->index()) 
+        //      newIdx.insert(i+stride*j);
+        //   
+        //cachedResult.index(Index(newIdx));          
                 
       }
     }    

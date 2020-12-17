@@ -177,6 +177,11 @@ namespace minsky
         float d=sqr((i.second).first+offsx-x)+sqr((i.second).second+offsy-y);
         float z=i.first->zoomFactor();
         float w=0.5*i.first->iWidth()*z,h=0.5*i.first->iHeight()*z;
+        if (dynamic_cast<GodleyIcon*>(i.first.get()))
+        {
+			w=0.5*i.first->iWidth();
+			h=0.5*i.first->iHeight();
+		}
         if (d<minD && fabs((i.second).first+offsx-x)<w && fabs((i.second).second+offsy-y)<h)
           {
             minD=d;
@@ -556,9 +561,21 @@ namespace minsky
                       itemCoords.erase(itemFocus);   
                       itemCoords.emplace(make_pair(itemFocus,make_pair(xItem,yItem)));         
                     } else cairo_translate(cairo,itemCoords[it].first,itemCoords[it].second);
-                    auto godley=GodleyTableWindow(g);
+                    GodleyTableWindow godley(g);
                     godley.disableButtons();   
                     godley.draw(cairo);
+                    
+                    // draw title
+                    if (!g->table.title.empty())
+                      {
+                        CairoSave cs(cairo);
+                        Pango pango(cairo);
+                        pango.setMarkup("<b>"+latexToPango(g->table.title)+"</b>");
+                        pango.setFontSize(12);
+                        cairo_move_to(cairo,0.5*godley.colLeftMargin[godley.colLeftMargin.size()-1],godley.topTableOffset-2*godley.rowHeight);
+                        pango.show();
+                      }
+                       
                   }			   
               }              
           }

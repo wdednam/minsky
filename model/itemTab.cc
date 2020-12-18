@@ -578,7 +578,7 @@ namespace minsky
                     } else cairo_translate(cairo,itemCoords[it].first,itemCoords[it].second);
                     GodleyTableWindow godley(g);
                     godley.disableButtons();
-                    godley.displayValues=true;
+                    godley.displayValues=true;   
                     godley.draw(cairo);
                     
                     // draw title

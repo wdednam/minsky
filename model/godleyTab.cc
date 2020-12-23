@@ -81,10 +81,6 @@ namespace minsky
             cairo::CairoSave cs(cairo);   
             if (it==itemFocus) {
               cairo_translate(cairo,xItem,yItem);  		    				   
-<<<<<<< HEAD
-=======
-              itemCoords.erase(itemFocus);   
->>>>>>> 0d74b8ce3afbce45befbf637979607879ad9f453
               itemCoords[itemFocus]=move(make_pair(xItem,yItem));         
             } else cairo_translate(cairo,itemCoords[it].first,itemCoords[it].second);
             g->godleyT->disableButtons();

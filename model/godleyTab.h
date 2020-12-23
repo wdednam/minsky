@@ -28,7 +28,9 @@ namespace minsky
   class GodleyTab: public ItemTab
   {	  
   public:
-    bool itemSelector(ItemPtr i) override {if (dynamic_cast<GodleyIcon*>(i.get())) return i.get(); return false;}
+    bool itemSelector(const ItemPtr& i) override;
+    ItemPtr itemAt(float x, float y) override;
+    void draw(cairo_t* cairo) override;
   };
   
 }

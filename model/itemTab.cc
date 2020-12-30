@@ -186,7 +186,7 @@ namespace minsky
     
     return item;
   }
-   
+  
   namespace
   {
  

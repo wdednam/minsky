@@ -514,7 +514,7 @@ namespace minsky
             if (p->plotOnTab()==false) p->togglePlotTabDisplay();	 
           return false;
         });
-  }       
+  }    
   
   void Canvas::deleteItem()
   {

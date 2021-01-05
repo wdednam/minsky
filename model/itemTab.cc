@@ -220,7 +220,7 @@ namespace minsky
             colLeftMargin.clear();                
             rowTopMargin.clear();
             std::string def;
-            int iC=0;                
+            int iC=0;  // keep track of number of Pars and Vars as distinct from Godleys and Plots                            
             size_t lastRank=1; // needed to space parameters and variables of different rank properly on the tabs.
             for (auto& it: itemVector)
               {

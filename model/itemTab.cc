@@ -220,8 +220,8 @@ namespace minsky
             colLeftMargin.clear();                
             rowTopMargin.clear();
             std::string def;
-            int iC=0;  // keep track of number of Pars and Vars as distinct from Godleys and Plots                            
-            size_t lastRank=1; // needed to space parameters and variables of different rank properly on the tabs.
+            int iC=0;  // keep track of number of Pars and Vars as distinct from Godleys and Plots
+            size_t lastRank=1; // needed to space parameters and variables of different rank properly on the tabs.                            
             for (auto& it: itemVector)
               {
                 if (auto v=it->variableCast())
@@ -231,12 +231,12 @@ namespace minsky
                     auto dims=value->hypercube().dims();                
                     Pango pango(cairo);      
                     x0=0.0;
-                    if (rank>0 && lastRank==0) y0+=2*rowHeight;
+                    if (rank>0 && lastRank==0) y0+=2*rowHeight;                    
                     float x=x0, y=y0;
-                    def=definition(*v);
+                    def=definition(*v);                      
                     pango.setMarkup("9999");
                     if (rank==0)
-                      {   
+                      { 
                         varAttribVals.clear();
                         varAttribVals.push_back(v->name());
                         varAttribVals.push_back(def);                    
@@ -484,8 +484,8 @@ namespace minsky
 					
                       }               
                     if (rank>0) y0=h+4.1*rowHeight;
-                    else y0+=2.1*rowHeight;
-                    lastRank=rank;   
+                    else y0+=2.1*rowHeight;   
+                    lastRank=rank;                       
                     iC++;
                     
                     // indicate cell mouse is hovering over

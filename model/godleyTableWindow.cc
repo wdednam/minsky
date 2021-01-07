@@ -267,7 +267,6 @@ namespace minsky
                           }
                         else // is flow tag, stock var or initial condition
                           text = latexToPango(text);
-                        //if (row!=1 || col!=0) text+=value;  // Do not add value "= 0.0" to Initial Condtions cell(1,0). For ticket 1064
                         text+=value;
                       }
                     else

@@ -665,6 +665,7 @@ namespace minsky
     if (auto g=dynamic_cast<Group*>(item.get()))
       {		  
         if (auto p=g->group.lock())
+         {
 		  if (!g->empty()) // minskly crashes if group empty and ungrouped subsequently. for ticket 1243
 		    {  	    				 
                // stash values of parameters in copied group, as they are reset for some unknown reason later on. for tickets 1243/1258
@@ -711,7 +712,8 @@ namespace minsky
 		  } else {
 		  	p->moveContents(*g);
             deleteItem();
-		  }          
+		  }
+	    }          
         
         // else item is toplevel which can't be ungrouped
       }

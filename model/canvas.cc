@@ -697,8 +697,8 @@ namespace minsky
                 }
 	           
                 selection.autoLayout();
-	           
-                if (!existingParms.empty()) existingParms.clear();
+		    
+		existingParms.clear();    
 	           
                 // Attach mouse focus only to first visible item in selection. For ticket 1098.      
                 for (auto& i: selection.items)
@@ -709,10 +709,7 @@ namespace minsky
                     }
                                    
                 if (!copyOfGroups.empty()) setItemFocus(copyOfGroups[0]);           
-              } else {
-              p->moveContents(*g);
-              deleteItem();
-            }
+              } else deleteItem();
           }       
         
         // else item is toplevel which can't be ungrouped

@@ -122,11 +122,15 @@ namespace minsky
    std::pair<double,Point> Item::rotatedPoints() const
    {
      // ensure resize handle is always active on the same corner of variable/items for 90 and 180 degree rotations. for ticket 1232   
-     double fm=std::fmod(rotation(),360), angle;	
-     float x1=right(),y1=bottom();  
+     double fm=std::fmod(rotation(),360), angle=rotation();	
+     bool notflipped=(fm>-90 && fm<90) || fm>270 || fm<-270;
+     Rotate r(rotation()+(notflipped? 0: 180),this->x(),this->y()); // rotate into variable's frame of reference     
+     angle=rotation()+(notflipped? 0: 180);
+     float x1=r.x(right(),bottom()), y1=r.y(right(),bottom());
+     //angle=angle+(notflipped? 0: 180);	
      if (fm==-90 || fm==270) {
        angle=-rotation();
-       Rotate r1(angle,this->x(),this->y());
+       Rotate r1(angle,0,this->y());
        x1=r1.x(right(),bottom());
        y1=r1.y(right(),bottom());						  
      }
@@ -135,7 +139,8 @@ namespace minsky
        x1=right();
        y1=top();					
      }
-     else angle=0;	
+     //else if (
+     //else angle=0;	
      Point p(x1,y1);  
      return make_pair(angle,p);  
   }
@@ -154,8 +159,13 @@ namespace minsky
   {
     double angle=rotatedPoints().first;		  
     Point p=rotatedPoints().second;		  
-    Rotate r(angle,this->x(),this->y());		  
-    return near(x,y,p.x(),p.y(),resizeHandleSize(),r);
+    //Rotate r(angle,0,0);		  
+     //double fm=std::fmod(rotation(),360);	
+     //bool notflipped=(fm>-90 && fm<90) || fm>270 || fm<-270;
+     Rotate r(0,0,0); // rotate into variable's frame of reference     
+     //float xr=right(), yr=notflipped? bottom() : top();
+     //cout << x1 << " " << y1 << endl;
+     return near(x,y,p.x(),p.y(),resizeHandleSize(),r);
   }
 
  
@@ -278,8 +288,14 @@ namespace minsky
   { 			  			
     double angle=rotatedPoints().first;		  
     Point p=rotatedPoints().second;			  
-    Rotate r(angle,this->x(),this->y());
-    drawResizeHandle(cairo,r.x(p.x(),p.y())-x(),r.y(p.x(),p.y())-y(),0.5*resizeHandleSize(),abs(rotation())==180? 0.5*M_PI : 0);
+    Rotate r(0,0,0);
+    //double fm=std::fmod(rotation(),360), angle=rotation()* M_PI / 180.0;	
+    //bool notflipped=(fm>-90 && fm<90) || fm>270 || fm<-270;
+    //Rotate r(rotation(),this->x(),this->y()); // rotate into variable's frame of reference     
+    //float x1=r.x(right(),notflipped? bottom() : top()), y1=r.y(right(),notflipped? bottom() : top());
+    //angle=angle+(notflipped? 0: M_PI);    
+    drawResizeHandle(cairo,r.x(p.x(),p.y())-x(),r.y(p.x(),p.y())-y(),0.5*resizeHandleSize(),abs(rotation())==180? 0.5*M_PI : angle*M_PI / 180.0);
+    //drawResizeHandle(cairo,x1-x(),y1-y(),0.5*resizeHandleSize(),abs(rotation())==180? 0.5*M_PI : angle*M_PI / 180.0);
     cairo_stroke(cairo);
   }
   

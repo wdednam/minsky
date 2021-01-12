@@ -141,7 +141,7 @@ namespace minsky
     }         
     
     /// rotate icon though 180∘
-    void flip() {rotation(rotation()+180);}
+    void flip() {rotation(rotation()+180);updateBoundingBox();}
 
     virtual std::string classType() const {return "Item";}
 

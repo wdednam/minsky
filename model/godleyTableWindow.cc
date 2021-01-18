@@ -309,15 +309,15 @@ namespace minsky
     // now row sum column
     x+=3;
     double y=topTableOffset;
-    cairo_move_to(cairo,x,y);
+    cairo_move_to(cairo,x,y-rowHeight);
     pango.setMarkup("A-L-E");
     pango.show();
     double colWidth=pango.width();
-    y+=rowHeight;
+    //y+=rowHeight;
   
-    for (unsigned row=1; row<godleyIcon->table.rows(); ++row)
+    for (unsigned row=0; row<godleyIcon->table.rows(); ++row)
       {
-        if (row>0 && row<scrollRowStart) continue;
+        if (row>-1 && row<scrollRowStart) continue;
         pango.setMarkup(latexToPango(godleyIcon->table.rowSum(row)));
         colWidth=max(colWidth,pango.width());
         cairo_move_to(cairo,x,y);
